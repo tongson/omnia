@@ -1,0 +1,14 @@
+101  strdup(): insufficient memory
+102  calloc(): error allocating memory
+103  elf_version(): returned EV_NONE
+104  open(): failed
+105  elf_begin(): returned NULL
+106  elf_kind(): did not return ELF_K_ELF (not an ELF file)
+107  elf_getshdrstrndx(): return -1
+108  gelf_getshdr(): failed
+109  elf_strptr(): returned NULL (conversion failed)
+110  realloc(): error allocating memory
+111  luaL_loadstring(): failed (loading a script failed)
+112  luaL_loadstring(): failed (loading the main script failed)
+113  load_scripts(): returned 0 scripts
+114  luaL_newstate(): memory allocation error
