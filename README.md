@@ -1,7 +1,7 @@
 Omnia
 =====
 
-Another Lua 5.3 build system. My main use case is for ELF platforms and statically linking with [musl libc](http://www.musl-libc.org/).
+Another Lua 5.3 build system for standalone executables. My main use case is for ELF platforms and statically linking with [musl libc](http://www.musl-libc.org/).
 
 This was made possible by [Luawrapper](https://github.com/ncarrier/luawrapper)
 
