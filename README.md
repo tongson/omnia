@@ -56,7 +56,7 @@ Module                                                      | Version         | 
 [Linotify](https://github.com/hoelzro/linotify)             | 0.4             | MIT
 [LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)            | 0.12.2          | MIT
 
-[1] Modified to return an exit code instead of errno. Some systems do not have errno.h.
-[2] SVN snapshot for various fixes. The last release is very old.
-[3] Curses not included
+[1] Modified to return an exit code instead of errno. Some systems do not have errno.h.<br/>
+[2] SVN snapshot for various fixes. The last release is very old.<br/>
+[3] Curses not included<br/>
 
