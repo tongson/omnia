@@ -18,8 +18,7 @@ LDFLAGS= -Wl,--gc-sections -Wl,--strip-all -Wl,--relax -Wl,--sort-common
 
 all: bootstrap deps lua sections exe
 
-# Linux only for now
-luaDEFINES:= -DLUA_COMPAT_BITLIB -DLUA_USE_LINUX
+luaDEFINES:= -DLUA_COMPAT_BITLIB -DLUA_USE_POSIX
 DLDFLAGS:= -Wl,-E -lm -lcrypt -lrt $(LDFLAGS)
 
 include aux/tests.mk
