@@ -637,53 +637,24 @@ struct ConsControl {
 };
 
 
-static void namedfield (LexState *ls, struct ConsControl *cc) {
-  /* namedfield -> (NAME '=' exp) */
+static void recfield (LexState *ls, struct ConsControl *cc) {
+  /* recfield -> (NAME | '['exp1']') = exp1 */
   FuncState *fs = ls->fs;
   int reg = ls->fs->freereg;
   expdesc key, val;
   int rkkey;
-  checklimit(fs, cc->nh, MAX_INT, "items in a constructor");
-  checkname(ls, &key);
-  cc->nh++;
-  checknext(ls, '=');
-  rkkey = luaK_exp2RK(fs, &key);
-  expr(ls, &val);
-  luaK_codeABC(fs, OP_SETTABLE, cc->t->u.info, rkkey, luaK_exp2RK(fs, &val));
-  fs->freereg = reg;  /* free registers */
-}
-
-
-static void kfield (LexState *ls, struct ConsControl *cc) {
-  /* kfield -> ('[' exp ']' '=' exp) */
-  FuncState *fs = ls->fs;
-  int reg = ls->fs->freereg;
-  expdesc key, val;
-  int rkkey;
-  yindex(ls, &key);
-  cc->nh++;
-  checknext(ls, '=');
-  rkkey = luaK_exp2RK(fs, &key);
-  expr(ls, &val);
-  luaK_codeABC(fs, OP_SETTABLE, cc->t->u.info, rkkey, luaK_exp2RK(fs, &val));
-  fs->freereg = reg;  /* free registers */
-}
-
-
-static void recfields (LexState *ls, struct ConsControl *cc) {
-  /* recfields -> (`['exp`] = exp' | NAME = exp {NAME = exp})*/
-  if(ls->t.token == '[')
-    kfield(ls, cc);
-  else if(ls->t.token == TK_NAME) {
-    do {
-      namedfield(ls, cc);
-    } while(ls->t.token == TK_NAME);
-  } else {
-    lua_assert(0); /* not entirely sure this can be reached */
+  if (ls->t.token == TK_NAME) {
+    checklimit(fs, cc->nh, MAX_INT, "items in a constructor");
+    checkname(ls, &key);
   }
-  check_condition(ls,
-      ls->t.token == '}' | ls->t.token == ',' | ls->t.token == ';',
-      "expected separator (',' | ';') or '}'");
+  else  /* ls->t.token == '[' */
+    yindex(ls, &key);
+  cc->nh++;
+  checknext(ls, '=');
+  rkkey = luaK_exp2RK(fs, &key);
+  expr(ls, &val);
+  luaK_codeABC(fs, OP_SETTABLE, cc->t->u.info, rkkey, luaK_exp2RK(fs, &val));
+  fs->freereg = reg;  /* free registers */
 }
 
 
@@ -729,11 +700,11 @@ static void field (LexState *ls, struct ConsControl *cc) {
       if (luaX_lookahead(ls) != '=')  /* expression? */
         listfield(ls, cc);
       else
-        recfields(ls, cc);
+        recfield(ls, cc);
       break;
     }
     case '[': {
-      kfield(ls, cc);
+      recfield(ls, cc);
       break;
     }
     default: {

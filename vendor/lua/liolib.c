@@ -32,7 +32,6 @@
 */
 #define l_checkmode(mode) \
 	(*mode != '\0' && strchr("rwa", *(mode++)) != NULL &&	\
-	(*mode != 'e' || ++mode) &&  /* skip if char is 'e' */ \
 	(*mode != '+' || ++mode) &&  /* skip if char is '+' */	\
 	(*mode != 'b' || ++mode) &&  /* skip if char is 'b' */	\
 	(*mode == '\0'))
@@ -244,7 +243,7 @@ static void opencheck (lua_State *L, const char *fname, const char *mode) {
 
 static int io_open (lua_State *L) {
   const char *filename = luaL_checkstring(L, 1);
-  const char *mode = luaL_optstring(L, 2, "re");
+  const char *mode = luaL_optstring(L, 2, "r");
   LStream *p = newfile(L);
   const char *md = mode;  /* to traverse/check mode */
   luaL_argcheck(L, l_checkmode(md), 2, "invalid mode");
@@ -307,12 +306,12 @@ static int g_iofile (lua_State *L, const char *f, const char *mode) {
 
 
 static int io_input (lua_State *L) {
-  return g_iofile(L, IO_INPUT, "re");
+  return g_iofile(L, IO_INPUT, "r");
 }
 
 
 static int io_output (lua_State *L) {
-  return g_iofile(L, IO_OUTPUT, "we");
+  return g_iofile(L, IO_OUTPUT, "w");
 }
 
 

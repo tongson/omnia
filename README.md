@@ -44,25 +44,19 @@ C modules are a bit more complicated.
 
 Project                                                     | Version         | License
 ------------------------------------------------------------|-----------------|---------
-[Lua](http://www.lua.org)[1]                                | 5.3.0           | MIT
-[Luawrapper](https://github.com/ncarrier/luawrapper)[2]     | 0.2.1           | MIT
-[ELF Tool Chain/libelf](https://wiki.freebsd.org/LibElf)[3] | SVN r3177       | BSD
+[Lua](http://www.lua.org)                                   | 5.3.0           | MIT
+[Luawrapper](https://github.com/ncarrier/luawrapper)[1]     | 0.2.1           | MIT
+[ELF Tool Chain/libelf](https://wiki.freebsd.org/LibElf)[2] | SVN r3177       | BSD
 
 #### Available modules
 
 Module                                                      | Version         | License
 ------------------------------------------------------------|-----------------|---------
-[Luaposix](https://github.com/luaposix/luaposix)[4]         | 33.2.1          | MIT
+[Luaposix](https://github.com/luaposix/luaposix)[3]         | 33.2.1          | MIT
 [Linotify](https://github.com/hoelzro/linotify)             | 0.4             | MIT
 [LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)            | 0.12.2          | MIT
 
----
-
-1. Modifications:
-    * O_CLOEXEC on file streams
-    * LUAI_MAXSHORTLEN set to 64
-    * Optional commas on consecutive name=string table fields
-1. Modified to return an exit code instead of errno. Some systems do not have errno.h.
-1. SVN snapshot for various fixes. The last release is very old.
-1. Curses not included.
+[1] Modified to return an exit code instead of errno. Some systems do not have errno.h.
+[2] SVN snapshot for various fixes. The last release is very old.
+[3] Curses not included
 
