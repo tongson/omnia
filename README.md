@@ -27,10 +27,10 @@ If you want to link statically run `make STATIC=1`
 
 Adding plain Lua modules is trivial. $(NAME) is the name of the module passed to `VENDOR_LUA`.
 
-1. Create the directory `vendor/$(NAME)/src`<br/>
-  example: `mkdir -p vendor/dkjson/src`
-1. Copy the Lua module to `vendor/$(NAME)/src/$(NAME).lua`<br/>
-  example: `cp ~/Downloads/dkjson.lua vendor/dkjson/src`
+1. Create the directory `vendor/$(NAME)`<br/>
+  example: `mkdir -p vendor/dkjson`
+1. Copy the Lua module to `vendor/$(NAME)/$(NAME).lua`<br/>
+  example: `cp ~/Downloads/dkjson.lua vendor/dkjson`
 1. Add `$(NAME)` to `VENDOR_LUA`<br/>
   example: `VENDOR_LUA= re dkjson`
 

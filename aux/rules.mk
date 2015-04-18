@@ -18,10 +18,10 @@ $(LUA_T): $(LUA_O) $(luawrapperA) $(libelfA)
 	$(ECHOT) [CC] $@
 	$(CC) $(LUAWRAPPER) -o $@ $(CCWARN) $(CFLAGS) $(CCOPT) $(DLDFLAGS) $(LDLIBS) $(LUA_O)
 
-%LUA:
-	$(OBJCOPYA)$(*F)=vendor/$(*F)/src/$(*F).lua $(LUA_T) $(LUA_T)
+%LUA: $(LUA_T)
+	$(OBJCOPYA)$(*F)=vendor/$(*F)/$(*F).lua $(LUA_T) $(LUA_T)
 
-lua: $(LUA_T)
+lua: $(LUA_T) $(foreach m, $(VENDOR_LUA), $mLUA)
 	$(CP) $(LUA_T) $(EXE)
 
 sections: $(foreach m, $(VENDOR_LUA), $mLUA)
