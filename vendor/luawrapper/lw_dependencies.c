@@ -11,6 +11,9 @@ endif
 
 #include "lw_dependencies.h"
 
+#ifdef lib_lsocket
+extern int luaopen_lsocket (lua_State *L);
+#endif
 #ifdef lib_lpeg
 extern int luaopen_lpeg (lua_State *L);
 #endif
@@ -51,6 +54,9 @@ extern int luaopen_posix_sys_wait(lua_State *L);
 #endif
 
 const struct luaL_Reg lw_dependencies[] = {
+	#ifdef lib_lsocket
+	{.name = "lsocket", .func = luaopen_lsocket},
+	#endif
 	#ifdef lib_lpeg
         {.name = "lpeg", .func = luaopen_lpeg},
 	#endif

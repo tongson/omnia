@@ -2,7 +2,7 @@
 .SUFFIXES:
 EXE= bin/main
 MAIN= bin/main.lua
-VENDOR_C= luaposix linotify lpeg
+VENDOR_C= luaposix linotify lpeg lsocket
 VENDOR_LUA= re
 LIB=
 MAKEFLAGS= --silent
