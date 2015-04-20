@@ -57,7 +57,7 @@ Module                                                      | Version         | 
 [LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)            | 0.12.2          | MIT
 [lsocket](http://tset.de/lsocket/)[4]                       | 1.4             | MIT
 
-[1] Modified to return an exit code instead of errno. Some systems do not have errno.h.<br/>
+[1] Modified to return an exit code instead of errno. Some systems does not have error(3) or error.h<br/>
 [2] SVN snapshot for various fixes. The last release is very old.<br/>
 [3] Curses not included. posix.deprecated and posix.compat removed<br/>
 [4] Does not include the async resolver<br/>
