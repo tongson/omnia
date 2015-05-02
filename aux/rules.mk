@@ -33,9 +33,6 @@ exe: $(LUA_T) lua sections
 strip: $(LUA_T)
 	$(STRIP) $(STRIPFLAGS) $^
 
-compress: $(EXE)
-	$(UPX) $(UPXFLAGS) $<
-
 clean: $(CLEAN) clean_luawrapper clean_libelf
 	$(ECHO) "Cleaning up..."
 	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUAC2C_T) $(EXE) $(TESTLOG_F)
@@ -56,6 +53,6 @@ has-%:
 		exit -1; \
 	}
 
-.PHONY: all init bootstrap deps modules compress strip clean lua sections exe print-% vprint-% has-% %LUA
+.PHONY: all init bootstrap deps modules strip clean lua sections exe print-% vprint-% has-% %LUA
 
 
