@@ -26,7 +26,7 @@ lua: $(LUA_T) $(foreach m, $(VENDOR_LUA), $mLUA)
 
 sections: $(foreach m, $(VENDOR_LUA), $mLUA)
 
-exe: $(LUA_T)
+exe: $(LUA_T) lua sections
 	$(OBJCOPYA)main=$(MAIN) $(LUA_T) $(EXE)
 	$(ECHOT) [LN] $(EXE)
 
