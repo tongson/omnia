@@ -16,7 +16,7 @@ $(LUA_O): $(DEPS)
 
 $(LUA_T): $(LUA_O) $(luawrapperA) $(libelfA)
 	$(ECHOT) [CC] $@
-	$(CC) $(LUAWRAPPER) -o $@ $(CCWARN) $(CFLAGS) $(CCOPT) $(LDFLAGS) $(LDLIBS) $(LUA_O)
+	$(CC) $(LUAWRAPPER) -o $@ $(CCWARN) $(CFLAGS) $(CCOPT) $(DLDFLAGS) $(LDLIBS) $(LUA_O)
 
 %LUA: $(LUA_T)
 	$(OBJCOPYA)$(*F)=vendor/$(*F)/$(*F).lua $(LUA_T) $(LUA_T)
