@@ -1,4 +1,3 @@
-TESTLOG_F = test.log
 AUX_P = aux
 LUAC_T= bin/luac
 LUAC2C_T= bin/luac2c
@@ -18,7 +17,6 @@ OBJCOPYA= @objcopy --add-section lw_
 RM= rm
 RMFLAGS= -f
 RMRF= rm -rf
-CP= @cp
 
 _rest= $(wordlist 2,$(words $(1)),$(1))
 _lget= $(firstword lib/$(1))/Makefile $(if $(_rest),$(call _lget,$(_rest)),)
