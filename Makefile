@@ -19,7 +19,7 @@ LDFLAGS= -Wl,--gc-sections -Wl,--strip-all -Wl,--relax -Wl,--sort-common
 all: bootstrap deps lua sections exe
 
 luaDEFINES:= -DLUA_COMPAT_BITLIB -DLUA_USE_POSIX
-DLDFLAGS:= -Wl,-E -lm -lcrypt -lrt $(LDFLAGS)
+DLDFLAGS= -Wl,-E -lm -lcrypt -lrt $(LDFLAGS)
 
 include aux/tests.mk
 include aux/flags.mk
