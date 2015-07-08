@@ -44,7 +44,7 @@ C modules are a bit more complicated.
 
 Project                                                     | Version         | License
 ------------------------------------------------------------|-----------------|---------
-[Lua](http://www.lua.org)                                   | 5.3.0           | MIT
+[Lua](http://www.lua.org)                                   | 5.3.1           | MIT
 [Luawrapper](https://github.com/ncarrier/luawrapper)[1]     | 0.2.1           | MIT
 [ELF Tool Chain/libelf](https://wiki.freebsd.org/LibElf)[2] | SVN r3177       | BSD
 
