@@ -1,5 +1,5 @@
 /*
-** $Id: liolib.c,v 2.142 2015/01/02 12:50:28 roberto Exp $
+** $Id: liolib.c,v 2.144 2015/04/03 18:41:57 roberto Exp $
 ** Standard I/O (and system) library
 ** See Copyright Notice in lua.h
 */
@@ -32,6 +32,7 @@
 */
 #define l_checkmode(mode) \
 	(*mode != '\0' && strchr("rwa", *(mode++)) != NULL &&	\
+	(*mode != 'e' || ++mode) &&  /* skip if char is 'e' */ \
 	(*mode != '+' || ++mode) &&  /* skip if char is '+' */	\
 	(*mode != 'b' || ++mode) &&  /* skip if char is 'b' */	\
 	(*mode == '\0'))
@@ -243,7 +244,7 @@ static void opencheck (lua_State *L, const char *fname, const char *mode) {
 
 static int io_open (lua_State *L) {
   const char *filename = luaL_checkstring(L, 1);
-  const char *mode = luaL_optstring(L, 2, "r");
+  const char *mode = luaL_optstring(L, 2, "re");
   LStream *p = newfile(L);
   const char *md = mode;  /* to traverse/check mode */
   luaL_argcheck(L, l_checkmode(md), 2, "invalid mode");
@@ -306,12 +307,12 @@ static int g_iofile (lua_State *L, const char *f, const char *mode) {
 
 
 static int io_input (lua_State *L) {
-  return g_iofile(L, IO_INPUT, "r");
+  return g_iofile(L, IO_INPUT, "re");
 }
 
 
 static int io_output (lua_State *L) {
-  return g_iofile(L, IO_OUTPUT, "w");
+  return g_iofile(L, IO_OUTPUT, "we");
 }
 
 
@@ -410,12 +411,6 @@ static int readdigits (RN *rn, int hex) {
 }
 
 
-/* access to locale "radix character" (decimal point) */
-#if !defined(l_getlocaledecpoint)
-#define l_getlocaledecpoint()     (localeconv()->decimal_point[0])
-#endif
-
-
 /*
 ** Read a number: first reads a valid prefix of a numeral into a buffer.
 ** Then it calls 'lua_stringtonumber' to check whether the format is
@@ -425,9 +420,10 @@ static int read_number (lua_State *L, FILE *f) {
   RN rn;
   int count = 0;
   int hex = 0;
-  char decp[2] = ".";
+  char decp[2];
   rn.f = f; rn.n = 0;
-  decp[0] = l_getlocaledecpoint();  /* get decimal point from locale */
+  decp[0] = lua_getlocaledecpoint();  /* get decimal point from locale */
+  decp[1] = '\0';
   l_lockfile(rn.f);
   do { rn.c = l_getc(rn.f); } while (isspace(rn.c));  /* skip spaces */
   test2(&rn, "-+");  /* optional signal */
@@ -457,7 +453,7 @@ static int read_number (lua_State *L, FILE *f) {
 static int test_eof (lua_State *L, FILE *f) {
   int c = getc(f);
   ungetc(c, f);  /* no-op when c == EOF */
-  lua_pushlstring(L, NULL, 0);
+  lua_pushliteral(L, "");
   return (c != EOF);
 }
 
