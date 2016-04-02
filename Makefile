@@ -2,7 +2,7 @@
 .SUFFIXES:
 EXE= bin/main
 MAIN= bin/main.lua
-VENDOR_C= luaposix linotify lpeg lsocket
+VENDOR_C= lpeg
 VENDOR_LUA= re
 LIB=
 MAKEFLAGS= --silent
@@ -19,13 +19,10 @@ luaDEFINES:= -DLUA_COMPAT_BITLIB -DLUA_USE_POSIX
 DLDFLAGS= -Wl,-E -lm -lcrypt -lrt $(LDFLAGS)
 
 all: bin/lua
-	$(MAKE) sections
 	$(MAKE) exe
 
 include aux/tests.mk
 include aux/flags.mk
-include vendor/libelf/Makefile
-include vendor/luawrapper/Makefile
 include aux/std.mk
 ifneq ($(LIB),)
   include $(eval _d:=lib/$(LIB) $(_d)) $(call _lget,$(LIB))
