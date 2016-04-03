@@ -1,4 +1,4 @@
-lpegA= vendor/lpeg/liblpeg.a
+lpegA= lpeg.a
 lpegOBJS= vendor/lpeg/lpcap.o vendor/lpeg/lpcode.o vendor/lpeg/lpprint.o vendor/lpeg/lptree.o vendor/lpeg/lpvm.o
 DEPS+=$(lpegA)
 CLEAN+= clean_lpeg

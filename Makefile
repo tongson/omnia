@@ -1,7 +1,7 @@
 .POSIX:
 .SUFFIXES:
-EXE= bin/main
-MAIN= bin/main.lua
+EXE= main
+MAIN= bin/$(EXE).lua
 VENDOR_C= lpeg
 VENDOR_LUA= re
 LIB=

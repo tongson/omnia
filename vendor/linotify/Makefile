@@ -1,6 +1,6 @@
 linotifySRC= vendor/linotify/linotify.c
 linotifyOBJ= vendor/linotify/linotify.o
-linotifyA= vendor/linotify/liblinotify.a
+linotifyA= linotify.a
 DEPS+=$(linotifyA)
 CLEAN+= clean_linotify
 CCWARN=

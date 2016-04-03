@@ -16,11 +16,13 @@ $(LUA_A): $(LUA_O)
 	$(RANLIB) $@
 
 exe: $(LUA_A)
-	$(LUA_T) aux/luastatic.lua $(MAIN) $(LUA_A) $(CLUA_MODS) $(LUA_MODS) $(INCLUDES)
+	cd $(MODULES_P) && \
+	$(CP) $(LUA_MODS) ../..		
+	$(LUA_T) $(LUASTATIC) $(MAIN) $(LUA_MODS) $(CLUA_MODS) $(LUA_A) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT)
 
 clean: $(CLEAN) 
 	$(ECHO) "Cleaning up..."
-	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUAC2C_T) $(EXE)
+	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUAC2C_T) $(EXE) $(LUA_A) $(MAIN).c $(LUA_MODS)
 	$(RMRF) test/tmp
 	$(ECHO) "Done!"
 

@@ -1,6 +1,6 @@
 lsocketSRC= vendor/lsocket/lsocket.c
 lsocketOBJ= vendor/lsocket/lsocket.o
-lsocketA= vendor/lsocket/liblsocket.a
+lsocketA= lsocket.a
 DEPS+=$(lsocketA)
 CLEAN+= clean_lsocket
 CCWARN=
