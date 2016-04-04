@@ -2,6 +2,10 @@ $(LUAC_T):
 	$(ECHOT) [CC] $@
 	$(CC) -o $@ -DMAKE_LUAC $(DEFINES) $(INCLUDES) $(CCWARN) $(ONE).c -lm
 
+$(LUAC2C_T): $(AUX_P)/luac2c.c
+	$(ECHOT) [CC] $@
+	$(CC) -o $@ $(CCWARN) $<
+
 $(LUA_T):
 	$(ECHOT) [CC] $@
 	$(CC) -o $@ -DMAKE_LUA $(luaDEFINES) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(ONE).c -lm
