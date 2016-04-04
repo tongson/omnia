@@ -2,32 +2,27 @@ $(LUAC_T):
 	$(ECHOT) [CC] $@
 	$(CC) -o $@ -DMAKE_LUAC $(DEFINES) $(INCLUDES) $(CCWARN) $(ONE).c -lm
 
-$(LUAC2C_T): $(AUX_P)/luac2c.c
+$(LUA_T):
 	$(ECHOT) [CC] $@
-	cc -o $@ $(CCWARN) $<
+	$(CC) -o $@ -DMAKE_LUA $(luaDEFINES) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(ONE).c -lm
 
-$(LUA_O): $(BUILD_DEPS) $(LUAC_T) $(LUAC2C_T) $(DEPS)
+$(LUA_O): $(BUILD_DEPS) $(LUA_T) $(LUAC_T) $(DEPS)
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ -c -DMAKE_LIB $(DEFINES) $(luaDEFINES) $(LDEFINES) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(ONE).c $(LDLIBS)
+	$(CC) -o $@ -c -DMAKE_LIB $(DEFINES) $(luaDEFINES) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(ONE).c 
 
-$(LUA_T): $(LUA_O) $(luawrapperA) $(libelfA)
-	$(ECHOT) [CC] $@
-	$(CC) $(LUAWRAPPER) -o $@ $(CCWARN) $(CFLAGS) $(CCOPT) $(DLDFLAGS) $(LDLIBS) $(LUA_O)
+$(LUA_A): $(LUA_O)
+	$(ECHOT) [AR] $@
+	$(AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
+	$(RANLIB) $@
 
-ifneq ($(filter sections,$(MAKECMDGOALS)),)
-.NOTPARALLEL:
-%LUA:
-	$(OBJCOPYA)$(*F)=vendor/$(*F)/$(*F).lua $(LUA_T) $(LUA_T)
-sections: $(foreach m, $(VENDOR_LUA), $mLUA)
-endif
+exe: $(LUA_A)
+	cd $(MODULES_P) && \
+	$(CP) $(LUA_MODS) ../..		
+	$(LUA_T) $(LUASTATIC) $(MAIN) $(LUA_MODS) $(CLUA_MODS) $(LUA_A) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT)
 
-exe:
-	$(OBJCOPYA)main=$(MAIN) $(LUA_T) $(EXE)
-	$(ECHOT) [LN] $(EXE)
-
-clean: $(CLEAN) clean_luawrapper clean_libelf
+clean: $(CLEAN) 
 	$(ECHO) "Cleaning up..."
-	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUAC2C_T) $(EXE)
+	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUAC2C_T) $(EXE) $(LUA_A) $(MAIN).c $(LUA_MODS)
 	$(RMRF) test/tmp
 	$(ECHO) "Done!"
 
