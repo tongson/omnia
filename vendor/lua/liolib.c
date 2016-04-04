@@ -1,5 +1,5 @@
 /*
-** $Id: liolib.c,v 2.144 2015/04/03 18:41:57 roberto Exp $
+** $Id: liolib.c,v 2.148 2015/11/23 11:36:11 roberto Exp $
 ** Standard I/O (and system) library
 ** See Copyright Notice in lua.h
 */
@@ -23,19 +23,24 @@
 #include "lualib.h"
 
 
-#if !defined(l_checkmode)
+
 
 /*
-** Check whether 'mode' matches '[rwa]%+?b?'.
 ** Change this macro to accept other modes for 'fopen' besides
 ** the standard ones.
 */
+#if !defined(l_checkmode)
+
+/* accepted extensions to 'mode' in 'fopen' */
+#if !defined(L_MODEEXT)
+#define L_MODEEXT	"b"
+#endif
+
+/* Check whether 'mode' matches '[rwa]%+?[L_MODEEXT]*' */
 #define l_checkmode(mode) \
 	(*mode != '\0' && strchr("rwa", *(mode++)) != NULL &&	\
-	(*mode != 'e' || ++mode) &&  /* skip if char is 'e' */ \
-	(*mode != '+' || ++mode) &&  /* skip if char is '+' */	\
-	(*mode != 'b' || ++mode) &&  /* skip if char is 'b' */	\
-	(*mode == '\0'))
+	(*mode != '+' || (++mode, 1)) &&  /* skip if char is '+' */	\
+	(strspn(mode, L_MODEEXT) == strlen(mode)))
 
 #endif
 
@@ -177,7 +182,7 @@ static FILE *tofile (lua_State *L) {
 /*
 ** When creating file handles, always creates a 'closed' file handle
 ** before opening the actual file; so, if there is a memory error, the
-** file is not left opened.
+** handle is in a consistent state.
 */
 static LStream *newprefile (lua_State *L) {
   LStream *p = (LStream *)lua_newuserdata(L, sizeof(LStream));
@@ -244,7 +249,7 @@ static void opencheck (lua_State *L, const char *fname, const char *mode) {
 
 static int io_open (lua_State *L) {
   const char *filename = luaL_checkstring(L, 1);
-  const char *mode = luaL_optstring(L, 2, "re");
+  const char *mode = luaL_optstring(L, 2, "r");
   LStream *p = newfile(L);
   const char *md = mode;  /* to traverse/check mode */
   luaL_argcheck(L, l_checkmode(md), 2, "invalid mode");
@@ -307,20 +312,27 @@ static int g_iofile (lua_State *L, const char *f, const char *mode) {
 
 
 static int io_input (lua_State *L) {
-  return g_iofile(L, IO_INPUT, "re");
+  return g_iofile(L, IO_INPUT, "r");
 }
 
 
 static int io_output (lua_State *L) {
-  return g_iofile(L, IO_OUTPUT, "we");
+  return g_iofile(L, IO_OUTPUT, "w");
 }
 
 
 static int io_readline (lua_State *L);
 
 
+/*
+** maximum number of arguments to 'f:lines'/'io.lines' (it + 3 must fit
+** in the limit for upvalues of a closure)
+*/
+#define MAXARGLINE	250
+
 static void aux_lines (lua_State *L, int toclose) {
   int n = lua_gettop(L) - 1;  /* number of arguments to read */
+  luaL_argcheck(L, n <= MAXARGLINE, MAXARGLINE + 2, "too many arguments");
   lua_pushinteger(L, n);  /* number of arguments to read */
   lua_pushboolean(L, toclose);  /* close/not close file when finished */
   lua_rotate(L, 2, 2);  /* move 'n' and 'toclose' to their positions */
@@ -463,7 +475,7 @@ static int read_line (lua_State *L, FILE *f, int chop) {
   int c = '\0';
   luaL_buffinit(L, &b);
   while (c != EOF && c != '\n') {  /* repeat until end of line */
-    char *buff = luaL_prepbuffer(&b);  /* pre-allocate buffer */
+    char *buff = luaL_prepbuffer(&b);  /* preallocate buffer */
     int i = 0;
     l_lockfile(f);  /* no memory errors can happen inside the lock */
     while (i < LUAL_BUFFERSIZE && (c = l_getc(f)) != EOF && c != '\n')
@@ -484,7 +496,7 @@ static void read_all (lua_State *L, FILE *f) {
   luaL_Buffer b;
   luaL_buffinit(L, &b);
   do {  /* read file in chunks of LUAL_BUFFERSIZE bytes */
-    char *p = luaL_prepbuffsize(&b, LUAL_BUFFERSIZE);
+    char *p = luaL_prepbuffer(&b);
     nr = fread(p, sizeof(char), LUAL_BUFFERSIZE, f);
     luaL_addsize(&b, nr);
   } while (nr == LUAL_BUFFERSIZE);
