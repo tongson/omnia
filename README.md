@@ -40,7 +40,7 @@ C modules are a bit more complicated.
 
 Project                                                     | Version         | License
 ------------------------------------------------------------|-----------------|---------
-[Lua](http://www.lua.org)                                   | 5.3.1           | MIT
+[Lua](http://www.lua.org)[1]                                | 5.3.2           | MIT
 [luastatic](https://github.com/ers35/luastatic)             | 0ef44ef         | CC0
 
 #### Available modules
@@ -49,9 +49,10 @@ Module                                                      | Version         | 
 ------------------------------------------------------------|-----------------|---------
 [Luaposix](https://github.com/luaposix/luaposix)[1]         | 33.3.1          | MIT
 [Linotify](https://github.com/hoelzro/linotify)             | 0.4             | MIT
-[LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)            | 0.12.2          | MIT
+[LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)            | 1.0.0           | MIT
 [lsocket](http://tset.de/lsocket/)[2]                       | 1.4             | MIT
 
-[1] Curses not included. posix.deprecated and posix.compat removed<br/>
-[2] Does not include the async resolver<br/>
+[1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.2)
+[2] Curses not included. posix.deprecated and posix.compat removed<br/>
+[3] Does not include the async resolver<br/>
 
