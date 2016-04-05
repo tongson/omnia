@@ -1,7 +1,7 @@
 .POSIX:
 .SUFFIXES:
-EXE= main 
-MAIN= bin/$(EXE).lua
+EXE= main
+MAIN= $(EXE).lua
 VENDOR_C= lpeg
 VENDOR_LUA= re
 LIB=
@@ -10,14 +10,14 @@ CC= cc
 LD= ld
 RANLIB= ranlib
 AR= ar
-LUAC= bin/luac
+LUAC= luac
 CCWARN= -Wall
 CCOPT= -Os -mtune=generic -mmmx -msse -msse2 -fomit-frame-pointer -pipe
 CFLAGS+= -ffunction-sections -fdata-sections -fno-asynchronous-unwind-tables -fno-unwind-tables
 LDFLAGS= -Wl,--gc-sections -Wl,--strip-all -Wl,--relax -Wl,--sort-common
 luaDEFINES:= -DLUA_COMPAT_BITLIB -DLUA_USE_POSIX
 
-all: bin/lua
+all: lua
 	$(MAKE) exe
 
 include aux/tests.mk
