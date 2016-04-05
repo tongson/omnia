@@ -10,7 +10,7 @@ $(LUA_T):
 	$(ECHOT) [CC] $@
 	$(CC) -o $@ -DMAKE_LUA $(luaDEFINES) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(ONE).c -lm
 
-$(LUA_O): $(BUILD_DEPS) $(LUA_T) $(LUAC_T) $(DEPS)
+$(LUA_O): $(BUILD_DEPS) $(LUA_T) $(LUAC_T) 
 	$(ECHOT) [CC] $@
 	$(CC) -o $@ -c -DMAKE_LIB $(DEFINES) $(luaDEFINES) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(ONE).c 
 
@@ -19,10 +19,10 @@ $(LUA_A): $(LUA_O)
 	$(AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
 	$(RANLIB) $@
 
-exe: $(LUA_A)
+exe: $(LUA_A) $(CLUA_MODS)
 	cd $(MODULES_P) && \
 	$(CP) $(LUA_MODS) ../..		
-	$(LUA_T) $(LUASTATIC) $(MAIN) $(LUA_MODS) $(CLUA_MODS) $(LUA_A) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT)
+	$(LUA_T) $(LUASTATIC) $(MAIN) $(LUA_MODS) $(CLUA_MODS) $(LUA_A) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(LDFLAGS)
 
 clean: $(CLEAN) 
 	$(ECHO) "Cleaning up..."
