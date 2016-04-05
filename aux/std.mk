@@ -3,7 +3,6 @@ MODULES_P= vendor/modules
 ONE= $(AUX_P)/one
 LUASTATIC= aux/luastatic.lua
 LUAC_T= bin/luac
-LUAC2C_T= bin/luac2c
 LUA_O= $(ONE).o
 LUA_A= aux/liblua.a
 LUA_T= bin/lua
