@@ -36,14 +36,6 @@ for _, sub in ipairs {
 end
 
 
--- Inject deprecated APIs (overwriting submodules) for backwards compatibility.
-for k, v in pairs (require "posix.deprecated") do
-  M[k] = v
-end
-for k, v in pairs (require "posix.compat") do
-  M[k] = v
-end
-
 M.version = "posix for " .. _VERSION .. " / luaposix 33.4.0"
 
 

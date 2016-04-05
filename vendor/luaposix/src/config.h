@@ -9,6 +9,6 @@
 #define HAVE_INTTYPES_H 1
 #define HAVE_MEMORY_H 1
 #define HAVE_CURSES 0
-#define VERSION "33.3.2"
-#define PACKAGE_STRING "luaposix 33.3.2"
+#define VERSION "33.4.0"
+#define PACKAGE_STRING "luaposix 33.4.0"
 #define PACKAGE_NAME "luaposix"

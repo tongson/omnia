@@ -1,40 +1,41 @@
-posix_cSRC= vendor/luaposix/src/posix.c
-posix_cOBJ= vendor/luaposix/posix_c.o
-posixSRC= vendor/luaposix/src/init.lua
-posixOBJ= vendor/luaposix/posix.o
-posixC= vendor/luaposix/posix.c
-posixLUAC= vendor/luaposix/posix.luac
-posixA= luaposix.a
-DEPS+= $(posixA)
+LUAPOSIX= ctype dirent errno fcntl fnmatch getopt glob grp \
+  libgen poll pwd sched signal stdio stdlib sys.msg \
+  sys.resource sys.socket sys.stat sys.statvfs sys.time \
+  sys.times sys.utsname sys.wait syslog termio time \
+  unistd utime
+posix_P= vendor/luaposix/src
+CLUA_MODS+= $(foreach m, $(LUAPOSIX), posix.$m.a)
+CLUA_MODS:= $(filter-out luaposix.a,$(CLUA_MODS))
+CFLAGS+= -lrt
+VENDOR_LUA+= posix
 CLEAN+= clean_posix
 TEST+= test_posix
 TESTS= dir.lua fork2.lua fork.lua getopt.lua signal.lua
 CCWARN=
 
-$(posixA): $(posix_cOBJ) $(posixOBJ)
+$(posix_P)/sys/%.o:  $(posix_P)/sys/%.c
+	$(ECHOT) [CC] $@
+	$(CC) -o $@ $(DEFINES) $(posixDEFINES) $(INCLUDES) -Ivendor/luaposix/src $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
+
+posix.sys.%.a: $(posix_P)/sys/%.o
 	$(ECHOT) [AR] $@
 	$(AR) $(ARFLAGS) $@ $^ >/dev/null 2>&1
 	$(RANLIB) $@
 
-$(posix_cOBJ): $(posix_cSRC) $(LINIT_T)
+$(posix_P)/%.o:  $(posix_P)/%.c
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(DEFINES) $(luaposixDEFINES) $(INCLUDES) -Ivendor/luaposix/src $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
+	$(CC) -o $@ $(DEFINES) $(posixDEFINES) $(INCLUDES) -Ivendor/luaposix/src $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
 
-$(posixOBJ): $(posixC) $(LINIT_T)
-	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(DEFINES) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
-
-$(posixC): $(posixLUAC) $(LUAC2C_T)
-	@$(LUAC2C_T) -n posix -o $@ $<
-
-$(posixLUAC): $(posixSRC) $(LUAC_T)
-	@$(LUAC) -s -o $@ $<
+posix.%.a: $(posix_P)/%.o
+	$(ECHOT) [AR] $@
+	$(AR) $(ARFLAGS) $@ $^ >/dev/null 2>&1
+	$(RANLIB) $@
 
 clean_posix:
-	$(RM) $(RMFLAGS) $(posix_cOBJ) $(posixA) $(posixOBJ) $(posixC) $(posixLUAC)
+	$(RM) $(RMFLAGS) $(posix_P)/*.o $(CLUA_MODS)
 
 test_posix: $(LUA_T)
-	cd vendor/luaposix/test; for i in $(TESTS); do ../../../bin/lua $$i; done
+	cd vendor/posix/test; for i in $(TESTS); do ../../../bin/lua $$i; done
 
 .PHONY: clean_posix test_posix
 
