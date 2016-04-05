@@ -131,7 +131,11 @@ local bin_module_require_template = [[int luaopen_%s(lua_State *L);
 ]]
 for i, v in ipairs(module_library_files) do
   local noext = v.basename_noextension
-  table.insert(bin_module_require, bin_module_require_template:format(noext, noext, noext))
+  local luaopen = noext
+  if v.name:find("%.(%a+)%.") then
+    luaopen = v.basename_underscore
+  end
+  table.insert(bin_module_require, bin_module_require_template:format(luaopen, noext, luaopen))
 end
 local bin_module_requirestr = table.concat(bin_module_require, "\n")
 
