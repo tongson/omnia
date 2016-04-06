@@ -10,7 +10,7 @@ $(lsocketA): $(lsocketOBJ)
 	$(AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
 	$(RANLIB) $@
 
-$(lsocketOBJ): $(lsocketSRC) $(LINIT_T)
+$(lsocketOBJ): $(lsocketSRC) 
 	$(ECHOT) [CC] $@
 	$(CC) -o $@ $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
 
