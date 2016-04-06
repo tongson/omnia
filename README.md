@@ -10,7 +10,7 @@ Similar projects:<br>
 [luabuild](https://github.com/stevedonovan/luabuild)
 
 Requires: Developement tools e.g. build-essential. Does not require autotools.<br/>
-Note: Linux only. xBSD soon.
+Note: Linux and OS X only. xBSD soon.
 
 #### Getting started
 
