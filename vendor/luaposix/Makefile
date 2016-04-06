@@ -9,8 +9,6 @@ CLUA_MODS:= $(filter-out luaposix.a,$(CLUA_MODS))
 CFLAGS+= -lrt
 VENDOR_LUA+= posix
 CLEAN+= clean_posix
-TEST+= test_posix
-TESTS= dir.lua fork2.lua fork.lua getopt.lua signal.lua
 CCWARN=
 
 $(posix_P)/sys/%.o:  $(posix_P)/sys/%.c
@@ -33,9 +31,6 @@ posix.%.a: $(posix_P)/%.o
 
 clean_posix:
 	$(RM) $(RMFLAGS) $(posix_P)/*.o $(CLUA_MODS)
-
-test_posix: $(LUA_T)
-	cd vendor/posix/test; for i in $(TESTS); do ../../../bin/lua $$i; done
 
 .PHONY: clean_posix test_posix
 
