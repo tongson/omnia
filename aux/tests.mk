@@ -12,6 +12,11 @@ ifeq ($(shell aux/test-cc.sh $(CC)), GCC)
   CFLAGS+= -static-libgcc
 endif
 
+# Replace --gc-sections with -dead-strip on Mac
+ifeq ($(shell aux/test-mac.sh $(CC)), __APPLE__)
+  LDFLAGS:= -Wl,-dead-strip -Wl,--strip-all -Wl,--relax -Wl,--sort-common
+endif
+
 # Test for GCC LTO capability.
 ifeq ($(shell aux/test-gcc47.sh $(CC)), GCC47)
   ifeq ($(shell aux/test-binutils-plugins.sh gcc-ar), true)
