@@ -1,5 +1,8 @@
 lpegA= lpeg.a
-lpegOBJS= vendor/c/lpeg/lpcap.o vendor/c/lpeg/lpcode.o vendor/c/lpeg/lpprint.o vendor/c/lpeg/lptree.o vendor/c/lpeg/lpvm.o
+lpegOBJS= vendor/c/lpeg/lpcap.o vendor/c/lpeg/lpcode.o vendor/c/lpeg/lptree.o vendor/c/lpeg/lpvm.o
+ifeq ($(DEBUG), 1)
+  lpegOBJS+= vendor/c/lpeg/lpprint.o
+endif
 DEPS+=$(lpegA)
 CLEAN+= clean_lpeg
 CCWARN=
