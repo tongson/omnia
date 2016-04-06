@@ -15,7 +15,7 @@ CCWARN=
 
 $(posix_P)/sys/%.o:  $(posix_P)/sys/%.c
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(DEFINES) $(posixDEFINES) $(INCLUDES) -Ivendor/luaposix/src $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
+	$(CC) -o $@ $(DEFINES) $(luaposixDEFINES) $(INCLUDES) -Ivendor/luaposix/src $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
 
 posix.sys.%.a: $(posix_P)/sys/%.o
 	$(ECHOT) [AR] $@
@@ -24,7 +24,7 @@ posix.sys.%.a: $(posix_P)/sys/%.o
 
 $(posix_P)/%.o:  $(posix_P)/%.c
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(DEFINES) $(posixDEFINES) $(INCLUDES) -Ivendor/luaposix/src $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
+	$(CC) -o $@ $(DEFINES) $(luaposixDEFINES) $(INCLUDES) -Ivendor/luaposix/src $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
 
 posix.%.a: $(posix_P)/%.o
 	$(ECHOT) [AR] $@
