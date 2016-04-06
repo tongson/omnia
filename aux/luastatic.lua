@@ -263,8 +263,8 @@ do
   local linklibstr = table.concat(linklibs, " ")
   local ccformat 
     = "%s -Os -std=c99 %s.c %s %s %s -lm %s %s -o %s%s"
-  local rdynamic = "-rdynamic"
-  local ldl = "-ldl"
+  local rdynamic = ""
+  local ldl = ""
   local binary_extension = ""
   if dumpmachine(CC):match"mingw" then
     rdynamic = ""
