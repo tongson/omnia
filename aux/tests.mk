@@ -14,7 +14,7 @@ endif
 
 # Replace --gc-sections with -dead-strip on Mac
 ifeq ($(shell aux/test-mac.sh $(CC)), __APPLE__)
-  LDFLAGS:= -Wl,-dead-strip -Wl,--strip-all -Wl,--relax -Wl,--sort-common
+  LDFLAGS:= -Wl,-dead_strip
 endif
 
 # Test for GCC LTO capability.
