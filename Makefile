@@ -23,6 +23,6 @@ ifneq ($(LIB),)
   include $(eval _d:=lib/$(LIB) $(_d)) $(call _lget,$(LIB))
 endif
 ifneq ($(VENDOR_C),)
-  include $(eval _d:=vendor/$(VENDOR_C) $(_d)) $(call _vget,$(VENDOR_C))
+  include $(eval _d:=vendor/c/$(VENDOR_C) $(_d)) $(call _vget,$(VENDOR_C))
 endif
 include aux/rules.mk
