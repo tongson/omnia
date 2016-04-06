@@ -9,7 +9,7 @@ Similar projects:<br>
 [LuaDist](http://luadist.org/)<br/>
 [luabuild](https://github.com/stevedonovan/luabuild)
 
-Requires: Developement tools e.g. build-essential<br/>
+Requires: Developement tools e.g. build-essential. Does not require autotools.<br/>
 Note: Linux only. xBSD soon.
 
 #### Getting started
@@ -26,14 +26,14 @@ If you want to link statically run `make STATIC=1`
 
 Adding plain Lua modules is trivial. $(NAME) is the name of the module passed to `VENDOR_LUA`.
 
-1. Copy the Lua module to `vendor/modules/$(NAME).lua`<br/>
-  example: `cp ~/Downloads/dkjson.lua vendor/modules`
+1. Copy the Lua module to `vendor/lua/$(NAME).lua`<br/>
+  example: `cp ~/Downloads/dkjson.lua vendor/lua`
 1. Add `$(NAME)` to `VENDOR_LUA`<br/>
   example: `VENDOR_LUA= re dkjson`
 
 C modules are a bit more complicated.
 
-1. Provide a Makefile in `vendor/$(NAME)/Makefile`
+1. Provide a Makefile in `vendor/c/$(NAME)/Makefile`. See existing modules such as luaposix and lpeg for pointers.
 1. Add `$(NAME)` to `VENDOR_C`
 
 #### Included projects
@@ -53,6 +53,6 @@ Module                                                      | Version         | 
 [lsocket](http://tset.de/lsocket/)[2]                       | 1.4             | MIT
 
 [1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.2)
-[2] Curses not included. posix.deprecated and posix.compat removed<br/>
+[2] posix.deprecated and posix.compat removed<br/>
 [3] Does not include the async resolver<br/>
 
