@@ -13,7 +13,7 @@ ifeq ($(shell aux/test-cc.sh $(CC)), GCC)
 endif
 
 # Replace --gc-sections with -dead-strip on Mac
-ifeq ($(shell aux/test-mac.sh $(CC)), __APPLE__)
+ifeq ($(shell aux/test-mac.sh $(CC)), APPLE)
   LDFLAGS:= -Wl,-dead_strip
 endif
 

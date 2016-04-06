@@ -1,2 +1,10 @@
 #!/bin/sh
-$1 -dM -E -x c /dev/null | grep __APPLE__ | cut -f 2 -d ' '
+C=idCC-$$.c
+
+cat >$C <<_EOF
+#ifdef __APPLE__
+APPLE
+#endif
+_EOF
+$1 -E $C | tail -n1
+rm -f $C
