@@ -9,7 +9,7 @@ Similar projects:<br>
 [LuaDist](http://luadist.org/)<br/>
 [luabuild](https://github.com/stevedonovan/luabuild)
 
-Requires: Developement tools e.g. build-essential. Does not require autotools.<br/>
+Requires: Development tools e.g. the package build-essential. Does not require autotools.<br/>
 Note: Linux and OS X only. xBSD soon.
 
 #### Getting started
@@ -47,12 +47,12 @@ Project                                                     | Version         | 
 
 Module                                                      | Version         | License
 ------------------------------------------------------------|-----------------|---------
-[Luaposix](https://github.com/luaposix/luaposix)[1]         | 33.3.1          | MIT
+[Luaposix](https://github.com/luaposix/luaposix)[2]         | 33.4.0          | MIT
 [Linotify](https://github.com/hoelzro/linotify)             | 0.4             | MIT
 [LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)            | 1.0.0           | MIT
-[lsocket](http://tset.de/lsocket/)[2]                       | 1.4             | MIT
+[lsocket](http://tset.de/lsocket/)[3]                       | 1.4             | MIT
 
-[1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.2)
+[1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.2)<br/>
 [2] posix.deprecated and posix.compat removed<br/>
 [3] Does not include the async resolver<br/>
 
