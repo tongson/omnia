@@ -41,7 +41,7 @@ C modules are a bit more complicated.
 Project                                                     | Version         | License
 ------------------------------------------------------------|-----------------|---------
 [Lua](http://www.lua.org)[1]                                | 5.3.2           | MIT
-[luastatic](https://github.com/ers35/luastatic)             | 0ef44ef         | CC0
+[luastatic](https://github.com/ers35/luastatic)             | 4a26fa9         | CC0
 
 #### Available modules
 
