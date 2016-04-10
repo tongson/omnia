@@ -101,7 +101,7 @@ local lua_module_require_template = [[struct module
   char *name;
   unsigned char *buf;
   unsigned int len;
-} lua_bundle[] = 
+} lua_bundle[] =
 {
 %s
 };
@@ -113,7 +113,7 @@ for i, v in ipairs(lua_source_files) do
   f:close()
   local fmt = [[static unsigned char lua_require_%s[] = {%s};]]
   table.insert(luaprogramcdata, fmt:format(i, hexstr))
-  table.insert(lua_module_require, 
+  table.insert(lua_module_require,
     ("\t{\"%s\", lua_require_%s, %s},"):format(
       v.name:gsub("/", "."):gsub("%.lua$", ""), i, #strdata
     )
@@ -130,12 +130,9 @@ local bin_module_require_template = [[int luaopen_%s(lua_State *L);
   lua_pop(L, 1);
 ]]
 for i, v in ipairs(module_library_files) do
-  local noext = v.basename_noextension
-  local luaopen = noext
-  if v.name:find("%.(%a+)%.") then
-    luaopen = v.basename_underscore
-  end
-  table.insert(bin_module_require, bin_module_require_template:format(luaopen, noext, luaopen))
+  table.insert(bin_module_require, bin_module_require_template:format(
+    v.basename_underscore, v.basename_noextension, v.basename_underscore)
+  )
 end
 local bin_module_requirestr = table.concat(bin_module_require, "\n")
 
@@ -207,7 +204,7 @@ main(int argc, char *argv[])
 {
   lua_State *L = luaL_newstate();
   luaL_openlibs(L);
-  
+
   // add loader to package.searchers
   lua_getglobal(L, "table");
   lua_getfield(L, -1, "insert");
@@ -226,9 +223,9 @@ main(int argc, char *argv[])
   // table.insert(package.searchers, lua_loader);
   lua_call(L, 2, 0);
   assert(lua_gettop(L) == 0);
-  
+
   %s
-  
+
   if (luaL_loadbuffer(L, (const char*)lua_bundle[0].buf, lua_bundle[0].len, "%s"))
   {
     puts(lua_tostring(L, 1));
@@ -247,7 +244,7 @@ main(int argc, char *argv[])
   return 0;
 }
 ]]):format(
-  luaprogramcdatastr, lua_module_requirestr, bin_module_requirestr, 
+  luaprogramcdatastr, lua_module_requirestr, bin_module_requirestr,
   mainlua.basename_underscore
 )
 local infile = lua_source_files[1].name
@@ -265,7 +262,7 @@ do
     table.insert(linklibs, v.name)
   end
   local linklibstr = table.concat(linklibs, " ")
-  local ccformat 
+  local ccformat
     = "%s -Os -std=c99 %s.c %s %s %s -lm %s %s -o %s%s"
   local rdynamic = ""
   local ldl = ""
@@ -276,7 +273,7 @@ do
     binary_extension = ".exe"
   end
   ccformat = ccformat:format(
-    CC, infile, liblua.name, rdynamic, ldl, linklibstr, otherflags_str, 
+    CC, infile, liblua.name, rdynamic, ldl, linklibstr, otherflags_str,
     mainlua.basename_noextension, binary_extension
   )
   print(ccformat)
