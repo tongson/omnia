@@ -22,7 +22,7 @@ VENDOR_LUA_P= vendor/lua
 APP_LUA_P= app/lua
 
 _rest= $(wordlist 2,$(words $(1)),$(1))
-_lget= $(firstword lib/$(1))/Makefile $(if $(_rest),$(call _lget,$(_rest)),)
+_lget= $(firstword app/c/$(1))/Makefile $(if $(_rest),$(call _lget,$(_rest)),)
 _vget= $(firstword vendor/c/$(1))/Makefile $(if $(_rest),$(call _vget,$(_rest)),)
 SRC_P= aux/lua
 INCLUDES:= -I$(SRC_P) -Iinclude -I$(AUX_P)
