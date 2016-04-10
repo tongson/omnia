@@ -45,12 +45,13 @@ Project                                                     | Version         | 
 
 #### Available modules
 
-Module                                                      | Version         | License
-------------------------------------------------------------|-----------------|---------
-[Luaposix](https://github.com/luaposix/luaposix)[2]         | 33.4.0          | MIT
-[Linotify](https://github.com/hoelzro/linotify)             | 0.4             | MIT
-[LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)            | 1.0.0           | MIT
-[lsocket](http://tset.de/lsocket/)[3]                       | 1.4             | MIT
+Module                                                          | Version         | License
+----------------------------------------------------------------|-----------------|---------
+[Luaposix](https://github.com/luaposix/luaposix)[2]             | 33.4.0          | MIT
+[Linotify](https://github.com/hoelzro/linotify)                 | 0.4             | MIT
+[LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)                | 1.0.0           | MIT
+[lsocket](http://tset.de/lsocket/)[3]                           | 1.4             | MIT
+[luafilesystem](https://github.com/keplerproject/luafilesystem) | 1.6.3           | MIT
 
 [1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.2)<br/>
 [2] posix.deprecated and posix.compat removed<br/>
