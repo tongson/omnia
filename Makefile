@@ -24,7 +24,7 @@ include aux/tests.mk
 include aux/flags.mk
 include aux/std.mk
 ifneq ($(APP_C),)
-  include $(eval _d:=lib/$(APP_C) $(_d)) $(call _lget,$(APP_C))
+  include $(eval _d:=app/$(APP_C) $(_d)) $(call _lget,$(APP_C))
 endif
 ifneq ($(VENDOR_C),)
   include $(eval _d:=vendor/c/$(VENDOR_C) $(_d)) $(call _vget,$(VENDOR_C))

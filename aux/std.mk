@@ -19,7 +19,7 @@ RM= rm
 RMFLAGS= -f
 RMRF= rm -rf
 VENDOR_LUA_P= vendor/lua
-APP_LUA_P= lib/lua
+APP_LUA_P= app/lua
 
 _rest= $(wordlist 2,$(words $(1)),$(1))
 _lget= $(firstword lib/$(1))/Makefile $(if $(_rest),$(call _lget,$(_rest)),)
