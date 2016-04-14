@@ -31,3 +31,9 @@ CLUA_MODS+= $(foreach m, $(APP_C), $m.a)
 LUA_MODS+= $(foreach m, $(VENDOR_LUA), $m.lua)
 LUA_MODS+= $(foreach m, $(APP_LUA), $m.lua)
 BUILD_DEPS= has-$(CC) has-$(RANLIB) has-$(LD) has-$(AR) has-$(STRIP) has-$(RM) has-$(CP)
+ifneq ($(APP_C),)
+  include $(eval _d:=app/$(APP_C) $(_d)) $(call _lget,$(APP_C))
+endif
+ifneq ($(VENDOR_C),)
+  include $(eval _d:=vendor/c/$(VENDOR_C) $(_d)) $(call _vget,$(VENDOR_C))
+endif
