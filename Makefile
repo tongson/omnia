@@ -20,7 +20,6 @@ CFLAGS+= -ffunction-sections -fdata-sections -fno-asynchronous-unwind-tables -fn
 LDFLAGS= -Wl,--gc-sections -Wl,--strip-all -Wl,--relax -Wl,--sort-common
 luaDEFINES:= -DLUA_COMPAT_BITLIB -DLUA_USE_POSIX
 include aux/tests.mk
-include aux/flags.mk
 include aux/std.mk
 ifneq ($(APP_C),)
   include $(eval _d:=app/$(APP_C) $(_d)) $(call _lget,$(APP_C))
