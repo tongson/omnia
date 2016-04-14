@@ -1,4 +1,5 @@
 NULSTRING:=
+CFLAGS_LRT= -lrt
 
 # FLAGS when compiling for an OpenWRT target.
 ifneq (,$(findstring openwrt,$(CC)))
