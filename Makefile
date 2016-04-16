@@ -8,7 +8,6 @@ APP_C=
 APP_LUA=
 MAKEFLAGS= --silent
 CC= cc
-export CC
 LD= ld
 RANLIB= ranlib
 AR= ar
