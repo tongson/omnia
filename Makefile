@@ -1,5 +1,4 @@
 EXE= main
-MAIN= $(EXE).lua
 VENDOR_C= lpeg
 VENDOR_LUA= re
 VENDOR_SUBDIRS=

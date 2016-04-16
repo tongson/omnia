@@ -1,5 +1,6 @@
 all: $(EXE)
 
+MAIN= $(EXE).lua
 AUX_P= aux
 MODULES_P= vendor/lua
 ONE= $(AUX_P)/one
