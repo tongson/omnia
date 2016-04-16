@@ -1,3 +1,5 @@
+.POSIX:
+.SUFFIXES:
 NULSTRING:=
 CFLAGS_LRT= -lrt
 

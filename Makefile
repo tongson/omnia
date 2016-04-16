@@ -1,5 +1,3 @@
-.POSIX:
-.SUFFIXES:
 EXE= main
 MAIN= $(EXE).lua
 VENDOR_C= lpeg
