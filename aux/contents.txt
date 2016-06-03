@@ -1,0 +1,15 @@
+lbitlib.h - Included when LUA_COMPAT_BITLIB is defined.
+lua - Copy of Lua.
+luastatic.lua - Copy of luastatic.
+one.c - Amalgamated Lua.
+rules.mk - Makefile for compiling.
+std.mk - Makefile variables and auxiliary routines.
+test-F_CLOSEM.sh - Test for F_CLOSEM.
+test-binutils-plugins.sh - Test/look for binutils plugins by running `$plugin --help`.
+test-cc.sh - Test for the current compiler.
+test-gcc47.sh - Test for GCC version 4.7+.
+test-mac.sh - Test if building on OS X.
+test-netlinkh.sh - Test/look for the header linux/netlink.h.
+test-posix_fadvise.sh - Test for posix_fadvise. From FreeBSD.
+test-strlcpy.sh - Test for strlcpy(3).
+tests.mk - Set Makefile variables depending on a some tests.
