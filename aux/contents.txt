@@ -2,6 +2,7 @@ lbitlib.h - Included when LUA_COMPAT_BITLIB is defined.
 lua - Copy of Lua.
 luastatic.lua - Copy of luastatic.
 one.c - Amalgamated Lua.
+attributes.h - GCC extensions wrappers used by the md5 module.
 rules.mk - Makefile for compiling.
 std.mk - Makefile variables and auxiliary routines.
 test-F_CLOSEM.sh - Test for F_CLOSEM.
