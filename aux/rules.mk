@@ -21,7 +21,7 @@ $(EXE): $(LUA_A) $(CLUA_MODS)
 	for f in $(APP_LUA); do cp $(APP_LUA_P)/$$f.lua .; done
 	for d in $(VENDOR_SUBDIRS); do cp -R $(MODULES_P)/$$d .; done
 	$(ECHOT) [LN] $(MAIN)
-	$(LUA_T) $(LUASTATIC) $(MAIN) $(LUA_MODS) $(VENDOR_DEPS) $(CLUA_MODS) $(LUA_A) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(LDFLAGS) 2>&1 >/dev/null
+	CC=$(CC) NM=$(NM) $(LUA_T) $(LUASTATIC) $(MAIN) $(LUA_MODS) $(VENDOR_DEPS) $(CLUA_MODS) $(LUA_A) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(LDFLAGS) 2>&1 >/dev/null
 
 clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
