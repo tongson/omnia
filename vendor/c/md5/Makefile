@@ -9,7 +9,7 @@ $(md5A): $(md5OBJ)
 	$(AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
 	$(RANLIB) $@
 
-$(md5OBJ): $(md5SRC) $(LINIT_T)
+$(md5OBJ): $(md5SRC)
 	$(ECHOT) [CC] $@
 	$(CC) -o $@ $(INCLUDES) -Ivendor/c/md5 $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
 

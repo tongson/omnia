@@ -10,7 +10,7 @@ $(linotifyA): $(linotifyOBJ)
 	$(AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
 	$(RANLIB) $@
 
-$(linotifyOBJ): $(linotifySRC) $(LINIT_T)
+$(linotifyOBJ): $(linotifySRC)
 	$(ECHOT) [CC] $@
 	$(CC) -o $@ $(INCLUDES) -Ivendor/c/linotify $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
 
