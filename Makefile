@@ -6,6 +6,7 @@ VENDOR_DEPS=
 APP_C=
 APP_LUA=
 APP_SUBDIRS=
+APP_DEPS=
 MAKEFLAGS= --silent
 CC= cc
 LD= ld
