@@ -2,7 +2,6 @@ all: $(EXE)
 
 MAIN= $(EXE).lua
 AUX_P= aux
-MODULES_P= vendor/lua
 ONE= $(AUX_P)/one
 LUASTATIC= aux/luastatic.lua
 LUAC_T= luac
@@ -21,6 +20,7 @@ RMFLAGS= -f
 RMRF= rm -rf
 VENDOR_LUA_P= vendor/lua
 APP_LUA_P= app/lua
+VENDOR_LUA_P= vendor/lua
 
 _rest= $(wordlist 2,$(words $(1)),$(1))
 _lget= $(firstword app/c/$(1))/Makefile $(if $(_rest),$(call _lget,$(_rest)),)

@@ -19,7 +19,8 @@ $(EXE): $(LUA_A) $(CLUA_MODS)
 	$(ECHOT) [CP] $(LUA_MODS)
 	for f in $(VENDOR_LUA); do cp $(VENDOR_LUA_P)/$$f.lua .; done
 	for f in $(APP_LUA); do cp $(APP_LUA_P)/$$f.lua .; done
-	for d in $(VENDOR_SUBDIRS); do cp -R $(MODULES_P)/$$d .; done
+	for d in $(VENDOR_SUBDIRS); do cp -R $(VENDOR_LUA_P)/$$d .; done
+	for d in $(APP_SUBDIRS); do cp -R $(APP_LUA_P)/$$d .; done
 	$(ECHOT) [LN] $(MAIN)
 	CC=$(CC) NM=$(NM) $(LUA_T) $(LUASTATIC) $(MAIN) $(LUA_MODS) $(VENDOR_DEPS) $(CLUA_MODS) $(LUA_A) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(LDFLAGS) 2>&1 >/dev/null
 
