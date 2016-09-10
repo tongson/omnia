@@ -1,7 +1,6 @@
 all: $(EXE)
 MAIN:= $(EXE).lua
-AUX_P:= aux
-ONE:= $(AUX_P)/one
+ONE:= aux/one
 LUASTATIC:= aux/luastatic.lua
 LUAC_T:= luac
 LUA_O:= $(ONE).o
@@ -20,7 +19,7 @@ RMRF:= rm -rf
 VENDOR_P:= vendor/lua
 APP_P:= app/lua
 SRC_P:= aux/lua
-INCLUDES:= -I$(SRC_P) -Iinclude -I$(AUX_P)
+INCLUDES:= -I$(SRC_P) -Iinclude -Iaux
 VENDOR_LUA:= $(addsuffix /*.lua,$(VENDOR_DIR))
 APP_LUA:= $(addsuffix /*.lua,$(APP_DIR))
 VENDOR_DIRS:= $(foreach f, $(VENDOR_DIR), $(firstword $(subst /, ,$f)))
