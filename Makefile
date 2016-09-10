@@ -1,10 +1,10 @@
-EXE= main
-APP=
-APP_DIR=
-APP_C=
-VENDOR= re
-VENDOR_DIR=
-VENDOR_C= lpeg
+EXE:= main
+APP:=
+APP_DIR:=
+APP_C:=
+VENDOR:= re
+VENDOR_DIR:=
+VENDOR_C:= lpeg
 MAKEFLAGS= --silent
 CC= cc
 LD= ld
