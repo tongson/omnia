@@ -15,7 +15,7 @@ Note: Linux and OS X only. xBSD soon.
 #### Getting started
 
 1. Edit the following space delimited variables in the top-level Makefile<br/>
-     MAIN: Path to the "main" Lua script<br/>
+     MAIN: The "main" Lua script<br/>
      APP: Lua modules that is specific to your application<br/>
      APP_DIR: Directories containing Lua modules that is specific to your application</br>
      APP_C: Lua C modules that is specific to your application<br/>
