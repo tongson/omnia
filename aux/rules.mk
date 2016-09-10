@@ -15,19 +15,20 @@ $(LUA_A): $(LUA_O)
 	$(AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
 	$(RANLIB) $@
 
-$(EXE): $(LUA_A) $(CLUA_MODS)
-	$(ECHOT) [CP] $(LUA_MODS)
-	for f in $(VENDOR_LUA); do cp $(VENDOR_LUA_P)/$$f.lua .; done
-	for f in $(APP_LUA); do cp $(APP_LUA_P)/$$f.lua .; done
-	for d in $(VENDOR_SUBDIRS); do cp -R $(VENDOR_LUA_P)/$$d .; done
-	for d in $(APP_SUBDIRS); do cp -R $(APP_LUA_P)/$$d .; done
+$(EXE): $(LUA_A) $(C_MODULES)
+	$(ECHOT) [CP] $(MODULES)
+	for f in $(VENDOR); do cp $(VENDOR_P)/$$f.lua .; done
+	for f in $(APP); do cp $(APP_P)/$$f.lua .; done
+	for d in $(VENDOR_DIRS); do cp -R $(VENDOR_P)/$$d .; done
+	for d in $(APP_DIRS); do cp -R $(APP_P)/$$d .; done
 	$(ECHOT) [LN] $(MAIN)
-	CC=$(CC) NM=$(NM) $(LUA_T) $(LUASTATIC) $(MAIN) $(LUA_MODS) $(VENDOR_DEPS) $(APP_DEPS) $(CLUA_MODS) $(LUA_A) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(LDFLAGS) 2>&1 >/dev/null
+	CC=$(CC) NM=$(NM) $(LUA_T) $(LUASTATIC) $(MAIN) $(APP_LUA) $(VENDOR_LUA) $(MODULES) $(C_MODULES) \
+		 $(LUA_A) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(LDFLAGS) 2>&1 >/dev/null
 
 clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
-	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(EXE) $(LUA_A) $(MAIN).c $(LUA_MODS)
-	$(RMRF) $(VENDOR_SUBDIRS)
+	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(MAIN).c $(EXE) $(MODULES)
+	$(RMRF) $(VENDOR_DIRS) $(APP_DIRS)
 	$(ECHO) "Done!"
 
 print-%: ; @echo $*=$($*)

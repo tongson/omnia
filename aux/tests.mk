@@ -58,6 +58,7 @@ ifeq ($(shell aux/test-F_CLOSEM.sh $(CC)), true)
 endif
 
 ifeq ($(DEBUG), 1)
+  CCWARN:= -Wall
   CFLAGS:= -O1 -fno-omit-frame-pointer -g
   CCOPT:= $(NULSTRING)
   LDFLAGS:= $(NULSTRING)
