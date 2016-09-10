@@ -14,24 +14,43 @@ Note: Linux and OS X only. xBSD soon.
 
 #### Getting started
 
-1. Edit the following variables in the top-level Makefile<br/>
+1. Edit the following space delimited variables in the top-level Makefile<br/>
      MAIN: Path to the "main" Lua script<br/>
-     VENDOR_C: Space delimited string of C modules<br/>
-     VENDOR_LUA: Space delimited string of Lua modules<br/>
+     APP: Lua modules that is specific to your application<br/>
+     APP_DIR: Directories containing Lua modules that is specific to your application</br>
+     APP_C: Lua C modules that is specific to your application<br/>
+     VENDOR: 3rd party Lua modules<br/>
+     VENDOR_DIR: directories containing 3rd party Lua modules
+     VENDOR_C: 3rd party C modules<br/>
+
+The APP, VENDOR split is just for organization. Underneath they are using the same Make routines.
 
 1. Run `make`<br/>
-If you want to link statically run `make STATIC=1`
+If you want to link statically run `make STATIC=1`<br/>
+During developlement or debugging run `make DEBUG=1`
 
-#### Adding modules
+#### Adding plain Lua modules. (NOTE: VENDOR and APP are interchangeable.)
 
-Adding plain Lua modules is trivial. $(NAME) is the name of the module passed to `VENDOR_LUA`.
+Adding plain Lua modules is trivial. $(NAME) is the name of the module passed to `VENDOR`.
 
 1. Copy the Lua module to `vendor/lua/$(NAME).lua`<br/>
   example: `cp ~/Downloads/dkjson.lua vendor/lua`
-1. Add `$(NAME)` to `VENDOR_LUA`<br/>
-  example: `VENDOR_LUA= re dkjson`
+1. Add `$(NAME)` to `VENDOR`<br/>
+  example: `VENDOR= re dkjson`
 
-C modules are a bit more complicated.
+For Lua modules that are split into multile files, such as Penlight:
+
+1. Copy the directory of the Lua module to `vendor/lua/$(NAME)`<br/>
+  example: `cp -R ~/Download/Penlight-1.3.1/lua/pl vendor/lua`
+1. Add `$(NAME)` to `VENDOR_DIR`<br/>
+  example: `VENDOR_DIR= pl`
+
+For modules with multiple levels of directories you will have to pass each directory. Example:<br/>
+  `VENDOR_DIR= ldoc ldoc/builtin ldoc/html`
+
+Lua does not have facilities to traverse directories and I'd like to avoid shell out functions.
+
+#### Adding C modules
 
 1. Provide a Makefile in `vendor/c/$(NAME)/Makefile`. See existing modules such as luaposix and lpeg for pointers.
 1. Add `$(NAME)` to `VENDOR_C`
@@ -40,8 +59,8 @@ C modules are a bit more complicated.
 
 Project                                                     | Version         | License
 ------------------------------------------------------------|-----------------|---------
-[Lua](http://www.lua.org)[1]                                | 5.3.2           | MIT
-[luastatic](https://github.com/ers35/luastatic)             | 9fc48bc         | CC0
+[Lua](http://www.lua.org)[1]                                | 5.3.3           | MIT
+[luastatic](https://github.com/ers35/luastatic)             | 0.0.4           | CC0
 
 #### Available modules
 
@@ -54,7 +73,6 @@ Module                                                          | Version       
 [luafilesystem](https://github.com/keplerproject/luafilesystem) | 1.6.3           | MIT
 [md5](http://www.rjek.com/luahash-0.00.tar.bz2)                 | 0.00            | PD
 
-[1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.2)<br/>
+[1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.3)<br/>
 [2] posix.deprecated and posix.compat removed<br/>
 [3] Does not include the async resolver<br/>
-
