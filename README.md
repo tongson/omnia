@@ -55,6 +55,10 @@ Lua does not have facilities to traverse directories and I'd like to avoid shell
 1. Provide a Makefile in `vendor/c/$(NAME)/Makefile`. See existing modules such as luaposix and lpeg for pointers.
 1. Add `$(NAME)` to `VENDOR_C`
 
+#### Example application using omnia
+
+The included Lua script might be too simplistic to demonstrate Omnia. For a more complicated application check my 'fork' of [LDoc](https://github.com/tongson/LDoc)
+
 #### Included projects
 
 Project                                                     | Version         | License
