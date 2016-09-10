@@ -62,7 +62,7 @@ Project                                                     | Version         | 
 [Lua](http://www.lua.org)[1]                                | 5.3.3           | MIT
 [luastatic](https://github.com/ers35/luastatic)             | 0.0.4           | CC0
 
-#### Available modules
+#### Available modules (Feel free to open a Github issue if you want help with adding a new Lua module.)
 
 Module                                                          | Version         | License
 ----------------------------------------------------------------|-----------------|---------
