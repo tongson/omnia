@@ -24,7 +24,7 @@ ifeq ($(shell aux/test-mac.sh $(CC)), APPLE)
 endif
 
 # Test for GCC LTO capability.
-ifeq ($(shell aux/test-gcc47.sh $(CC)), GCC47)
+ifeq ($(shell aux/test-gcc47.sh $(CC)), true)
   ifeq ($(shell aux/test-binutils-plugins.sh gcc-ar), true)
     CFLAGS+= -fwhole-program -flto -fuse-linker-plugin
     LDFLAGS+= -fwhole-program -flto
