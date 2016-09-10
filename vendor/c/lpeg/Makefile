@@ -17,6 +17,6 @@ vendor/c/lpeg/%.o: vendor/c/lpeg/%.c
 	$(CC) -o $@ $(lpegDEFINES) $(INCLUDES) -Ivendor/c/lpeg $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
 
 clean_lpeg:
-	$(RM) $(RMFLAGS) $(lpegOBJS) $(lpegA)
+	$(RM) $(RMFLAGS) $(lpegOBJS) $(lpegA) vendor/c/lpeg/lpprint.o
 
 .PHONY: clean_lpeg
