@@ -20,7 +20,7 @@ Note: Linux and OS X only. xBSD soon.
      APP_DIR: Directories containing Lua modules that is specific to your application</br>
      APP_C: Lua C modules that is specific to your application<br/>
      VENDOR: 3rd party Lua modules<br/>
-     VENDOR_DIR: directories containing 3rd party Lua modules
+     VENDOR_DIR: directories containing 3rd party Lua modules<br/>
      VENDOR_C: 3rd party C modules<br/>
 
 The APP, VENDOR split is just for organization. Underneath they are using the same Make routines.
