@@ -1,7 +1,6 @@
 md5SRC= vendor/c/md5/md5.c
 md5OBJ= vendor/c/md5/md5.o
 md5A= md5.a
-DEPS+=$(md5A)
 CLEAN+= clean_md5
 
 $(md5A): $(md5OBJ)

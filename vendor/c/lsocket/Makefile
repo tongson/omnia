@@ -1,7 +1,6 @@
 lsocketSRC= vendor/c/lsocket/lsocket.c
 lsocketOBJ= vendor/c/lsocket/lsocket.o
 lsocketA= lsocket.a
-DEPS+=$(lsocketA)
 CLEAN+= clean_lsocket
 CCWARN=
 
@@ -10,7 +9,7 @@ $(lsocketA): $(lsocketOBJ)
 	$(AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
 	$(RANLIB) $@
 
-$(lsocketOBJ): $(lsocketSRC) 
+$(lsocketOBJ): $(lsocketSRC)
 	$(ECHOT) [CC] $@
 	$(CC) -o $@ $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
 

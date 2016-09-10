@@ -1,9 +1,9 @@
 linotifySRC= vendor/c/linotify/linotify.c
 linotifyOBJ= vendor/c/linotify/linotify.o
-linotifyA= linotify.a
-DEPS+=$(linotifyA)
+linotifyA= inotify.a
+C_MODULES+= $(linotifyA)
+C_MODULES:= $(filter-out linotify.a,$(C_MODULES))
 CLEAN+= clean_linotify
-CCWARN=
 
 $(linotifyA): $(linotifyOBJ)
 	$(ECHOT) [AR] $@

@@ -3,9 +3,7 @@ lpegOBJS= vendor/c/lpeg/lpcap.o vendor/c/lpeg/lpcode.o vendor/c/lpeg/lptree.o ve
 ifeq ($(DEBUG), 1)
   lpegOBJS+= vendor/c/lpeg/lpprint.o
 endif
-DEPS+=$(lpegA)
 CLEAN+= clean_lpeg
-CCWARN=
 
 $(lpegA): $(lpegOBJS)
 	$(ECHOT) [AR] $@
@@ -17,6 +15,6 @@ vendor/c/lpeg/%.o: vendor/c/lpeg/%.c
 	$(CC) -o $@ $(lpegDEFINES) $(INCLUDES) -Ivendor/c/lpeg $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
 
 clean_lpeg:
-	$(RM) $(RMFLAGS) $(lpegOBJS) $(lpegA) vendor/c/lpeg/lpprint.o
+	$(RM) $(RMFLAGS) $(lpegOBJS) $(lpegA) vendor/c/lpeg/lpprint.o lpprint.o
 
 .PHONY: clean_lpeg

@@ -4,12 +4,11 @@ LUAPOSIX= ctype dirent errno fcntl fnmatch getopt glob grp \
   sys.times sys.utsname sys.wait syslog termio time \
   unistd utime
 luaposix_P= vendor/c/luaposix/src
-CLUA_MODS+= $(foreach m, $(LUAPOSIX), posix.$m.a)
-CLUA_MODS:= $(filter-out luaposix.a,$(CLUA_MODS))
+C_MODULES+= $(foreach m, $(LUAPOSIX), posix.$m.a)
+C_MODULES:= $(filter-out luaposix.a,$(C_MODULES))
 CFLAGS+= $(CFLAGS_LRT)
-VENDOR_LUA+= posix
+VENDOR+= posix
 CLEAN+= clean_posix
-CCWARN=
 
 $(luaposix_P)/sys/%.o:  $(luaposix_P)/sys/%.c
 	$(ECHOT) [CC] $@
@@ -30,7 +29,7 @@ posix.%.a: $(luaposix_P)/%.o
 	$(RANLIB) $@
 
 clean_posix:
-	$(RM) $(RMFLAGS) $(luaposix_P)/*.o $(CLUA_MODS)
+	$(RM) $(RMFLAGS) $(luaposix_P)/*.o $(C_MODULES)
 
 .PHONY: clean_posix test_posix
 
