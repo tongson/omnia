@@ -1,5 +1,5 @@
 EXE:= main
-SRC:=
+SRC:= src
 SRC_DIR:=
 SRC_C:=
 VENDOR:= re
