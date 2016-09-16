@@ -16,20 +16,20 @@ Note: Linux and OS X only. xBSD soon.
 
 1. Edit the following space delimited variables in the top-level Makefile<br/>
      MAIN: The "main" Lua script<br/>
-     APP: Lua modules that is specific to your application<br/>
-     APP_DIR: Directories containing Lua modules that is specific to your application</br>
-     APP_C: Lua C modules that is specific to your application<br/>
+     SRC: Lua modules that is specific to your application. Copy these to `src/lua`. <br/>
+     SRC_DIR: Directories containing Lua modules that is specific to your application. Copy these to `src/lua`.</br>
+     SRC_C: Lua C modules that is specific to your application. Copy these to `src/c`.<br/>
      VENDOR: 3rd party Lua modules<br/>
      VENDOR_DIR: directories containing 3rd party Lua modules<br/>
      VENDOR_C: 3rd party C modules<br/>
 
-The APP, VENDOR split is just for organization. Underneath they are using the same Make routines.
+The SRC, VENDOR split is just for organization. Underneath they are using the same Make routines.
 
 1. Run `make`<br/>
 If you want to link statically run `make STATIC=1`<br/>
 During developlement or debugging run `make DEBUG=1`
 
-#### Adding plain Lua modules. (NOTE: VENDOR and APP are interchangeable.)
+#### Adding plain Lua modules. (NOTE: VENDOR and SRC are interchangeable.)
 
 Adding plain Lua modules is trivial. $(NAME) is the name of the module passed to `VENDOR`.
 
