@@ -1,7 +1,7 @@
 EXE:= main
-APP:=
-APP_DIR:=
-APP_C:=
+SRC:=
+SRC_DIR:=
+SRC_C:=
 VENDOR:= re
 VENDOR_DIR:=
 VENDOR_C:= lpeg

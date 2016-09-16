@@ -17,23 +17,22 @@ RM:= rm
 RMFLAGS:= -f
 RMRF:= rm -rf
 VENDOR_P:= vendor/lua
-APP_P:= app/lua
-SRC_P:= aux/lua
-INCLUDES:= -I$(SRC_P) -Iinclude -Iaux
+SRC_P:= src/lua
+INCLUDES:= -Iaux/lua -Iinclude -Iaux
 VENDOR_LUA:= $(addsuffix /*.lua,$(VENDOR_DIR))
-APP_LUA:= $(addsuffix /*.lua,$(APP_DIR))
+SRC_LUA:= $(addsuffix /*.lua,$(SRC_DIR))
 VENDOR_DIRS:= $(foreach f, $(VENDOR_DIR), $(firstword $(subst /, ,$f)))
-APP_DIRS:= $(foreach f, $(APP_DIR), $(firstword $(subst /, ,$f)))
+SRC_DIRS:= $(foreach f, $(SRC_DIR), $(firstword $(subst /, ,$f)))
 _rest= $(wordlist 2,$(words $(1)),$(1))
-_lget= $(firstword app/c/$(1))/Makefile $(if $(_rest),$(call _lget,$(_rest)),)
+_lget= $(firstword src/c/$(1))/Makefile $(if $(_rest),$(call _lget,$(_rest)),)
 _vget= $(firstword vendor/c/$(1))/Makefile $(if $(_rest),$(call _vget,$(_rest)),)
 MODULES+= $(foreach m, $(VENDOR), $m.lua)
-MODULES+= $(foreach m, $(APP), $m.lua)
+MODULES+= $(foreach m, $(SRC), $m.lua)
 C_MODULES+= $(foreach m, $(VENDOR_C), $m.a)
-C_MODULES+= $(foreach m, $(APP_C), $m.a)
+C_MODULES+= $(foreach m, $(SRC_C), $m.a)
 BUILD_DEPS= has-$(CC) has-$(RANLIB) has-$(NM) has-$(LD) has-$(AR) has-$(STRIP) has-$(RM) has-$(CP)
-ifneq ($(APP_C),)
-  include $(eval _d:=app/c/$(APP_C) $(_d)) $(call _lget,$(APP_C))
+ifneq ($(SRC_C),)
+  include $(eval _d:=src/c/$(SRC_C) $(_d)) $(call _lget,$(SRC_C))
 endif
 ifneq ($(VENDOR_C),)
   include $(eval _d:=vendor/c/$(VENDOR_C) $(_d)) $(call _vget,$(VENDOR_C))

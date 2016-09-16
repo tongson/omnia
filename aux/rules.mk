@@ -18,17 +18,17 @@ $(LUA_A): $(LUA_O)
 $(EXE): $(LUA_A) $(C_MODULES)
 	$(ECHOT) [CP] $(MODULES)
 	for f in $(VENDOR); do cp $(VENDOR_P)/$$f.lua .; done
-	for f in $(APP); do cp $(APP_P)/$$f.lua .; done
+	for f in $(SRC); do cp $(SRC_P)/$$f.lua .; done
 	for d in $(VENDOR_DIRS); do cp -R $(VENDOR_P)/$$d .; done
-	for d in $(APP_DIRS); do cp -R $(APP_P)/$$d .; done
+	for d in $(SRC_DIRS); do cp -R $(SRC_P)/$$d .; done
 	$(ECHOT) [LN] $(MAIN)
-	CC=$(CC) NM=$(NM) $(LUA_T) $(LUASTATIC) $(MAIN) $(APP_LUA) $(VENDOR_LUA) $(MODULES) $(C_MODULES) \
+	CC=$(CC) NM=$(NM) $(LUA_T) $(LUASTATIC) $(MAIN) $(SRC_LUA) $(VENDOR_LUA) $(MODULES) $(C_MODULES) \
 		 $(LUA_A) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(LDFLAGS) 2>&1 >/dev/null
 
 clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
 	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(MAIN).c $(EXE) $(MODULES)
-	$(RMRF) $(VENDOR_DIRS) $(APP_DIRS)
+	$(RMRF) $(VENDOR_DIRS) $(SRC_DIRS)
 	$(ECHO) "Done!"
 
 print-%: ; @echo $*=$($*)
