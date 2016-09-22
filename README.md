@@ -75,6 +75,8 @@ Project                                                     | Version         | 
 ------------------------------------------------------------|-----------------|---------
 [Lua](http://www.lua.org)[1]                                | 5.3.3           | MIT
 [luastatic](https://github.com/ers35/luastatic)             | 0.0.4           | CC0
+[Moonscript](http://moonscript.org)                         | 0.4.0           | MIT
+[mooni](https://luarocks.org/modules/steved/mooni)          | 0.5             | MIT
 
 #### Available modules (Feel free to open a Github issue if you want help with adding a new Lua module.)
 
@@ -86,7 +88,6 @@ Module                                                          | Version       
 [lsocket](http://tset.de/lsocket/)[3]                           | 1.4             | MIT
 [luafilesystem](https://github.com/keplerproject/luafilesystem) | 1.6.3           | MIT
 [md5](http://www.rjek.com/luahash-0.00.tar.bz2)                 | 0.00            | PD
-[Moonscript](http://moonscript.org)                             | 0.4.0           | MIT
 
 [1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.3)<br/>
 [2] posix.deprecated and posix.compat removed<br/>
