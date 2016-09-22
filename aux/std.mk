@@ -11,6 +11,7 @@ ECHO:= @printf '%s\n'
 ECHON:= @printf '%s'
 ECHOT:= @printf ' %s\t%s\n'
 CP:= cp
+CPR:= cp -R
 STRIP:= strip
 STRIPFLAGS:= --strip-all
 RM:= rm
@@ -28,6 +29,12 @@ _lget= $(firstword src/c/$(1))/Makefile $(if $(_rest),$(call _lget,$(_rest)),)
 _vget= $(firstword vendor/c/$(1))/Makefile $(if $(_rest),$(call _vget,$(_rest)),)
 MODULES+= $(foreach m, $(VENDOR), $m.lua)
 MODULES+= $(foreach m, $(SRC), $m.lua)
+SRC_MOON:= $(wildcard *.moon)
+SRC_MOON+= $(wildcard src/lua/*.moon)
+SRC_MOON+= $(wildcard vendor/lua/*.moon)
+SRC_MOON+= $(foreach m, $(SRC_DIR), $(wildcard src/lua/$m/*.moon))
+SRC_MOON+= $(foreach m, $(VENDOR_DIR), $(wildcard vendor/lua/$m/*.moon))
+COMPILED:= $(foreach m, $(SRC_MOON), $(addsuffix .lua, $(basename $m)))
 C_MODULES+= $(foreach m, $(VENDOR_C), $m.a)
 C_MODULES+= $(foreach m, $(SRC_C), $m.a)
 BUILD_DEPS= has-$(CC) has-$(RANLIB) has-$(NM) has-$(LD) has-$(AR) has-$(STRIP) has-$(RM) has-$(CP)
@@ -36,4 +43,7 @@ ifneq ($(SRC_C),)
 endif
 ifneq ($(VENDOR_C),)
   include $(eval _d:=vendor/c/$(VENDOR_C) $(_d)) $(call _vget,$(VENDOR_C))
+endif
+ifneq ($(SRC_MOON),)
+  include aux/moonscript.mk
 endif

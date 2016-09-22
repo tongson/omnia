@@ -15,7 +15,7 @@ $(LUA_A): $(LUA_O)
 	$(AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
 	$(RANLIB) $@
 
-$(EXE): $(LUA_A) $(C_MODULES)
+$(EXE): $(LUA_A) $(C_MODULES) $(COMPILED)
 	$(ECHOT) [CP] $(MODULES)
 	for f in $(VENDOR); do cp $(VENDOR_P)/$$f.lua .; done
 	for f in $(SRC); do cp $(SRC_P)/$$f.lua .; done

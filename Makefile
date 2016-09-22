@@ -1,6 +1,6 @@
-EXE:= main
-SRC:= src
-SRC_DIR:=
+EXE:= test
+SRC:= src moon_src
+SRC_DIR:= moon
 SRC_C:=
 VENDOR:= re
 VENDOR_DIR:=
