@@ -1,7 +1,7 @@
 Omnia
 =====
 
-Compile in Lua and Moonscript source code into standalone executables.
+Compile Lua and Moonscript source code into standalone executables.
 
 It's another Lua 5.3 build system for standalone executables. My main use case is for ELF platforms and statically linking with [musl libc](http://www.musl-libc.org/).
 
@@ -18,9 +18,9 @@ Note: Linux and OS X only. xBSD soon.
 
 1. Edit the following space delimited variables in the top-level Makefile<br/>
      MAIN: The "main" script<br/>
-     SRC: Modules that is specific to your application. Copy these to `src/lua`. <br/>
-     SRC_DIR: Directories containing modules that is specific to your application. Copy these to `src/lua`.</br>
-     SRC_C: C modules that is specific to your application. Copy these to `src/c`.<br/>
+     SRC: Modules that are specific to your application. Copy these to `src/lua`. <br/>
+     SRC_DIR: Directories containing modules that are specific to your application. Copy these to `src/lua`.</br>
+     SRC_C: C modules that are specific to your application. Copy these to `src/c`.<br/>
      VENDOR: 3rd party modules<br/>
      VENDOR_DIR: directories containing 3rd party modules<br/>
      VENDOR_C: 3rd party C modules<br/>
