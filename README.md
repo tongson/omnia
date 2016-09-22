@@ -1,7 +1,7 @@
 Omnia
 =====
 
-Compile Lua and Moonscript source code into standalone executables.
+Compile Lua and Moonscript source code into standalone executables. This makes it easy to use them for general purpose scripting.
 
 It's another Lua 5.3 build system for standalone executables. My main use case is for ELF platforms and statically linking with [musl libc](http://www.musl-libc.org/).
 
