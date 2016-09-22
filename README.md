@@ -1,7 +1,9 @@
 Omnia
 =====
 
-Another Lua 5.3 build system for standalone executables. My main use case is for ELF platforms and statically linking with [musl libc](http://www.musl-libc.org/).
+Compile in Lua and Moonscript source code into standalone executables.
+
+It's another Lua 5.3 build system for standalone executables. My main use case is for ELF platforms and statically linking with [musl libc](http://www.musl-libc.org/).
 
 This was made possible by [luastatic](https://github.com/ers35/luastatic)
 
@@ -15,12 +17,12 @@ Note: Linux and OS X only. xBSD soon.
 #### Getting started
 
 1. Edit the following space delimited variables in the top-level Makefile<br/>
-     MAIN: The "main" Lua script<br/>
-     SRC: Lua modules that is specific to your application. Copy these to `src/lua`. <br/>
-     SRC_DIR: Directories containing Lua modules that is specific to your application. Copy these to `src/lua`.</br>
-     SRC_C: Lua C modules that is specific to your application. Copy these to `src/c`.<br/>
-     VENDOR: 3rd party Lua modules<br/>
-     VENDOR_DIR: directories containing 3rd party Lua modules<br/>
+     MAIN: The "main" script<br/>
+     SRC: Modules that is specific to your application. Copy these to `src/lua`. <br/>
+     SRC_DIR: Directories containing modules that is specific to your application. Copy these to `src/lua`.</br>
+     SRC_C: C modules that is specific to your application. Copy these to `src/c`.<br/>
+     VENDOR: 3rd party modules<br/>
+     VENDOR_DIR: directories containing 3rd party modules<br/>
      VENDOR_C: 3rd party C modules<br/>
 
 The SRC, VENDOR split is just for organization. Underneath they are using the same Make routines.
@@ -29,18 +31,18 @@ The SRC, VENDOR split is just for organization. Underneath they are using the sa
 If you want to link statically run `make STATIC=1`<br/>
 During developlement or debugging run `make DEBUG=1`
 
-#### Adding plain Lua modules. (NOTE: VENDOR and SRC are interchangeable.)
+#### Adding plain Lua and Moonscript modules. (NOTE: VENDOR and SRC are interchangeable.)
 
-Adding plain Lua modules is trivial. $(NAME) is the name of the module passed to `VENDOR`.
+Adding plain modules is trivial. $(NAME) is the name of the module passed to `VENDOR`.
 
-1. Copy the Lua module to `vendor/lua/$(NAME).lua`<br/>
+1. Copy the module to `vendor/lua/$(NAME).{lua,moon}`<br/>
   example: `cp ~/Downloads/dkjson.lua vendor/lua`
 1. Add `$(NAME)` to `VENDOR`<br/>
   example: `VENDOR= re dkjson`
 
-For Lua modules that are split into multile files, such as Penlight:
+For modules that are split into multile files, such as Penlight:
 
-1. Copy the directory of the Lua module to `vendor/lua/$(NAME)`<br/>
+1. Copy the directory of the Lua to `vendor/lua/$(NAME)`<br/>
   example: `cp -R ~/Download/Penlight-1.3.1/lua/pl vendor/lua`
 1. Add `$(NAME)` to `VENDOR_DIR`<br/>
   example: `VENDOR_DIR= pl`
@@ -59,6 +61,14 @@ Lua does not have facilities to traverse directories and I'd like to avoid shell
 
 The included Lua script might be too simplistic to demonstrate Omnia. For a more complicated application check my 'fork' of [LDoc](https://github.com/tongson/LDoc)
 
+#### Moonscript support
+
+Just treat Moonscript source the same as Lua source. The Make routines will handle the compilation of Moonscript sources and link the appropriate compiled Lua source to the final executable.
+
+The Moonscript standard library is included but you have to add `moon` to the `VENDOR` line in the Makefile.
+
+A copy of `mooni` is also included. To compile, run `make mooni`.
+
 #### Included projects
 
 Project                                                     | Version         | License
@@ -76,6 +86,7 @@ Module                                                          | Version       
 [lsocket](http://tset.de/lsocket/)[3]                           | 1.4             | MIT
 [luafilesystem](https://github.com/keplerproject/luafilesystem) | 1.6.3           | MIT
 [md5](http://www.rjek.com/luahash-0.00.tar.bz2)                 | 0.00            | PD
+[Moonscript](http://moonscript.org)                             | 0.4.0           | MIT
 
 [1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.3)<br/>
 [2] posix.deprecated and posix.compat removed<br/>
