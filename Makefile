@@ -1,4 +1,4 @@
-EXE:= test
+EXE:= main
 SRC:= src moon_src
 SRC_DIR:= moon
 SRC_C:=

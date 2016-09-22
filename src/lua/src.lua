@@ -1,5 +1,5 @@
 local b={}
-function b.test()
+function b.src()
   return true
 end
 return b
