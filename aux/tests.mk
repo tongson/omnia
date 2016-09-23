@@ -75,4 +75,5 @@ ifeq ($(ASAN), 1)
   CFLAGS:= -fsanitize=address -O1 -fno-omit-frame-pointer -g
   CCOPT:= $(NULSTRING)
   LDFLAGS:= $(NULSTRING)
+  MAKEFLAGS:= $(NULSTRING)
 endif
