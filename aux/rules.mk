@@ -6,7 +6,7 @@ $(LUA_T):
 	$(ECHOT) [CC] $@
 	$(CC) -o $@ -DMAKE_LUA $(luaDEFINES) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(ONE).c -lm
 
-$(LUA_O): $(BUILD_DEPS) $(LUA_T)
+$(LUA_O): $(LUA_T)
 	$(ECHOT) [CC] $@
 	$(CC) -o $@ -c -DMAKE_LIB $(DEFINES) $(luaDEFINES) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(ONE).c
 
@@ -15,7 +15,7 @@ $(LUA_A): $(LUA_O)
 	$(AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
 	$(RANLIB) $@
 
-$(EXE): $(LUA_A) $(C_MODULES) $(COMPILED)
+$(EXE): $(BUILD_DEPS) $(LUA_A) $(C_MODULES) $(COMPILED)
 	$(ECHOT) [CP] $(MODULES)
 	for f in $(VENDOR); do cp $(VENDOR_P)/$$f.lua .; done
 	for f in $(SRC); do cp $(SRC_P)/$$f.lua .; done
