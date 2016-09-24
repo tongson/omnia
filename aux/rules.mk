@@ -45,6 +45,4 @@ has-%:
 		exit -1; \
 	}
 
-.PHONY: all clean sections exe print-% vprint-% has-% %LUA
-
-
+.PHONY: all clean print-% vprint-% has-%
