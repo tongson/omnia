@@ -38,12 +38,31 @@ COMPILED:= $(foreach m, $(SRC_MOON), $(addsuffix .lua, $(basename $m)))
 C_MODULES+= $(foreach m, $(VENDOR_C), $m.a)
 C_MODULES+= $(foreach m, $(SRC_C), $m.a)
 BUILD_DEPS= has-$(CC) has-$(RANLIB) has-$(NM) has-$(LD) has-$(AR) has-$(STRIP) has-$(RM) has-$(CP)
+
 ifneq ($(SRC_C),)
   include $(eval _d:=src/c/$(SRC_C) $(_d)) $(call _lget,$(SRC_C))
 endif
+
 ifneq ($(VENDOR_C),)
   include $(eval _d:=vendor/c/$(VENDOR_C) $(_d)) $(call _vget,$(VENDOR_C))
 endif
+
 ifneq ($(SRC_MOON),)
   include aux/moonscript.mk
 endif
+
+print-%: ; @echo $*=$($*)
+
+vprint-%:
+	@echo '$*=$($*)'
+	@echo ' origin = $(origin $*)'
+	@echo ' flavor = $(flavor $*)'
+	@echo ' value = $(value $*)'
+
+has-%:
+	@command -v "${*}" >/dev/null 2>&1 || { \
+		echo "Missing build-time dependency: ${*}"; \
+		exit -1; \
+	}
+
+.PHONY: all clean print-% vprint-% has-%

@@ -30,19 +30,3 @@ clean: $(CLEAN)
 	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(MAIN).c $(EXE) $(MODULES)
 	$(RMRF) $(VENDOR_DIRS) $(SRC_DIRS)
 	$(ECHO) "Done!"
-
-print-%: ; @echo $*=$($*)
-
-vprint-%:
-	@echo '$*=$($*)'
-	@echo ' origin = $(origin $*)'
-	@echo ' flavor = $(flavor $*)'
-	@echo ' value = $(value $*)'
-
-has-%:
-	@command -v "${*}" >/dev/null 2>&1 || { \
-		echo "Missing build-time dependency: ${*}"; \
-		exit -1; \
-	}
-
-.PHONY: all clean print-% vprint-% has-%
