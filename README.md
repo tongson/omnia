@@ -17,7 +17,7 @@ Note: Linux and OS X only. xBSD soon.
 #### Getting started
 
 1. Edit the following space delimited variables in the top-level Makefile<br/>
-     MAIN: The "main" script<br/>
+     MAIN: The "main" script in the `bin/` directory<br/>
      SRC: Modules that are specific to your application. Copy these to `src/lua`. <br/>
      SRC_DIR: Directories containing modules that are specific to your application. Copy these to `src/lua`.</br>
      SRC_C: C modules that are specific to your application. Copy these to `src/c`.<br/>
@@ -30,6 +30,8 @@ The SRC, VENDOR split is just for organization. Underneath they are using the sa
 1. Run `make`<br/>
 If you want to link statically run `make STATIC=1`<br/>
 During developlement or debugging run `make DEBUG=1`
+
+2. The executable will be located under the `bin/` directory
 
 #### Adding plain Lua and Moonscript modules. (NOTE: VENDOR and SRC are interchangeable.)
 
