@@ -1,4 +1,4 @@
-EXE:= bin/test
+EXE:= test
 SRC:= src moon_src
 SRC_DIR:= moon
 SRC_C:=

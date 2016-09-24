@@ -1,5 +1,5 @@
-all: $(EXE)
-MAIN:= $(EXE).lua
+EXE_T:= bin/$(EXE)
+MAIN:= $(EXE_T).lua
 ONE:= aux/one
 LUASTATIC:= bin/luastatic.lua
 LUAC_T:= bin/luac
@@ -38,6 +38,8 @@ COMPILED:= $(foreach m, $(SRC_MOON), $(addsuffix .lua, $(basename $m)))
 C_MODULES+= $(foreach m, $(VENDOR_C), $m.a)
 C_MODULES+= $(foreach m, $(SRC_C), $m.a)
 BUILD_DEPS= has-$(CC) has-$(RANLIB) has-$(NM) has-$(LD) has-$(AR) has-$(STRIP) has-$(RM) has-$(CP)
+
+all: $(EXE_T)
 
 ifneq ($(SRC_C),)
   include $(eval _d:=src/c/$(SRC_C) $(_d)) $(call _lget,$(SRC_C))
