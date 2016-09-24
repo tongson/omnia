@@ -1,7 +1,7 @@
 all: $(EXE)
 MAIN:= $(EXE).lua
 ONE:= aux/one
-LUASTATIC:= aux/luastatic.lua
+LUASTATIC:= bin/luastatic.lua
 LUAC_T:= bin/luac
 LUA_O:= $(ONE).o
 LUA_A:= liblua.a
