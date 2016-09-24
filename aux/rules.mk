@@ -24,6 +24,8 @@ $(EXE): $(BUILD_DEPS) $(LUA_A) $(C_MODULES) $(COMPILED)
 	$(ECHOT) [LN] $(MAIN)
 	CC=$(CC) NM=$(NM) $(LUA_T) $(LUASTATIC) $(MAIN) $(SRC_LUA) $(VENDOR_LUA) $(MODULES) $(C_MODULES) \
 		 $(LUA_A) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(LDFLAGS) 2>&1 >/dev/null
+	$(RM) $(RMFLAGS) $(MAIN).c $(MODULES)
+	$(RMRF) $(VENDOR_DIRS) $(SRC_DIRS)
 
 clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
