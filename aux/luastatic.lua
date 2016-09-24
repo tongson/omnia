@@ -324,7 +324,7 @@ for i, v in ipairs(dep_library_files) do
   table.insert(linklibs, v.path)
 end
 local linklibstr = table.concat(linklibs, " ")
-local ccformat = "%s -Os -std=c99 %s.c %s %s -lm %s %s -o %s%s"
+local ccformat = "%s -Os -std=c99 %s.c %s %s -lm %s %s -o bin/%s%s"
 -- http://lua-users.org/lists/lua-l/2009-05/msg00147.html
 local rdynamic = ""
 local ldl = ""
