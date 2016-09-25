@@ -38,8 +38,17 @@ HAVE_LINUX_NETLINK_H:= $(shell aux/test-netlinkh.sh $(CC))
 HAVE_POSIX_FADVISE:= $(shell aux/test-posix_fadvise.sh $(CC))
 HAVE_STRLCPY:= $(shell aux/test-strlcpy.sh $(CC))
 HAVE_FCNTL_CLOSEM:= $(shell aux/test-F_CLOSEM.sh $(CC))
+HAVE_SYS_INOTIFY_H:= $(shell aux/test-inotifyh.sh $(CC))
 
-### Lua Module specific defines ###
+### Lua Module specific defines and tests ####
+
+## linotify
+
+ifeq ($(filter linotify,$(VENDOR_C)), linotify)
+	ifneq ($(HAVE_SYS_INOTIFY_H), true)
+    $(error Linotify module requested but Inotify header \(sys/inotify.h\) missing!)
+  endif
+endif
 
 ## luaposix
 
