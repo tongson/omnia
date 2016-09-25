@@ -13,7 +13,7 @@ Similar projects:<br>
 [LuaDist](http://luadist.org/)<br/>
 [luabuild](https://github.com/stevedonovan/luabuild)
 
-Requires: Development tools e.g. the package build-essential. Does not require autotools.<br/>
+Requires: GNU Make, a compiler and binutils (or equivalent). Installing development tools e.g. the package build-essential should have everything you need. Does not require autotools.<br/>
 Note: Linux and OS X only. xBSD soon.
 
 #### Getting started
