@@ -69,7 +69,7 @@ Just treat Moonscript source the same as Lua source. The Make routines will hand
 
 The Moonscript standard library is included but you have to add `moon` to the `VENDOR` line in the Makefile.
 
-A copy of `mooni` is also included. To compile, run `make mooni`.
+A copy of `mooni` is also included. To compile, run `make bin/mooni`.
 
 #### Included projects
 
