@@ -11,7 +11,7 @@ $(lsocketA): $(lsocketOBJ)
 
 $(lsocketOBJ): $(lsocketSRC)
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
+	$(CC) -o $@ $(ACFLAGS) -c $<
 
 clean_lsocket:
 	$(RM) $(RMFLAGS) $(lsocketOBJ) $(lsocketA)

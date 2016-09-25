@@ -12,7 +12,7 @@ $(lfsA): $(lfsOBJ)
 
 $(lfsOBJ): $(lfsSRC)
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ -I $(lfsP) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
+	$(CC) -o $@ -I $(lfsP) $(ACFLAGS) -c $<
 
 clean_lfs:
 	$(RM) $(RMFLAGS) $(lfsOBJ) $(lfsA)

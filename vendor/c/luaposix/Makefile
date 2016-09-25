@@ -12,7 +12,7 @@ CLEAN+= clean_posix
 
 $(luaposix_P)/sys/%.o:  $(luaposix_P)/sys/%.c
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(DEFINES) $(luaposixDEFINES) $(INCLUDES) -Ivendor/c/luaposix/src $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
+	$(CC) -o $@ $(luaposixDEFINES) -Ivendor/c/luaposix/src $(ACFLAGS) -c $<
 
 posix.sys.%.a: $(luaposix_P)/sys/%.o
 	$(ECHOT) [AR] $@
@@ -21,7 +21,7 @@ posix.sys.%.a: $(luaposix_P)/sys/%.o
 
 $(luaposix_P)/%.o:  $(luaposix_P)/%.c
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(DEFINES) $(luaposixDEFINES) $(INCLUDES) -Ivendor/c/luaposix/src $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
+	$(CC) -o $@ $(luaposixDEFINES) -Ivendor/c/luaposix/src $(ACFLAGS) -c $<
 
 posix.%.a: $(luaposix_P)/%.o
 	$(ECHOT) [AR] $@

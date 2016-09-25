@@ -19,7 +19,6 @@ RMFLAGS:= -f
 RMRF:= rm -rf
 VENDOR_P:= vendor/lua
 SRC_P:= src/lua
-INCLUDES:= -Iaux/lua -Iinclude -Iaux
 VENDOR_LUA:= $(addsuffix /*.lua,$(VENDOR_DIR))
 SRC_LUA:= $(addsuffix /*.lua,$(SRC_DIR))
 VENDOR_DIRS:= $(foreach f, $(VENDOR_DIR), $(firstword $(subst /, ,$f)))

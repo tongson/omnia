@@ -12,7 +12,7 @@ $(lpegA): $(lpegOBJS)
 
 vendor/c/lpeg/%.o: vendor/c/lpeg/%.c
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(lpegDEFINES) $(INCLUDES) -Ivendor/c/lpeg $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
+	$(CC) -o $@ $(lpegDEFINES) -Ivendor/c/lpeg -c $(ACFLAGS) $<
 
 clean_lpeg:
 	$(RM) $(RMFLAGS) $(lpegOBJS) $(lpegA) vendor/c/lpeg/lpprint.o lpprint.o

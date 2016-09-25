@@ -10,7 +10,7 @@ $(md5A): $(md5OBJ)
 
 $(md5OBJ): $(md5SRC)
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(INCLUDES) -Ivendor/c/md5 $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
+	$(CC) -o $@ -Ivendor/c/md5 $(ACFLAGS) -c $<
 
 clean_md5:
 	$(RM) $(RMFLAGS) $(md5OBJ) $(md5A)

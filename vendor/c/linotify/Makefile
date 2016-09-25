@@ -12,7 +12,7 @@ $(linotifyA): $(linotifyOBJ)
 
 $(linotifyOBJ): $(linotifySRC)
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(INCLUDES) -Ivendor/c/linotify $(CCWARN) $(CFLAGS) $(CCOPT) -c $<
+	$(CC) -o $@ -Ivendor/c/linotify $(ACFLAGS) -c $<
 
 clean_linotify:
 	$(RM) $(RMFLAGS) $(linotifyOBJ) $(linotifyA)
