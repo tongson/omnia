@@ -14,3 +14,5 @@ test-netlinkh.sh - Test/look for the header linux/netlink.h.
 test-posix_fadvise.sh - Test for posix_fadvise. From FreeBSD.
 test-strlcpy.sh - Test for strlcpy(3).
 tests.mk - Set Makefile variables depending on a some tests.
+moonscript.mk - Make routines for supporting Moonscript source.
+test-inotifyh.sh - Test for the inotify headers.
