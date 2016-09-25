@@ -22,7 +22,7 @@ $(MOONI_T): $(MOONC_T)
 	$(RM) $(RMFLAGS) cimicida.lua $(MOONI).c
 	$(RMRF) moonscript
 
-%.lua: $(MOONC_T)
+%.lua: $(MOONC_T) %.moon
 	$(MOONC_T) $*.moon $@
 
 clean_moonscript:
