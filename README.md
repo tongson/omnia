@@ -27,6 +27,10 @@ Note: Linux and OS X only. xBSD soon.
      VENDOR_DIR: directories containing 3rd party modules<br/>
      VENDOR_C: 3rd party C modules<br/>
 
+2. Copy the main source file into the `bin/` directory.
+
+3. Copy modules into `src/lua/` or `vendor/lua/`.
+
 The SRC, VENDOR split is just for organization. Underneath they are using the same Make routines.
 
 1. Run `make`<br/>
