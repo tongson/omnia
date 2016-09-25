@@ -37,5 +37,5 @@ $(EXE_T): $(BUILD_DEPS) $(LUA_A) $(C_MODULES) $(COMPILED) $(MODULES) $(SRC_LUA) 
 
 clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
-	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(MAIN).c $(EXE_T) $(MODULES)
+	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(EXE_T)
 	$(ECHO) "Done!"
