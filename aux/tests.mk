@@ -34,16 +34,22 @@ ifeq ($(shell aux/test-gcc47.sh $(CC)), true)
   endif
 endif
 
+HAVE_LINUX_NETLINK_H:= $(shell aux/test-netlinkh.sh $(CC))
+HAVE_POSIX_FADVISE:= $(shell aux/test-posix_fadvise.sh $(CC))
+HAVE_STRLCPY:= $(shell aux/test-strlcpy.sh $(CC))
+HAVE_FCNTL_CLOSEM:= $(shell aux/test-F_CLOSEM.sh $(CC))
+
 ### Lua Module specific defines ###
 
 ## luaposix
-ifeq ($(shell aux/test-netlinkh.sh $(CC)), true)
+
+ifeq ($(HAVE_LINUX_NETLINK_H), true)
   luaposixDEFINES+= -DHAVE_LINUX_NETLINK_H
 endif
-ifeq ($(shell aux/test-posix_fadvise.sh $(CC)), true)
+ifeq ($(HAVE_POSIX_FADVISE), true)
   luaposixDEFINES+= -DHAVE_POSIX_FADVISE
 endif
-ifeq ($(shell aux/test-strlcpy.sh $(CC)), true)
+ifeq ($(HAVE_STRLCPY), true)
   luaposixDEFINES+= -DHAVE_STRLCPY
 endif
 
@@ -53,7 +59,7 @@ ifeq ($(DEBUG), 1)
 endif
 
 ## px
-ifeq ($(shell aux/test-F_CLOSEM.sh $(CC)), true)
+ifeq ($(HAVE_FCNTL_CLOSEM), true)
   pxDEFINES+= -DHAVE_FCNTL_CLOSEM
 endif
 
