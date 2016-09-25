@@ -73,7 +73,7 @@ ifeq ($(HAVE_FCNTL_CLOSEM), true)
 endif
 
 ifeq ($(DEBUG), 1)
-  CCWARN:= -Wall
+  CCWARN:= -Wall -Wextra -Wdeclaration-after-statement -Wredundant-decls -Wshadow -Wpointer-arith
   CFLAGS:= -O1 -fno-omit-frame-pointer -g
   CCOPT:= $(NULSTRING)
   LDFLAGS:= $(NULSTRING)
