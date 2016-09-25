@@ -83,8 +83,13 @@ else
 endif
 
 ifeq ($(STATIC), 1)
+  PIE:= $(NULSTRING)
   LDFLAGS+= -static
+else
+  PIE:= -fPIE
+  LDFLAGS+= -Wl,-pie
 endif
+CFLAGS+= $(PIE)
 
 ifeq ($(ASAN), 1)
   CFLAGS:= -fsanitize=address -O1 -fno-omit-frame-pointer -g
