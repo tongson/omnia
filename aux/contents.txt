@@ -1,5 +1,5 @@
 lbitlib.h - Included when LUA_COMPAT_BITLIB is defined.
-lua - Copy of Lua.
+lua - Copy of the Lua source code.
 one.c - Amalgamated Lua.
 rules.mk - Makefile for compiling.
 std.mk - Makefile variables and auxiliary routines.
