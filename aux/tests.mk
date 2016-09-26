@@ -4,7 +4,7 @@ export CC
 export NM
 NULSTRING:=
 CFLAGS_LRT= -lrt
-INCLUDES:= -Iaux/lua -Iinclude -Iaux
+INCLUDES:= -Iaux/lua
 
 # FLAGS when compiling for an OpenWRT target.
 ifneq (,$(findstring openwrt,$(CC)))

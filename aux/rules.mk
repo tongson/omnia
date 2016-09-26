@@ -8,7 +8,7 @@ $(LUA_T):
 
 $(LUA_O): $(LUA_T)
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ -c -DMAKE_LIB $(luaDEFINES) $(ACFLAGS) $(ONE).c
+	$(CC) -o $@ -c -Iaux -DMAKE_LIB $(luaDEFINES) $(ACFLAGS) $(ONE).c
 
 $(LUA_A): $(LUA_O)
 	$(ECHOT) [AR] $@
