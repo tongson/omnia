@@ -31,7 +31,7 @@ $(VENDOR_LUA):
 $(EXE_T): $(BUILD_DEPS) $(LUA_A) $(C_MODULES) $(COMPILED) $(MODULES) $(SRC_LUA) $(VENDOR_LUA)
 	$(ECHOT) [LN] $(EXE_T)
 	CC=$(CC) NM=$(NM) $(LUA_T) $(LUASTATIC) $(MAIN) $(SRC_LUA) $(VENDOR_LUA) $(MODULES) $(C_MODULES) $(LUA_A) \
-	  $(ACFLAGS) $(LDFLAGS) 2>&1 >/dev/null
+	  $(ACFLAGS) $(PIE) $(LDFLAGS) 2>&1 >/dev/null
 	$(RM) $(RMFLAGS) $(MAIN).c $(MODULES)
 	$(RMRF) $(VENDOR_DIRS) $(SRC_DIRS)
 
