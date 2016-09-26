@@ -3,6 +3,7 @@
 export CC
 export NM
 NULSTRING:=
+CONFIGURE_P:= aux/configure
 CFLAGS_LRT= -lrt
 INCLUDES:= -Iaux/lua
 
@@ -14,19 +15,19 @@ ifneq (,$(findstring openwrt,$(CC)))
 endif
 
 # Append -static-libgcc to CFLAGS if GCC is detected.
-ifeq ($(shell aux/test-cc.sh $(CC)), GCC)
+ifeq ($(shell $(CONFIGURE_P)/test-cc.sh $(CC)), GCC)
   CFLAGS+= -static-libgcc
 endif
 
 # Replace --gc-sections with -dead-strip on Mac
-ifeq ($(shell aux/test-mac.sh $(CC)), APPLE)
+ifeq ($(shell $(CONFIGURE_P)/test-mac.sh $(CC)), APPLE)
   LDFLAGS:= -Wl,-dead_strip
   CFLAGS_LRT:= $(NULSTRING)
 endif
 
 # Test for GCC LTO capability.
-ifeq ($(shell aux/test-gcc47.sh $(CC)), true)
-  ifeq ($(shell aux/test-binutils-plugins.sh gcc-ar), true)
+ifeq ($(shell $(CONFIGURE_P)/test-gcc47.sh $(CC)), true)
+  ifeq ($(shell $(CONFIGURE_P)/test-binutils-plugins.sh gcc-ar), true)
     CFLAGS+= -fwhole-program -flto -fuse-linker-plugin
     LDFLAGS+= -fwhole-program -flto
     RANLIB:= gcc-ranlib
@@ -35,11 +36,11 @@ ifeq ($(shell aux/test-gcc47.sh $(CC)), true)
   endif
 endif
 
-HAVE_LINUX_NETLINK_H:= $(shell aux/test-netlinkh.sh $(CC))
-HAVE_POSIX_FADVISE:= $(shell aux/test-posix_fadvise.sh $(CC))
-HAVE_STRLCPY:= $(shell aux/test-strlcpy.sh $(CC))
-HAVE_FCNTL_CLOSEM:= $(shell aux/test-F_CLOSEM.sh $(CC))
-HAVE_SYS_INOTIFY_H:= $(shell aux/test-inotifyh.sh $(CC))
+HAVE_LINUX_NETLINK_H:= $(shell $(CONFIGURE_P)/test-netlinkh.sh $(CC))
+HAVE_POSIX_FADVISE:= $(shell $(CONFIGURE_P)/test-posix_fadvise.sh $(CC))
+HAVE_STRLCPY:= $(shell $(CONFIGURE_P)/test-strlcpy.sh $(CC))
+HAVE_FCNTL_CLOSEM:= $(shell $(CONFIGURE_P)/test-F_CLOSEM.sh $(CC))
+HAVE_SYS_INOTIFY_H:= $(shell $(CONFIGURE_P)/test-inotifyh.sh $(CC))
 
 ### Lua Module specific defines and tests ####
 
