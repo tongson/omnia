@@ -40,16 +40,18 @@ BUILD_DEPS= has-$(CC) has-$(RANLIB) has-$(NM) has-$(LD) has-$(AR) has-$(STRIP) h
 
 all: $(EXE_T)
 
+include vendor/c/lpeg/Makefile
+
+ifneq ($(SRC_MOON),)
+  include aux/moonscript.mk
+endif
+
 ifneq ($(SRC_C),)
   include $(eval _d:=src/c/$(SRC_C) $(_d)) $(call _lget,$(SRC_C))
 endif
 
 ifneq ($(VENDOR_C),)
   include $(eval _d:=vendor/c/$(VENDOR_C) $(_d)) $(call _vget,$(VENDOR_C))
-endif
-
-ifneq ($(SRC_MOON),)
-  include aux/moonscript.mk
 endif
 
 print-%: ; @echo $*=$($*)

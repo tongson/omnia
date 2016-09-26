@@ -3,7 +3,6 @@ MOONI_T= bin/mooni
 MOONC= bin/moonc.lua
 MOONI= bin/mooni.lua
 MOONSCRIPT= moonscript/*.lua moonscript/parse/*.lua moonscript/compile/*.lua moonscript/transform/*.lua
-VENDOR_C+= lpeg
 CLEAN+= clean_moonscript
 
 $(MOONC_T): $(LUA_A) $(LUA_T) $(lpegA)
