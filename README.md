@@ -96,6 +96,7 @@ Module                                                          | Version       
 [lsocket](http://tset.de/lsocket/)[3]                           | 1.4             | MIT
 [luafilesystem](https://github.com/keplerproject/luafilesystem) | 1.6.3           | MIT
 [md5](http://www.rjek.com/luahash-0.00.tar.bz2)                 | 0.00            | PD
+[luaffifb](https://github.com/facebook/luaffifb)                | d1c9712         | BSD
 
 [1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.3)<br/>
 [2] posix.deprecated and posix.compat removed<br/>
