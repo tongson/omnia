@@ -3,33 +3,33 @@ LUAPOSIX= ctype dirent errno fcntl fnmatch getopt glob grp \
   sys.resource sys.socket sys.stat sys.statvfs sys.time \
   sys.times sys.utsname sys.wait syslog termio time \
   unistd utime
-luaposix_P= vendor/c/luaposix/src
+posix_P= vendor/c/posix/src
 C_MODULES+= $(foreach m, $(LUAPOSIX), posix.$m.a)
-C_MODULES:= $(filter-out luaposix.a,$(C_MODULES))
+C_MODULES:= $(filter-out posix.a,$(C_MODULES))
 CFLAGS+= $(CFLAGS_LRT)
 VENDOR+= posix
 CLEAN+= clean_posix
 
-$(luaposix_P)/sys/%.o:  $(luaposix_P)/sys/%.c
+$(posix_P)/sys/%.o:  $(posix_P)/sys/%.c
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(luaposixDEFINES) -Ivendor/c/luaposix/src $(ACFLAGS) -c $<
+	$(CC) -o $@ $(luaposixDEFINES) -I$(posix_P) $(ACFLAGS) -c $<
 
-posix.sys.%.a: $(luaposix_P)/sys/%.o
+posix.sys.%.a: $(posix_P)/sys/%.o
 	$(ECHOT) [AR] $@
 	$(AR) $(ARFLAGS) $@ $^ >/dev/null 2>&1
 	$(RANLIB) $@
 
-$(luaposix_P)/%.o:  $(luaposix_P)/%.c
+$(posix_P)/%.o:  $(posix_P)/%.c
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(luaposixDEFINES) -Ivendor/c/luaposix/src $(ACFLAGS) -c $<
+	$(CC) -o $@ $(luaposixDEFINES) -I$(posix_P) $(ACFLAGS) -c $<
 
-posix.%.a: $(luaposix_P)/%.o
+posix.%.a: $(posix_P)/%.o
 	$(ECHOT) [AR] $@
 	$(AR) $(ARFLAGS) $@ $^ >/dev/null 2>&1
 	$(RANLIB) $@
 
 clean_posix:
-	$(RM) $(RMFLAGS) $(luaposix_P)/*.o $(C_MODULES)
+	$(RM) $(RMFLAGS) $(posix_P)/*.o $(C_MODULES)
 
-.PHONY: clean_posix test_posix
+.PHONY: clean_posix
 
