@@ -24,7 +24,7 @@ end
 if _VERSION == 'Lua 5.1' then
     dlls.__cdecl = loadlib('ffi/libtest')
 else
-    dlls.__cdecl = ffi.load(package.searchpath('ffi.libtest', package.cpath))
+    dlls.__cdecl = ffi.load(package.searchpath('libtest', package.cpath))
 end
 
 if ffi.arch == 'x86' and ffi.os == 'Windows' then
