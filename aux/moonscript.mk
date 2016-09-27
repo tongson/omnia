@@ -9,7 +9,7 @@ $(MOONC_T): $(LUA_A) $(LUA_T) $(lpegA)
 	$(ECHOT) [CC] $@
 	$(CPR) vendor/lua/moonscript vendor/lua/cimicida.lua .
 	CC=$(CC) NM=$(NM) $(LUA_T) $(LUASTATIC) $(MOONC) cimicida.lua $(MOONSCRIPT) $(lpegA) \
-		 		 $(LUA_A) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(LDFLAGS) 2>&1 >/dev/null
+		 $(LUA_A) $(ACFLAGS) $(PIE) $(LDFLAGS) 2>&1 >/dev/null
 	$(RM) $(RMFLAGS) cimicida.lua $(MOONC).c
 	$(RMRF) moonscript
 
@@ -17,7 +17,7 @@ $(MOONI_T): $(MOONC_T)
 	$(ECHOT) [CC] $@
 	$(CPR) vendor/lua/moonscript vendor/lua/cimicida.lua .
 	CC=$(CC) NM=$(NM) $(LUA_T) $(LUASTATIC) $(MOONI) $(MOONSCRIPT) $(lpegA) \
-		 		 $(LUA_A) $(INCLUDES) $(CCWARN) $(CFLAGS) $(CCOPT) $(LDFLAGS) 2>&1 >/dev/null
+		 $(LUA_A) $(ACFLAGS) $(PIE) $(LDFLAGS) 2>&1 >/dev/null
 	$(RM) $(RMFLAGS) cimicida.lua $(MOONI).c
 	$(RMRF) moonscript
 
