@@ -1,11 +1,11 @@
-EXE:=
-SRC:=
-SRC_DIR:=
+EXE:= test
+SRC:= src moon_src
+SRC_DIR:= moon
 SRC_C:=
-VENDOR:=
+VENDOR:= cwtest
 VENDOR_DIR:=
-VENDOR_C:=
-MAKEFLAGS= --silent
+VENDOR_C:= lfs
+MAKEFLAGS=
 CROSS=
 CC= cc
 LD= ld

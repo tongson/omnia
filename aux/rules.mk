@@ -41,4 +41,6 @@ clean: $(CLEAN)
 	$(ECHO) "Done!"
 
 new:
-	$(RMRF) vendor/lua/* vendor/c/* src/lua/* src/c/* bin/test.moon bin/main.lua Makefile.test
+	$(RMRF) vendor/lua/* vendor/c/* src/lua/* src/c/* bin/test.moon bin/main.lua Makefile
+	$(CP) aux/Makefile.pristine Makefile
+
