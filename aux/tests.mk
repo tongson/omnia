@@ -76,7 +76,7 @@ endif
 
 ifeq ($(DEBUG), 1)
   CCWARN:= -Wall -Wextra -Wdeclaration-after-statement -Wredundant-decls -Wshadow -Wpointer-arith
-  CFLAGS:= -O1 -fno-omit-frame-pointer -g
+  CFLAGS:= -O1 -fPIC -fno-omit-frame-pointer -g
   CCOPT:= $(NULSTRING)
   LDFLAGS:= $(NULSTRING)
   MAKEFLAGS:= $(NULSTRING)
