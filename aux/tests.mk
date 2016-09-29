@@ -1,7 +1,5 @@
 .POSIX:
 .SUFFIXES:
-export CC
-export NM
 NULSTRING:=
 CONFIGURE_P:= aux/configure
 CFLAGS_LRT= -lrt
