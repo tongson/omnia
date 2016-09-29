@@ -5,6 +5,7 @@ rules.mk - Makefile for compiling.
 std.mk - Makefile variables and auxiliary routines.
 tests.mk - Set Makefile variables depending on a some tests.
 moonscript.mk - Make routines for supporting Moonscript source.
+Makefile.pristine - Pristine Makefile for new projects.
 configure/test-F_CLOSEM.sh - Test for F_CLOSEM.
 configure/test-binutils-plugins.sh - Test/look for binutils plugins by running `$plugin --help`.
 configure/test-cc.sh - Test for the current compiler.
