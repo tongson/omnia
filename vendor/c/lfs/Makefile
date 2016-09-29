@@ -12,7 +12,7 @@ $(lfsA): $(lfsOBJ)
 
 $(lfsOBJ): $(lfsSRC)
 	$(ECHOT) CC $@
-	$(CC) -o $@ -I $(lfsP) $(TARGET_FLAGS) -c $<
+	$(TARGET_CC) -o $@ -I $(lfsP) $(TARGET_FLAGS) -c $<
 
 clean_lfs:
 	$(RM) $(RMFLAGS) $(lfsOBJ) $(lfsA)
