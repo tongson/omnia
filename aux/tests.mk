@@ -12,6 +12,7 @@ TARGET_LD= $(CROSS)$(LD)
 TARGET_RANLIB= $(CROSS)$(RANLIB)
 TARGET_AR= $(CROSS)$(AR)
 TARGET_NM= $(CROSS)$(NM)
+TARGET_STRIP= $(CROSS)strip
 
 # FLAGS when compiling for an OpenWRT target.
 ifneq (,$(findstring openwrt,$(TARGET_CC)))
