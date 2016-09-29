@@ -4,12 +4,12 @@ inotifyA= inotify.a
 CLEAN+= clean_inotify
 
 $(inotifyA): $(inotifyOBJ)
-	$(ECHOT) [AR] $@
+	$(ECHOT) AR $@
 	$(TARGET_AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
 	$(TARGET_RANLIB) $@
 
 $(inotifyOBJ): $(inotifySRC)
-	$(ECHOT) [CC] $@
+	$(ECHOT) CC $@
 	$(TARGET_CC) -o $@ -Ivendor/c/inotify $(TARGET_FLAGS) -c $<
 
 clean_inotify:

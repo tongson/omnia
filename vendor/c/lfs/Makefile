@@ -6,12 +6,12 @@ CLEAN+= clean_lfs
 CCWARN=
 
 $(lfsA): $(lfsOBJ)
-	$(ECHOT) [AR] $@
+	$(ECHOT) AR $@
 	$(TARGET_AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
 	$(TARGET_RANLIB) $@
 
 $(lfsOBJ): $(lfsSRC)
-	$(ECHOT) [CC] $@
+	$(ECHOT) CC $@
 	$(CC) -o $@ -I $(lfsP) $(TARGET_FLAGS) -c $<
 
 clean_lfs:

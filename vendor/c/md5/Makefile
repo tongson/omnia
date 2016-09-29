@@ -4,12 +4,12 @@ md5A= md5.a
 CLEAN+= clean_md5
 
 $(md5A): $(md5OBJ)
-	$(ECHOT) [AR] $@
+	$(ECHOT) AR $@
 	$(TARGET_AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
 	$(TARGET_RANLIB) $@
 
 $(md5OBJ): $(md5SRC)
-	$(ECHOT) [CC] $@
+	$(ECHOT) CC $@
 	$(TARGET_CC) -o $@ -Ivendor/c/md5 $(TARGET_FLAGS) -c $<
 
 clean_md5:

@@ -5,12 +5,12 @@ CLEAN+= clean_lsocket
 CCWARN=
 
 $(lsocketA): $(lsocketOBJ)
-	$(ECHOT) [AR] $@
+	$(ECHOT) AR $@
 	$(TARGET_AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
 	$(TARGET_RANLIB) $@
 
 $(lsocketOBJ): $(lsocketSRC)
-	$(ECHOT) [CC] $@
+	$(ECHOT) CC $@
 	$(TARGET_CC) -o $@ $(TARGET_FLAGS) -c $<
 
 clean_lsocket:
