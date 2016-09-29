@@ -1,12 +1,21 @@
 $(LUAC_T):
 	$(ECHOT) CC $@
-	$(CC) -o $@ -DMAKE_LUAC $(FLAGS) $(ONE).c -lm
+	$(HOST_CC) -o $@ -DMAKE_LUAC $(FLAGS) $(ONE).c -lm
 
 $(LUA_T):
 	$(ECHOT) CC $@
-	$(CC) -o $@ -DMAKE_LUA $(luaDEFINES) $(FLAGS) $(ONE).c -lm
+	$(HOST_CC) -o $@ -DMAKE_LUA $(luaDEFINES) $(FLAGS) $(ONE).c -lm
 
-$(LUA_O): $(LUA_T)
+$(HOST_LUA_O):
+	$(ECHOT) CC $@
+	$(HOST_CC) -o $@ -c -Iaux -DMAKE_LIB $(luaDEFINES) $(FLAGS) $(ONE).c
+
+$(HOST_LUA_A): $(HOST_LUA_O)
+	$(ECHOT) AR $@
+	$(AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
+	$(RANLIB) $@
+
+$(LUA_O):
 	$(ECHOT) CC $@
 	$(TARGET_CC) -o $@ -c -Iaux -DMAKE_LIB $(luaDEFINES) $(TARGET_FLAGS) $(ONE).c
 
@@ -37,7 +46,7 @@ $(EXE_T): $(BUILD_DEPS) $(LUA_A) $(C_MODULES) $(COMPILED) $(MODULES) $(SRC_LUA) 
 
 clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
-	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(EXE_T)
+	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(EXE_T) $(HOST_LUA_A) $(HOST_LUA_O)
 	$(ECHO) "Done!"
 
 new:
