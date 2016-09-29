@@ -7,12 +7,12 @@ CCWARN=
 
 $(lfsA): $(lfsOBJ)
 	$(ECHOT) [AR] $@
-	$(AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
-	$(RANLIB) $@
+	$(TARGET_AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
+	$(TARGET_RANLIB) $@
 
 $(lfsOBJ): $(lfsSRC)
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ -I $(lfsP) $(ACFLAGS) -c $<
+	$(CC) -o $@ -I $(lfsP) $(TARGET_FLAGS) -c $<
 
 clean_lfs:
 	$(RM) $(RMFLAGS) $(lfsOBJ) $(lfsA)

@@ -5,12 +5,12 @@ CLEAN+= clean_inotify
 
 $(inotifyA): $(inotifyOBJ)
 	$(ECHOT) [AR] $@
-	$(AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
-	$(RANLIB) $@
+	$(TARGET_AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
+	$(TARGET_RANLIB) $@
 
 $(inotifyOBJ): $(inotifySRC)
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ -Ivendor/c/inotify $(ACFLAGS) -c $<
+	$(TARGET_CC) -o $@ -Ivendor/c/inotify $(TARGET_FLAGS) -c $<
 
 clean_inotify:
 	$(RM) $(RMFLAGS) $(inotifyOBJ) $(inotifyA)

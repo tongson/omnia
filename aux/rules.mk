@@ -1,19 +1,19 @@
 $(LUAC_T):
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ -DMAKE_LUAC $(ACFLAGS) $(ONE).c -lm
+	$(CC) -o $@ -DMAKE_LUAC $(FLAGS) $(ONE).c -lm
 
 $(LUA_T):
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ -DMAKE_LUA $(luaDEFINES) $(ACFLAGS) $(ONE).c -lm
+	$(CC) -o $@ -DMAKE_LUA $(luaDEFINES) $(FLAGS) $(ONE).c -lm
 
 $(LUA_O): $(LUA_T)
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ -c -Iaux -DMAKE_LIB $(luaDEFINES) $(ACFLAGS) $(ONE).c
+	$(TARGET_CC) -o $@ -c -Iaux -DMAKE_LIB $(luaDEFINES) $(TARGET_FLAGS) $(ONE).c
 
 $(LUA_A): $(LUA_O)
 	$(ECHOT) [AR] $@
-	$(AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
-	$(RANLIB) $@
+	$(TARGET_AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
+	$(TARGET_RANLIB) $@
 
 $(MODULES):
 	$(ECHOT) [CP] $(MODULES)
@@ -30,8 +30,8 @@ $(VENDOR_LUA):
 
 $(EXE_T): $(BUILD_DEPS) $(LUA_A) $(C_MODULES) $(COMPILED) $(MODULES) $(SRC_LUA) $(VENDOR_LUA)
 	$(ECHOT) [LN] $(EXE_T)
-	CC=$(CC) NM=$(NM) $(LUA_T) $(LUASTATIC) $(MAIN) $(SRC_LUA) $(VENDOR_LUA) $(MODULES) $(C_MODULES) $(LUA_A) \
-	  $(ACFLAGS) $(PIE) $(LDFLAGS) 2>&1 >/dev/null
+	CC=$(TARGET_CC) NM=$(TARGET_NM) $(LUA_T) $(LUASTATIC) $(MAIN) $(SRC_LUA) $(VENDOR_LUA) $(MODULES) $(C_MODULES) $(LUA_A) \
+	  $(TARGET_FLAGS) $(PIE) $(TARGET_LDFLAGS) 2>&1 >/dev/null
 	$(RM) $(RMFLAGS) $(MAIN).c $(MODULES)
 	$(RMRF) $(VENDOR_DIRS) $(SRC_DIRS)
 

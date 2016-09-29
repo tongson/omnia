@@ -12,21 +12,21 @@ CLEAN+= clean_posix
 
 $(posix_P)/sys/%.o:  $(posix_P)/sys/%.c
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(luaposixDEFINES) -I$(posix_P) $(ACFLAGS) -c $<
+	$(TARGET_CC) -o $@ $(luaposixDEFINES) -I$(posix_P) $(TARGET_FLAGS) -c $<
 
 posix.sys.%.a: $(posix_P)/sys/%.o
 	$(ECHOT) [AR] $@
-	$(AR) $(ARFLAGS) $@ $^ >/dev/null 2>&1
-	$(RANLIB) $@
+	$(TARGET_AR) $(ARFLAGS) $@ $^ >/dev/null 2>&1
+	$(TARGET_RANLIB) $@
 
 $(posix_P)/%.o:  $(posix_P)/%.c
 	$(ECHOT) [CC] $@
-	$(CC) -o $@ $(luaposixDEFINES) -I$(posix_P) $(ACFLAGS) -c $<
+	$(TARGET_CC) -o $@ $(luaposixDEFINES) -I$(posix_P) $(TARGET_FLAGS) -c $<
 
 posix.%.a: $(posix_P)/%.o
 	$(ECHOT) [AR] $@
-	$(AR) $(ARFLAGS) $@ $^ >/dev/null 2>&1
-	$(RANLIB) $@
+	$(TARGET_AR) $(ARFLAGS) $@ $^ >/dev/null 2>&1
+	$(TARGET_RANLIB) $@
 
 clean_posix:
 	$(RM) $(RMFLAGS) $(posix_P)/*.o $(C_MODULES)
