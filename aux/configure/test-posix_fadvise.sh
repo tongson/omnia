@@ -94,10 +94,7 @@ main(int argc, char *argv[])
 }
 _EOF
 if $1 -Werror -o test-posix_fadvise $C 2>/dev/null; then
-  ./test-posix_fadvise
-  if [ $? -eq 0 ]; then
     echo "true"
-  fi
 fi
 rm -f test-posix_fadvise $C
 
