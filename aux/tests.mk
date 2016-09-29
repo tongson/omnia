@@ -37,11 +37,11 @@ endif
 # Test for GCC LTO capability.
 ifeq ($(shell $(CONFIGURE_P)/test-gcc47.sh $(TARGET_CC)), true)
   ifeq ($(shell $(CONFIGURE_P)/test-binutils-plugins.sh $(CROSS)gcc-ar), true)
-    CFLAGS+= -fwhole-program -flto -fuse-linker-plugin
-    LDFLAGS+= -fwhole-program -flto
-    RANLIB:= $(CROSS)gcc-ranlib
-    AR:= $(CROSS)gcc-ar
-    NM:= $(CROSS)gcc-nm
+    TARGET_CFLAGS+= -fwhole-program -flto -fuse-linker-plugin
+    TARGET_LDFLAGS+= -fwhole-program -flto
+    TARGET_RANLIB:= $(CROSS)gcc-ranlib
+    TARGET_AR:= $(CROSS)gcc-ar
+    TARGET_NM:= $(CROSS)gcc-nm
   endif
 endif
 
