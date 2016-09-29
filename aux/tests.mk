@@ -88,8 +88,7 @@ ifeq ($(STATIC), 1)
   PIE:= $(NULSTRING)
   LDFLAGS+= -static
 else
-  PIE:= -fPIE
-  LDFLAGS+= -Wl,-pie
+  PIE:= -fPIE -pie
 endif
 
 ifeq ($(ASAN), 1)
