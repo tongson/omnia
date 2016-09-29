@@ -39,3 +39,6 @@ clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
 	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(EXE_T)
 	$(ECHO) "Done!"
+
+new:
+	$(RMRF) vendor/lua/* vendor/c/* src/lua/* src/c/* bin/test.moon bin/main.lua

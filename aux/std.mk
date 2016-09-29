@@ -68,4 +68,4 @@ has-%:
 		exit -1; \
 	}
 
-.PHONY: all clean print-% vprint-% has-%
+.PHONY: all new clean print-% vprint-% has-%
