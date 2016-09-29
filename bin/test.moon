@@ -20,10 +20,3 @@ with T
    \start "Function from a src/lua module (moonscript) (moon_src)"
    \eq type(moon_src.moon_src), "function"
    \exit! if not \done!
-with T
-   \start "FFI (luaffifb) tests"
-   make = os.execute "make -f Makefile.test bin/test_ffi 0>&- 2>&- 1>/dev/null"
-   \yes make
-   ffi = os.execute "bin/test_ffi 0>&- 2>&- 1>/dev/null"
-   \yes ffi
-   \exit! if not \done!
