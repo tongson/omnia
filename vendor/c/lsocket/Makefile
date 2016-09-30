@@ -11,7 +11,7 @@ $(lsocketA): $(lsocketOBJ)
 
 $(lsocketOBJ): $(lsocketSRC)
 	$(ECHOT) CC $@
-	$(TARGET_CC) -o $@ $(TARGET_FLAGS) -c $<
+	$(TARGET_DYNCC) -o $@ $(TARGET_FLAGS) -c $<
 
 clean_lsocket:
 	$(RM) $(RMFLAGS) $(lsocketOBJ) $(lsocketA)

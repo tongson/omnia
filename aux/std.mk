@@ -14,7 +14,6 @@ ECHON:= @printf '%s'
 ECHOT:= @printf ' %s\t%s\n'
 CP:= cp
 CPR:= cp -R
-STRIP:= $(TARGET_STRIP)
 STRIPFLAGS:= --strip-all
 RM:= rm
 RMFLAGS:= -f
@@ -38,7 +37,7 @@ SRC_MOON+= $(foreach m, $(VENDOR_DIR), $(wildcard vendor/lua/$m/*.moon))
 COMPILED:= $(foreach m, $(SRC_MOON), $(addsuffix .lua, $(basename $m)))
 C_MODULES+= $(foreach m, $(VENDOR_C), $m.a)
 C_MODULES+= $(foreach m, $(SRC_C), $m.a)
-BUILD_DEPS= has-$(TARGET_CC) has-$(TARGET_RANLIB) has-$(TARGET_NM) has-$(TARGET_AR) has-$(TARGET_STRIP)
+BUILD_DEPS= has-$(TARGET_STCC) has-$(TARGET_RANLIB) has-$(TARGET_NM) has-$(TARGET_AR) has-$(TARGET_STRIP)
 
 all: $(EXE_T)
 

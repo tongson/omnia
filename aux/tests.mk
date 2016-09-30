@@ -7,35 +7,45 @@ INCLUDES:= -Iaux/lua
 ifeq ($(CROSS),)
   CROSS:= $(NULSTRING)
 endif
-TARGET_CC:= $(CROSS)$(CC)
+ifeq ($(CROSS_CC),)
+  CROSS_CC:= $(HOST_CC)
+endif
+LD= ld
+NM= nm
+AR= ar
+RANLIB= ranlib
+STRIP= strip
+CC= $(CROSS_CC)
+TARGET_DYNCC:= $(CROSS)$(CC) -fPIC
+TARGET_STCC:= $(CROSS)$(CC)
 TARGET_LD= $(CROSS)$(LD)
 TARGET_RANLIB= $(CROSS)$(RANLIB)
 TARGET_AR= $(CROSS)$(AR)
 TARGET_NM= $(CROSS)$(NM)
-TARGET_STRIP= $(CROSS)strip
+TARGET_STRIP= $(CROSS)$(STRIP)
 
 # FLAGS when compiling for an OpenWRT target.
-ifneq (,$(findstring openwrt,$(TARGET_CC)))
+ifneq (,$(findstring openwrt,$(TARGET_STCC)))
   TARGET_CCOPT:= -Os -fomit-frame-pointer -pipe
   TARGET_LDFLAGS= -Wl,--gc-sections -Wl,--strip-all
   DEFINES+= -DHAVE_UCLIBC
 endif
 
 # Append -static-libgcc to CFLAGS if GCC is detected.
-IS_GCC:= $(shell $(CONFIGURE_P)/test-cc.sh $(TARGET_CC))
+IS_GCC:= $(shell $(CONFIGURE_P)/test-cc.sh $(TARGET_STCC))
 ifeq ($(IS_GCC), GCC)
   TARGET_CFLAGS+= -static-libgcc
 endif
 
 # Replace --gc-sections with -dead-strip on Mac
-IS_APPLE:= $(shell $(CONFIGURE_P)/test-mac.sh $(TARGET_CC))
+IS_APPLE:= $(shell $(CONFIGURE_P)/test-mac.sh $(TARGET_STCC))
 ifeq ($(IS_APPLE), APPLE)
   TARGET_LDFLAGS:= -Wl,-dead_strip
   CFLAGS_LRT:= $(NULSTRING)
 endif
 
 # Test for GCC LTO capability.
-ifeq ($(shell $(CONFIGURE_P)/test-gcc47.sh $(TARGET_CC)), true)
+ifeq ($(shell $(CONFIGURE_P)/test-gcc47.sh $(TARGET_STCC)), true)
   ifeq ($(shell $(CONFIGURE_P)/test-binutils-plugins.sh $(CROSS)gcc-ar), true)
     TARGET_CFLAGS+= -fwhole-program -flto -fuse-linker-plugin
     TARGET_LDFLAGS+= -fwhole-program -flto
@@ -45,11 +55,11 @@ ifeq ($(shell $(CONFIGURE_P)/test-gcc47.sh $(TARGET_CC)), true)
   endif
 endif
 
-HAVE_LINUX_NETLINK_H:= $(shell $(CONFIGURE_P)/test-netlinkh.sh $(TARGET_CC))
-HAVE_POSIX_FADVISE:= $(shell $(CONFIGURE_P)/test-posix_fadvise.sh $(TARGET_CC))
-HAVE_STRLCPY:= $(shell $(CONFIGURE_P)/test-strlcpy.sh $(TARGET_CC))
-HAVE_FCNTL_CLOSEM:= $(shell $(CONFIGURE_P)/test-F_CLOSEM.sh $(TARGET_CC))
-HAVE_SYS_INOTIFY_H:= $(shell $(CONFIGURE_P)/test-inotifyh.sh $(TARGET_CC))
+HAVE_LINUX_NETLINK_H:= $(shell $(CONFIGURE_P)/test-netlinkh.sh $(TARGET_STCC))
+HAVE_POSIX_FADVISE:= $(shell $(CONFIGURE_P)/test-posix_fadvise.sh $(TARGET_STCC))
+HAVE_STRLCPY:= $(shell $(CONFIGURE_P)/test-strlcpy.sh $(TARGET_STCC))
+HAVE_FCNTL_CLOSEM:= $(shell $(CONFIGURE_P)/test-F_CLOSEM.sh $(TARGET_STCC))
+HAVE_SYS_INOTIFY_H:= $(shell $(CONFIGURE_P)/test-inotifyh.sh $(TARGET_STCC))
 
 ### Lua Module specific defines and tests ####
 
@@ -107,5 +117,5 @@ ifeq ($(ASAN), 1)
   MAKEFLAGS:= $(NULSTRING)
 endif
 
-TARGET_FLAGS:= $(DEFINES) $(INCLUDES) $(TARGET_CFLAGS) $(TARGET_CCOPT)
-FLAGS:= $(DEFINES) $(INCLUDES) $(CFLAGS) $(CCOPT)
+TARGET_FLAGS:= $(DEFINES) $(INCLUDES) $(TARGET_CFLAGS) $(TARGET_CCOPT) $(CCWARN)
+FLAGS:= $(DEFINES) $(INCLUDES) $(CFLAGS) $(CCOPT) $(CCWARN)

@@ -22,11 +22,11 @@ $(host_lpegA): $(host_lpegOBJS)
 
 vendor/c/lpeg/%.o: vendor/c/lpeg/%.c
 	$(ECHOT) CC $@
-	$(TARGET_CC) -o $@ $(lpegDEFINES) -Ivendor/c/lpeg -c $(TARGET_FLAGS) $<
+	$(TARGET_DYNCC) -o $@ $(lpegDEFINES) -Ivendor/c/lpeg -c $(TARGET_FLAGS) $<
 
 vendor/c/lpeg/host_%.o: vendor/c/lpeg/%.c
 	$(ECHOT) CC $@
-	$(HOST_CC) -o $@ $(lpegDEFINES) -Ivendor/c/lpeg -c $(FLAGS) $<
+	$(HOST_CC) -o $@ $(lpegDEFINES) -Ivendor/c/lpeg -fPIC -c $(FLAGS) $<
 
 clean_lpeg:
 	$(RM) $(RMFLAGS) $(lpegOBJS) $(lpegA) $(host_lpegOBJS) $(host_lpegA) vendor/c/lpeg/lpprint.o lpprint.o

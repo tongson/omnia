@@ -10,7 +10,7 @@ $(inotifyA): $(inotifyOBJ)
 
 $(inotifyOBJ): $(inotifySRC)
 	$(ECHOT) CC $@
-	$(TARGET_CC) -o $@ -Ivendor/c/inotify $(TARGET_FLAGS) -c $<
+	$(TARGET_DYNCC) -o $@ -Ivendor/c/inotify $(TARGET_FLAGS) -c $<
 
 clean_inotify:
 	$(RM) $(RMFLAGS) $(inotifyOBJ) $(inotifyA)

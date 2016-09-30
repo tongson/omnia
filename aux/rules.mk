@@ -8,7 +8,7 @@ $(LUA_T):
 
 $(HOST_LUA_O):
 	$(ECHOT) CC $@
-	$(HOST_CC) -o $@ -c -Iaux -DMAKE_LIB $(luaDEFINES) $(FLAGS) $(ONE).c
+	$(HOST_CC) -o $@ -c -Iaux -DMAKE_LIB $(luaDEFINES) -fPIC $(FLAGS) $(ONE).c
 
 $(HOST_LUA_A): $(HOST_LUA_O)
 	$(ECHOT) AR $@
@@ -17,7 +17,7 @@ $(HOST_LUA_A): $(HOST_LUA_O)
 
 $(LUA_O):
 	$(ECHOT) CC $@
-	$(TARGET_CC) -o $@ -c -Iaux -DMAKE_LIB $(luaDEFINES) $(TARGET_FLAGS) $(ONE).c
+	$(TARGET_DYNCC) -o $@ -c -Iaux -DMAKE_LIB $(luaDEFINES) $(TARGET_FLAGS) $(ONE).c
 
 $(LUA_A): $(LUA_O)
 	$(ECHOT) AR $@
@@ -39,7 +39,7 @@ $(VENDOR_LUA):
 
 $(EXE_T): $(BUILD_DEPS) $(LUA_A) $(C_MODULES) $(COMPILED) $(MODULES) $(SRC_LUA) $(VENDOR_LUA)
 	$(ECHOT) LN $(EXE_T)
-	CC=$(TARGET_CC) NM=$(TARGET_NM) $(LUA_T) $(LUASTATIC) $(MAIN) $(SRC_LUA) $(VENDOR_LUA) $(MODULES) $(C_MODULES) $(LUA_A) \
+	CC=$(TARGET_STCC) NM=$(TARGET_NM) $(LUA_T) $(LUASTATIC) $(MAIN) $(SRC_LUA) $(VENDOR_LUA) $(MODULES) $(C_MODULES) $(LUA_A) \
 	  $(TARGET_FLAGS) $(PIE) $(TARGET_LDFLAGS) 2>&1 >/dev/null
 	$(RM) $(RMFLAGS) $(MAIN).c $(MODULES)
 	$(RMRF) $(VENDOR_DIRS) $(SRC_DIRS)
