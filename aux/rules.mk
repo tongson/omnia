@@ -25,16 +25,14 @@ $(LUA_A): $(LUA_O)
 	$(TARGET_RANLIB) $@
 
 $(MODULES):
-	$(ECHOT) CP $(MODULES)
+	$(ECHOT) CP MODULES
 	for f in $(VENDOR); do cp $(VENDOR_P)/$$f.lua .; done
 	for f in $(SRC); do cp $(SRC_P)/$$f.lua .; done
 
 $(SRC_LUA):
-	$(ECHOT) CP $(SRC_LUA)
 	for d in $(SRC_DIRS); do $(CPR) $(SRC_P)/$$d .; done
 
 $(VENDOR_LUA):
-	$(ECHOT) CP $(VENDOR_LUA)
 	for d in $(VENDOR_DIRS); do $(CPR) $(VENDOR_P)/$$d .; done
 
 $(EXE_T): $(BUILD_DEPS) $(LUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(MODULES) $(SRC_LUA) $(VENDOR_LUA)
@@ -46,7 +44,8 @@ $(EXE_T): $(BUILD_DEPS) $(LUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(MODULES) $(
 
 clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
-	$(RM) $(RMFLAGS) $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(EXE_T) $(HOST_LUA_A) $(HOST_LUA_O)
+	$(RM) $(RMFLAGS) $(MAIN).c $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(EXE_T) $(HOST_LUA_A) $(HOST_LUA_O) $(COMPILED) $(MODULES)
+	$(RMRF) $(SRC_DIRS) $(VENDOR_DIRS)
 	$(ECHO) "Done!"
 
 new:
