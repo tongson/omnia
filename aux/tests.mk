@@ -40,6 +40,7 @@ endif
 # Replace --gc-sections with -dead-strip on Mac
 IS_APPLE:= $(shell $(CONFIGURE_P)/test-mac.sh $(TARGET_STCC))
 ifeq ($(IS_APPLE), APPLE)
+  LDFLAGS:= -Wl,-dead_strip
   TARGET_LDFLAGS:= -Wl,-dead_strip
   CFLAGS_LRT:= $(NULSTRING)
 endif
