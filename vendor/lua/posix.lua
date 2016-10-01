@@ -18,24 +18,6 @@ local bit = require "bit32"
 local M = {}
 
 
--- For backwards compatibility, copy all table entries into M namespace.
-for _, sub in ipairs {
-  "ctype", "dirent", "errno", "fcntl", "fnmatch", "getopt", "glob", "grp",
-  "libgen", "poll", "pwd", "sched", "signal", "stdio", "stdlib", "sys.msg",
-  "sys.resource", "sys.socket", "sys.stat", "sys.statvfs", "sys.time",
-  "sys.times", "sys.utsname", "sys.wait", "syslog", "termio", "time",
-  "unistd", "utime"
-} do
-  local t = require ("posix." .. sub)
-  for k, v in pairs (t) do
-    if k ~= "version" then
-      assert(M[k] == nil, "posix namespace clash: " .. sub .. "." .. k)
-      M[k] = v
-    end
-  end
-end
-
-
 M.version = "posix for " .. _VERSION .. " / luaposix 33.4.0"
 
 
