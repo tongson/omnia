@@ -26,8 +26,8 @@ $(LUA_A): $(LUA_O)
 
 $(MODULES):
 	$(ECHOT) CP MODULES
-	for f in $(VENDOR); do cp $(VENDOR_P)/$$f.lua .; done
-	for f in $(SRC); do cp $(SRC_P)/$$f.lua .; done
+	for f in $(VENDOR); do $(CP) $(VENDOR_P)/$$f.lua .; done
+	for f in $(SRC); do $(CP) $(SRC_P)/$$f.lua .; done
 
 $(SRC_LUA):
 	for d in $(SRC_DIRS); do $(CPR) $(SRC_P)/$$d .; done
