@@ -30,14 +30,14 @@ $(MODULES):
 	for f in $(SRC); do cp $(SRC_P)/$$f.lua .; done
 
 $(SRC_LUA):
-	$(ECHOT) CP $(SRC_DIRS)
-	for d in $(SRC_DIRS); do cp -R $(SRC_P)/$$d .; done
+	$(ECHOT) CP $(SRC_LUA)
+	for d in $(SRC_DIRS); do $(CPR) $(SRC_P)/$$d .; done
 
 $(VENDOR_LUA):
-	$(ECHOT) CP $(VENDOR_DIRS)
-	for d in $(VENDOR_DIRS); do cp -R $(VENDOR_P)/$$d .; done
+	$(ECHOT) CP $(VENDOR_LUA)
+	for d in $(VENDOR_DIRS); do $(CPR) $(VENDOR_P)/$$d .; done
 
-$(EXE_T): $(BUILD_DEPS) $(LUA_A) $(C_MODULES) $(COMPILED) $(MODULES) $(SRC_LUA) $(VENDOR_LUA)
+$(EXE_T): $(BUILD_DEPS) $(LUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(MODULES) $(SRC_LUA) $(VENDOR_LUA)
 	$(ECHOT) LN $(EXE_T)
 	CC=$(TARGET_STCC) NM=$(TARGET_NM) $(LUA_T) $(LUASTATIC) $(MAIN) $(SRC_LUA) $(VENDOR_LUA) $(MODULES) $(C_MODULES) $(LUA_A) \
 	  $(TARGET_FLAGS) $(PIE) $(TARGET_LDFLAGS) 2>&1 >/dev/null
