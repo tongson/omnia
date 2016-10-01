@@ -41,7 +41,9 @@ BUILD_DEPS= has-$(TARGET_STCC) has-$(TARGET_RANLIB) has-$(TARGET_NM) has-$(TARGE
 
 all: $(EXE_T)
 
-include vendor/c/lpeg/Makefile
+ifeq ($(filter lpeg,$(VENDOR_C)),)
+  include vendor/c/lpeg/Makefile
+endif
 
 ifneq ($(SRC_MOON),)
   include aux/moonscript.mk
