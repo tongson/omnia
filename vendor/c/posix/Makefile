@@ -6,7 +6,6 @@ LUAPOSIX= ctype dirent errno fcntl fnmatch getopt glob grp \
 posix_P= vendor/c/posix/src
 C_MODULES+= $(foreach m, $(LUAPOSIX), posix.$m.a)
 C_MODULES:= $(filter-out posix.a,$(C_MODULES))
-CFLAGS+= $(CFLAGS_LRT)
 VENDOR+= posix
 CLEAN+= clean_posix
 

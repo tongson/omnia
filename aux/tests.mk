@@ -2,7 +2,6 @@
 .SUFFIXES:
 NULSTRING:=
 CONFIGURE_P:= aux/configure
-CFLAGS_LRT= -lrt
 INCLUDES:= -Iaux/lua
 ifeq ($(CROSS),)
   CROSS:= $(NULSTRING)
@@ -42,7 +41,12 @@ IS_APPLE:= $(shell $(CONFIGURE_P)/test-mac.sh $(TARGET_STCC))
 ifeq ($(IS_APPLE), APPLE)
   LDFLAGS:= -Wl,-dead_strip
   TARGET_LDFLAGS:= -Wl,-dead_strip
-  CFLAGS_LRT:= $(NULSTRING)
+endif
+
+# luaposix needs to link to lrt < glibc 2.17
+FOUND_RT:= $(shell $(CONFIGURE_P)/test-lrt.sh $(TARGET_STCC))
+ifeq ($(FOUND_RT), 0)
+  CFLAGS_LRT= -lrt
 endif
 
 # Test for GCC LTO capability.
@@ -118,5 +122,5 @@ ifeq ($(ASAN), 1)
   MAKEFLAGS:= $(NULSTRING)
 endif
 
-TARGET_FLAGS:= $(DEFINES) $(INCLUDES) $(TARGET_CFLAGS) $(TARGET_CCOPT) $(CCWARN)
+TARGET_FLAGS:= $(DEFINES) $(INCLUDES) $(TARGET_CFLAGS) $(TARGET_CCOPT) $(CCWARN) $(CFLAGS_LRT)
 FLAGS:= $(DEFINES) $(INCLUDES) $(CFLAGS) $(CCOPT) $(CCWARN)
