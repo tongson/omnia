@@ -37,12 +37,12 @@ char
 *strncpy_x(char *dest, const char *src, size_t n)
 {
 	size_t len = strlen(src);
-	if (len > n)
-	{
-		len = n;
-	}
 	if (len != 0)
 	{
+		if (len > n)
+		{
+			len = n;
+		}
 		memmove(dest, src, len);
 		if (len < n)
 		{
@@ -58,11 +58,12 @@ char
 	if (n > 0)
 	{
 		size_t len = strlen(src);
-		if (len + 1 > n)
-		{
-			len = n - 1;
-		}
 		if (len != 0)
+		{
+			if (len + 1 > n)
+			{
+				len = n - 1;
+			}
 			memmove(dest, src, len);
 			dest[len] = 0;
 		}
