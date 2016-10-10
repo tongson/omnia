@@ -34,22 +34,22 @@ luaX_pusherrno(lua_State *L, char *error)
 }
 
 char
-*strncpy_x(char* s1, const char* s2, size_t n)
+*strncpy_x(char *dest, const char *src, size_t n)
 {
-	size_t m = strlen(s2);
-	if (m > n)
+	size_t len = strlen(src);
+	if (len > n)
 	{
-		m = n;
+		len = n;
 	}
-	if (m != 0)
+	if (len != 0)
 	{
-		memmove(s1, s2, m);
-		if (m < n)
+		memmove(dest, src, len);
+		if (len < n)
 		{
-			bzero_x(s1 + m, n - m);
+			bzero_x(s1 + len, n - len);
 		}
 	}
-	return s1;
+	return dest;
 }
 
 char
