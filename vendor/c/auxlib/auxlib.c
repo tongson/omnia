@@ -41,10 +41,13 @@ char
 	{
 		m = n;
 	}
-	memmove(s1, s2, m);
-	if (m < n)
+	if (m != 0)
 	{
-        	bzero_x(s1 + m, n - m);
+		memmove(s1, s2, m);
+		if (m < n)
+		{
+			bzero_x(s1 + m, n - m);
+		}
 	}
 	return s1;
 }
