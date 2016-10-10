@@ -46,7 +46,7 @@ char
 		memmove(dest, src, len);
 		if (len < n)
 		{
-			bzero_x(s1 + len, n - len);
+			bzero_x(dest + len, n - len);
 		}
 	}
 	return dest;
