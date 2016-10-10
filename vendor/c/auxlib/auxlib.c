@@ -53,17 +53,17 @@ char
 }
 
 char
-*strnmove(char* s1, const char* s2, size_t n)
+*strnmove(char *dest, const char *src, size_t n)
 {
 	if (n > 0)
 	{
-        	size_t m = strlen(s2);
-        	if (m + 1 > n)
+		size_t len = strlen(src);
+		if (len + 1 > n)
 		{
-            		m = n - 1;
-        	}
-        	memmove(s1, s2, m);
-        	s1[m] = 0;
-    	}
-    	return s1;
+			len = n - 1;
+		}
+		memmove(dest, src, len);
+		dest[len] = 0;
+	}
+	return dest;
 }
