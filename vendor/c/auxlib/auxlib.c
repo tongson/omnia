@@ -16,23 +16,6 @@ bzero_x(void *ptr, size_t len)
 	__asm__ __volatile__("" : : "r"(ptr) : "memory");
 }
 
-int
-luaX_pusherror(lua_State *L, const char *error)
-{
-        lua_pushnil(L);
-        lua_pushstring(L, error);
-        return 2;
-}
-
-int
-luaX_pusherrno(lua_State *L, char *error)
-{
-        lua_pushnil(L);
-        lua_pushfstring(L, LUA_QS" : "LUA_QS, error, strerror(errno));
-        lua_pushinteger(L, errno);
-        return 3;
-}
-
 char
 *strncpy_x(char *dest, const char *src, size_t n)
 {
@@ -69,4 +52,21 @@ char
 		}
 	}
 	return dest;
+}
+
+int
+luaX_pusherror(lua_State *L, const char *error)
+{
+        lua_pushnil(L);
+        lua_pushstring(L, error);
+        return 2;
+}
+
+int
+luaX_pusherrno(lua_State *L, char *error)
+{
+        lua_pushnil(L);
+        lua_pushfstring(L, LUA_QS" : "LUA_QS, error, strerror(errno));
+        lua_pushinteger(L, errno);
+        return 3;
 }
