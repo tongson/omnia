@@ -2,6 +2,10 @@ ifeq ($(filter linenoise,$(VENDOR_C)),)
   include vendor/c/linenoise/Makefile
 endif
 
+ifeq ($(filter lpeg,$(VENDOR_C)),)
+  include vendor/c/lpeg/Makefile
+endif
+
 MOONC_T= bin/moonc
 MOOR_T= bin/moor
 MOONPICK_T= bin/moonpick

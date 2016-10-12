@@ -49,10 +49,6 @@ ifneq ($(VENDOR_C),)
   include $(eval _d:=vendor/c/$(VENDOR_C) $(_d)) $(call _vget,$(VENDOR_C))
 endif
 
-ifeq ($(filter lpeg,$(VENDOR_C)),)
-  include vendor/c/lpeg/Makefile
-endif
-
 ifneq ($(SRC_MOON),)
   include aux/moonscript.mk
 endif
