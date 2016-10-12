@@ -1,7 +1,7 @@
 Omnia
 =====
 
-Compile Lua and Moonscript source code into standalone executables. This makes it easy to use them for general purpose scripting.
+Compile Lua and MoonScript source code into standalone executables. This makes it easy to use them for general purpose scripting.
 
 Ideally you would do development with Lua and Luarocks then deploy to production using Omnia.
 
@@ -39,7 +39,7 @@ During developlement or debugging run `make DEBUG=1`
 
 2. The executable will be located under the `bin/` directory
 
-#### Adding plain Lua and Moonscript modules. (NOTE: VENDOR and SRC are interchangeable.)
+#### Adding plain Lua and MoonScript modules. (NOTE: VENDOR and SRC are interchangeable.)
 
 Adding plain modules is trivial. $(NAME) is the name of the module passed to `VENDOR`.
 
@@ -69,11 +69,11 @@ Lua does not have facilities to traverse directories and I'd like to avoid shell
 
 The included Lua script might be too simplistic to demonstrate Omnia. For a more complicated application check my 'fork' of [LDoc](https://github.com/tongson/LDoc)
 
-#### Moonscript support
+#### MoonScript support
 
-Just treat Moonscript source the same as Lua source. The Make routines will handle the compilation of Moonscript sources and link the appropriate compiled Lua source to the final executable.
+Just treat MoonScript source the same as Lua source. The Make routines will handle the compilation of MoonScript sources and link the appropriate compiled Lua source to the final executable.
 
-The Moonscript standard library is included but you have to add `moon` to the `VENDOR` line in the Makefile.
+The MoonScript standard library is included but you have to add `moon` to the `VENDOR` line in the Makefile.
 
 A copy of the MoonScript REPL `moor` is also included. To compile, run `make bin/moor`.
 
@@ -83,7 +83,7 @@ Project                                                     | Version         | 
 ------------------------------------------------------------|-----------------|---------
 [Lua](http://www.lua.org)[1]                                | 5.3.3           | MIT
 [luastatic](https://github.com/ers35/luastatic)             | 0.0.4           | CC0
-[Moonscript](http://moonscript.org)                         | 0.5.0           | MIT
+[MoonScript](http://moonscript.org)                         | 0.5.0           | MIT
 [moor](https://github.com/Nymphium/moor)                    | 9329bd4         | MIT
 [linenoise](http://github.com/antirez/linenoise)            | c894b9e         | BSD 2C
 [moonpick](https://github.com/nilnor/moonpick)              | 2e390b3         | MIT
