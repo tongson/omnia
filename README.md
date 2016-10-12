@@ -85,6 +85,8 @@ Project                                                     | Version         | 
 [luastatic](https://github.com/ers35/luastatic)             | 0.0.4           | CC0
 [Moonscript](http://moonscript.org)                         | 0.5.0           | MIT
 [mooni](https://luarocks.org/modules/steved/mooni)          | 0.5             | MIT
+[moor](https://github.com/Nymphium/moor)                    | 9329bd4         | MIT
+[linenoise](http://github.com/antirez/linenoise)            | c894b9e         | BSD 2C
 
 #### Available modules (Feel free to open a Github issue if you want help with adding a new Lua module.)
 
@@ -97,6 +99,9 @@ Module                                                          | Version       
 [luafilesystem](https://github.com/keplerproject/luafilesystem) | 1.6.3           | MIT
 [md5](http://www.rjek.com/luahash-0.00.tar.bz2)                 | 0.00            | PD
 [cwtest](https://github.com/catwell/cwtest)                     | b027449         | MIT
+[lua-linenoise](https://github.com/hoelzro/lua-linenoise)       | f30fa48         | MIT
+[inspect.lua](https://github.com/kikito/inspect.lua)            | 3.1.0           | MIT
+
 
 [1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.3)<br/>
 [2] posix.deprecated and posix.compat removed<br/>
