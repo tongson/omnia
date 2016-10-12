@@ -1,8 +1,12 @@
+ifeq ($(filter linenoise,$(VENDOR_C)),)
+  include vendor/c/linenoise/Makefile
+endif
+
 MOONC_T= bin/moonc
-MOONI_T= bin/mooni
+MOOR_T= bin/moor
 MOONPICK_T= bin/moonpick
 MOONC= bin/moonc.lua
-MOONI= bin/mooni.lua
+MOOR= bin/moor.lua
 MOONPICK= bin/moonpick.lua
 MOONSCRIPT= moonscript/*.lua moonscript/parse/*.lua moonscript/compile/*.lua moonscript/transform/*.lua
 CLEAN+= clean_moonscript
@@ -15,13 +19,15 @@ $(MOONC_T): $(HOST_LUA_A) $(LUA_T) $(host_lpegA)
 	$(RM) $(RMFLAGS) cimicida.lua $(MOONC).c
 	$(RMRF) moonscript
 
-$(MOONI_T): $(MOONC_T)
+$(MOOR_T): $(MOONC_T) vendor/lua/moor.lua bin/moor.lua vendor/lua/moor/opts.lua vendor/lua/moor/utils.lua $(linenoiseA)
 	$(ECHOT) CC $@
-	$(CPR) vendor/lua/moonscript vendor/lua/cimicida.lua .
-	CC=$(HOST_CC) NM=$(NM) $(LUA_T) $(LUASTATIC) $(MOONI) $(MOONSCRIPT) $(host_lpegA) \
+	$(CPR) vendor/lua/moonscript vendor/lua/moor .
+	$(CP) vendor/lua/moor.lua vendor/lua/inspect.lua .
+	CC=$(HOST_CC) NM=$(NM) $(LUA_T) $(LUASTATIC) $(MOOR) moor.lua moor/*.lua inspect.lua $(MOONSCRIPT) \
+	   $(linenoiseA) $(host_lpegA) \
 		 $(HOST_LUA_A) $(FLAGS) $(LDFLAGS) 2>&1 >/dev/null
-	$(RM) $(RMFLAGS) cimicida.lua $(MOONI).c
-	$(RMRF) moonscript
+	$(RM) $(RMFLAGS) moor.lua inspect.lua $(MOOR).c
+	$(RMRF) moor moonscript
 
 $(MOONPICK_T): $(HOST_LUA_A) $(LUA_T) $(host_lpegA)
 	$(ECHOT) CC $@
@@ -37,4 +43,5 @@ $(MOONPICK_T): $(HOST_LUA_A) $(LUA_T) $(host_lpegA)
 	$(MOONC_T) $*.moon $@
 
 clean_moonscript:
-	$(RM) $(RMFLAGS) $(COMPILED) $(MOONC_T) $(MOONI_T) $(MOONPICK_T) $(host_lpegA) cimicida.lua
+	$(RM) $(RMFLAGS) $(COMPILED) $(MOONC_T) $(MOONI_T) $(MOONPICK_T) $(host_lpegA) cimicida.lua \
+		$(linenoiseA) vendor/lua/moor/*.lua vendor/lua/moor.lua bin/moor
