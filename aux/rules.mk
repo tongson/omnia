@@ -46,6 +46,7 @@ clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
 	$(RM) $(RMFLAGS) $(MAIN).c $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(EXE_T) $(HOST_LUA_A) $(HOST_LUA_O) $(COMPILED) $(MODULES)
 	$(RMRF) $(SRC_DIRS) $(VENDOR_DIRS)
+	$(RMRF) *.a
 	$(ECHO) "Done!"
 
 new:
