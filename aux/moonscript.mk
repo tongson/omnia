@@ -25,4 +25,4 @@ $(MOONI_T): $(MOONC_T)
 	$(MOONC_T) $*.moon $@
 
 clean_moonscript:
-	$(RM) $(RMFLAGS) $(COMPILED) $(MOONC_T) $(MOONI_T) $(host_lpegA)
+	$(RM) $(RMFLAGS) $(COMPILED) $(MOONC_T) $(MOONI_T) $(host_lpegA) cimicida.lua
