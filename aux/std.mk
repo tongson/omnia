@@ -12,8 +12,8 @@ LUACFLAGS?= -s
 ECHO:= @printf '%s\n'
 ECHON:= @printf '%s'
 ECHOT:= @printf ' %s\t%s\n'
-CP:= cp -n
-CPR:= cp -nR
+CP:= cp
+CPR:= cp -R
 STRIPFLAGS:= --strip-all
 RM:= rm
 RMFLAGS:= -f
@@ -41,20 +41,20 @@ BUILD_DEPS= has-$(TARGET_STCC) has-$(TARGET_RANLIB) has-$(TARGET_NM) has-$(TARGE
 
 all: $(EXE_T)
 
-ifeq ($(filter lpeg,$(VENDOR_C)),)
-  include vendor/c/lpeg/Makefile
-endif
-
-ifneq ($(SRC_MOON),)
-  include aux/moonscript.mk
-endif
-
 ifneq ($(SRC_C),)
   include $(eval _d:=src/c/$(SRC_C) $(_d)) $(call _lget,$(SRC_C))
 endif
 
 ifneq ($(VENDOR_C),)
   include $(eval _d:=vendor/c/$(VENDOR_C) $(_d)) $(call _vget,$(VENDOR_C))
+endif
+
+ifeq ($(filter lpeg,$(VENDOR_C)),)
+  include vendor/c/lpeg/Makefile
+endif
+
+ifneq ($(SRC_MOON),)
+  include aux/moonscript.mk
 endif
 
 print-%: ; @echo $*=$($*)
