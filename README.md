@@ -75,7 +75,7 @@ Just treat Moonscript source the same as Lua source. The Make routines will hand
 
 The Moonscript standard library is included but you have to add `moon` to the `VENDOR` line in the Makefile.
 
-A copy of `mooni` is also included. To compile, run `make bin/mooni`.
+A copy of the MoonScript REPL `moor` is also included. To compile, run `make bin/moor`.
 
 #### Included projects
 
@@ -84,7 +84,6 @@ Project                                                     | Version         | 
 [Lua](http://www.lua.org)[1]                                | 5.3.3           | MIT
 [luastatic](https://github.com/ers35/luastatic)             | 0.0.4           | CC0
 [Moonscript](http://moonscript.org)                         | 0.5.0           | MIT
-[mooni](https://luarocks.org/modules/steved/mooni)          | 0.5             | MIT
 [moor](https://github.com/Nymphium/moor)                    | 9329bd4         | MIT
 [linenoise](http://github.com/antirez/linenoise)            | c894b9e         | BSD 2C
 [moonpick](https://github.com/nilnor/moonpick)              | 2e390b3         | MIT
