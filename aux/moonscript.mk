@@ -1,4 +1,4 @@
-ifeq ($(filter linenoise,$(VENDOR_C)),)
+ifeq ($(filter bin/moor,$(MAKECMDGOALS)),bin/moor)
   include vendor/c/linenoise/Makefile
 endif
 
@@ -48,4 +48,4 @@ $(MOONPICK_T): $(HOST_LUA_A) $(LUA_T) $(host_lpegA)
 
 clean_moonscript:
 	$(RM) $(RMFLAGS) $(COMPILED) $(MOONC_T) $(MOONI_T) $(MOONPICK_T) $(host_lpegA) cimicida.lua \
-		$(linenoiseA) vendor/lua/moor/*.lua vendor/lua/moor.lua bin/moor
+	  vendor/c/linenoise/*.o vendor/lua/moor/*.lua vendor/lua/moor.lua bin/moor
