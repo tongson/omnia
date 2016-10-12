@@ -1,7 +1,6 @@
 lpeg_P= vendor/c/lpeg
 lpegA= lpeg.a
 host_lpegA= host_lpeg.a
-host_lpegOBJS=
 lpegOBJS= vendor/c/lpeg/lpcap.o vendor/c/lpeg/lpcode.o vendor/c/lpeg/lptree.o vendor/c/lpeg/lpvm.o
 host_lpegOBJS= $(lpeg_P)/host_lpcap.o $(lpeg_P)/host_lpcode.o $(lpeg_P)/host_lptree.o $(lpeg_P)/host_lpvm.o
 ifeq ($(DEBUG), 1)
