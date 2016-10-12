@@ -87,6 +87,7 @@ Project                                                     | Version         | 
 [mooni](https://luarocks.org/modules/steved/mooni)          | 0.5             | MIT
 [moor](https://github.com/Nymphium/moor)                    | 9329bd4         | MIT
 [linenoise](http://github.com/antirez/linenoise)            | c894b9e         | BSD 2C
+[moonpick](https://github.com/nilnor/moonpick)              | 2e390b3         | MIT
 
 #### Available modules (Feel free to open a Github issue if you want help with adding a new Lua module.)
 
