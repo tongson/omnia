@@ -30,10 +30,10 @@ $(MODULES):
 	for f in $(SRC); do $(CP) $(SRC_P)/$$f.lua .; done
 
 $(SRC_LUA):
-	for d in $(SRC_DIRS); do $(CPR) $(SRC_P)/$$d .; done
+	for d in $(SRC_DIRS); do [ -d $$d ] || $(CPR) $(SRC_P)/$$d .; done
 
 $(VENDOR_LUA):
-	for d in $(VENDOR_DIRS); do $(CPR) $(VENDOR_P)/$$d .; done
+	for d in $(VENDOR_DIRS); do [ -d $$d ] || $(CPR) $(VENDOR_P)/$$d .; done
 
 $(EXE_T): $(BUILD_DEPS) $(LUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(MODULES) $(SRC_LUA) $(VENDOR_LUA)
 	$(ECHOT) LN $(EXE_T)
