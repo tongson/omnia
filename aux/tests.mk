@@ -31,8 +31,8 @@ ifneq (,$(findstring openwrt,$(TARGET_STCC)))
 endif
 
 # Append -static-libgcc to CFLAGS if GCC is detected.
-IS_GCC:= $(shell $(CONFIGURE_P)/test-cc.sh $(TARGET_STCC))
-ifeq ($(IS_GCC), GCC)
+IS_CC:= $(shell $(CONFIGURE_P)/test-cc.sh $(TARGET_STCC))
+ifeq ($(IS_CC), GCC)
   TARGET_CFLAGS+= -static-libgcc
 endif
 
@@ -120,7 +120,11 @@ ifeq ($(STATIC), 1)
   PIE:= $(NULSTRING)
   TARGET_LDFLAGS+= -static
 else
-  PIE:= -fPIE -pie
+  ifneq ($(IS_CC), CLANG)
+    PIE:= -fPIE -pie
+  else
+    PIE:= -fPIE -Wl,-pie
+  endif
 endif
 
 ifeq ($(ASAN), 1)
