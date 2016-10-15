@@ -259,7 +259,7 @@ setproctitle_impl(const char *fmt, ...)
 }
 
 static int
-set_name(lua_State *L)
+string(lua_State *L)
 {
         const char *name = luaL_checkstring(L, 1);
         /* Only allowed up to SPT_MAXTITLE bytes*/
@@ -278,7 +278,7 @@ set_name(lua_State *L)
 static const
 luaL_Reg setproctitle_funcs[] =
 {
-	{"set_name", set_name},
+	{"string", string},
 	{NULL, NULL}
 };
 
