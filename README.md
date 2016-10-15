@@ -101,6 +101,8 @@ Module                                                          | Version       
 [cwtest](https://github.com/catwell/cwtest)                     | b027449         | MIT
 [lua-linenoise](https://github.com/hoelzro/lua-linenoise)       | f30fa48         | MIT
 [inspect.lua](https://github.com/kikito/inspect.lua)            | 3.1.0           | MIT
+[cimicida](https://github.com/Configi/configi)                  | c3919b6         | MIT
+[lib](https://github.com/Configi/configi)                       | 03a197b         | MIT
 
 
 [1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.3)<br/>
