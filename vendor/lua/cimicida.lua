@@ -1,18 +1,59 @@
 --- Additional functions. Can also be called from the `lib` module.
 -- @module lib
 local io, string, os, table = io, string, os, table
-local type, pcall, load, setmetatable, ipairs, next = type, pcall, load, setmetatable, ipairs, next
-local has_px, px = pcall(require, "px")
-if has_px then
-end
+local type, pcall, load, setmetatable, ipairs, next, pairs, error, require =
+      type, pcall, load, setmetatable, ipairs, next, pairs, error, require
 local ENV = {}
 _ENV = ENV
+
+local fix_return_values = function(ok, ...)
+    if ok then
+        return ...
+    else
+        return nil, (...)
+    end
+end
+
+--- Receives a function that might raise exceptions and returns a function that follows the Lua return value convention.
+-- From http://lua-users.org/wiki/FinalizedExceptions
+-- @tparam function function to wrap
+-- @treturn function a function that follows the Lua return value convention
+local pcall_f = function(f)
+    return function(...)
+        return fix_return_values(pcall(f, ...))
+    end
+end
+
+--- Returns a function similar to assert but does not mess with the error message and takes an optional finalizer function.
+-- From http://lua-users.org/wiki/FinalizedExceptions
+-- @tparam function finalizer function
+-- @treturn function wrapped function
+local try_f = function(finalizer)
+    return function(ok, ...)
+        if ok then
+            return ok, ...
+        else
+            if finalizer then
+                finalizer()
+            end
+            error((...), 0)
+        end
+   end
+end
+
+--- ADA-style case insensitive calls to modules with lower case functions.
+-- @tparam string module name
+-- @treturn table module functions
+local xrequire = function(m)
+    local module = require(m)
+    return setmetatable({}, { __index = function(_, func) return module[string.lower(func)] end })
+end
 
 --- Output formatted string to the current output.
 -- @tparam string str C-like string
 -- @tparam varargs ... Variable number of arguments to interpolate str
 local printf = function (str, ...)
-  io.write(string.format(str, ...))
+    io.write(string.format(str, ...))
 end
 
 --- Output formatted string to a specified output.
@@ -20,26 +61,26 @@ end
 -- @tparam string str C-like string
 -- @tparam varargs ... Variable number of arguments to interpolate str
 local fprintf = function (fd, str, ...)
-  local o = io.output()
-  io.output(fd)
-  local ret, err = printf(str, ...)
-  io.output(o)
-  return ret, err
+    local o = io.output()
+    io.output(fd)
+    local ret, err = printf(str, ...)
+    io.output(o)
+    return ret, err
 end
 
 --- Output formatted string to STDERR.
 -- @tparam string str C-like string
 -- @tparam varargs ... Variable number of arguments to interpolate str
 local warn = function (str, ...)
-  fprintf(io.stderr, str, ...)
+    fprintf(io.stderr, str, ...)
 end
 
 --- Output formatted string to STDERR and return 1 as the exit status.
 -- @tparam string str C-like string
 -- @tparam varargs ... Variable number of arguments to interpolate str
 local errorf = function (str, ...)
-  warn(str, ...)
-  os.exit(1)
+    warn(str, ...)
+    os.exit(1)
 end
 
 --- Call cimicida.errorf if the first argument is false (i.e. nil or false).
@@ -47,11 +88,11 @@ end
 -- @tparam string str C-like string
 -- @tparam varargs ... Variable number of arguments to interpolate str
 local assertf = function (v, str, ...)
-  if v then
-    return true
-  else
-    errorf(str, ...)
-  end
+    if v then
+        return true
+    else
+        errorf(str, ...)
+    end
 end
 
 --- Append a line break and string to an input string.
@@ -59,26 +100,26 @@ end
 -- @tparam string a string to append to str
 -- @treturn string new string
 local append = function (str, a)
-  return string.format("%s\n%s", str, a)
+    return string.format("%s\n%s", str, a)
 end
 
 --- Time in the strftime(3) format %H:%M.
 -- @treturn string the time as a string
 local time_hm = function ()
-  return os.date("%H:%M")
+    return os.date("%H:%M")
 end
 
 
 --- Date in the strftime(3) format %Y-%m-%d.
 -- @treturn string the date as a string
 local date_ymd = function ()
-  return os.date("%Y-%m-%d")
+    return os.date("%Y-%m-%d")
 end
 
 --- Timestamp in the strftime(3) format %Y-%m-%d %H:%M:%S %Z%z.
 -- @treturn string the timestamp as a string
 local timestamp = function ()
-  return os.date("%Y-%m-%d %H:%M:%S %Z%z")
+    return os.date("%Y-%m-%d %H:%M:%S %Z%z")
 end
 
 --- Check if a table has an specified string.
@@ -87,22 +128,22 @@ end
 -- @tparam bool plain if true, turns off pattern matching facilities
 -- @treturn bool a boolean value, true if v is found, nil otherwise
 local find_string = function (tbl, str, plain)
-  for _, tval in next, tbl do
-    tval = string.gsub(tval, '[%c]', '')
-    if string.find(tval, str, 1, plain) then return true end
-  end
+    for _, tval in next, tbl do
+        tval = string.gsub(tval, '[%c]', '')
+        if string.find(tval, str, 1, plain) then return true end
+    end
 end
 
---- Convert an array to a record.
--- Array values are converted into field names.
+--- Convert a sequence into a dictionary.
+-- Sequence values are converted into field names.
 -- @warning Does not check if input table is a sequence.
 -- @tparam table tbl the properly sequenced table to convert
 -- @param def default value for each field in the record. Should not be nil
 -- @treturn table the converted table
-local arr_to_rec = function (tbl, def)
-  local t = {}
-  for n = 1, #tbl do t[tbl[n]] = def end
-  return t
+local seq_to_dict = function (tbl, def)
+    local t = {}
+    for n = 1, #tbl do t[tbl[n]] = def end
+    return t
 end
 
 --- Convert string to table.
@@ -110,60 +151,53 @@ end
 -- @tparam string str string to convert
 -- @treturn table a new table
 local ln_to_tbl = function (str)
-  local tbl = {}
-  if not str then
+    local tbl = {}
+    if not str then
+        return tbl
+    end
+    for ln in string.gmatch(str, "([^\n]*)\n") do
+        tbl[#tbl + 1] = ln
+    end
     return tbl
-  end
-  for ln in string.gmatch(str, "([^\n]*)\n") do
-    tbl[#tbl + 1] = ln
-  end
-  return tbl
 end
 
 --- Split alphanumeric matches of a string into table values.
 -- @tparam string str string to convert
 -- @treturn table a new
 local word_to_tbl = function (str)
-  local t = {}
-  for s in string.gmatch(str, "%w+") do
-    t[#t + 1] = s
-  end
-  return t
+    local t = {}
+    for s in string.gmatch(str, "%w+") do
+        t[#t + 1] = s
+    end
+    return t
 end
 
 --- Split non-space character matches of a string into table values.
 -- @tparam string str string to convert
 -- @treturn table a new table
 local str_to_tbl = function (str)
-  local t = {}
-  for s in string.gmatch(str, "%S+") do
-    t[#t + 1] = s
-  end
-  return t
+    local t = {}
+    for s in string.gmatch(str, "%S+") do
+        t[#t + 1] = s
+    end
+    return t
 end
 
---- Escape a string for pattern usage.
--- From lua-nucleo.
+--- Escape magic characters of the string so that it can be used as a pattern to string matching functions.
+-- Escapes embedded zeroes as the %z pattern.<br/>
+-- From Luapower/glue.
 -- @tparam string str string to escape
--- @treturn string a new string
-local escape_pattern = function (str)
-  local matches =
-  {
-    ["^"] = "%^",
-    ["$"] = "%$",
-    ["("] = "%(",
-    [")"] = "%)",
-    ["%"] = "%%",
-    ["."] = "%.",
-    ["["] = "%[",
-    ["]"] = "%]",
-    ["*"] = "%*",
-    ["+"] = "%+",
-    ["-"] = "%-",
-    ["?"] = "%?",
-    ["\0"] = "%z"
-  }
-  return string.gsub(str, ".", matches)
+-- @tparam string mode optional mode argument (*i) if passed, also escapes alphabetical characters to that it matches both lowercase and uppercase
+-- @treturn string a new escaped string
+local escape_pattern = function(str, mode)
+    local format_ci_pat = function(c)
+        return string.format('[%s%s]', c:lower(), c:upper())
+    end
+    str = str:gsub('%%','%%%%'):gsub('%z','%%z'):gsub('([%^%$%(%)%.%[%]%*%+%-%?])', '%%%1')
+    if mode == '*i' then
+        str = str:gsub('[%a]', format_ci_pat)
+    end
+    return str
 end
 
 --- Filter table values.
@@ -173,23 +207,23 @@ end
 -- @tparam bool plain set to true if true, turns of pattern matching facilities
 -- @treturn table modified table
 local filter_tbl_value = function (tbl, patt, plain)
-  plain = plain or nil
-  local s, c = #tbl, 0
-  for n = 1, s do
-    if string.find(tbl[n], patt, 1, plain) then
-      tbl[n] = nil
+    plain = plain or nil
+    local s, c = #tbl, 0
+    for n = 1, s do
+        if string.find(tbl[n], patt, 1, plain) then
+            tbl[n] = nil
+        end
     end
-  end
-  for n = 1, s do
-    if tbl[n] ~= nil then
-      c = c + 1
-      tbl[c] = tbl[n]
+    for n = 1, s do
+        if tbl[n] ~= nil then
+            c = c + 1
+            tbl[c] = tbl[n]
+        end
     end
-  end
-  for n = c + 1, s do
-    tbl[n] = nil
-  end
-  return tbl
+    for n = c + 1, s do
+        tbl[n] = nil
+    end
+    return tbl
 end
 
 --- Convert file into a table.
@@ -197,16 +231,16 @@ end
 -- @tparam string file file to convert
 -- @treturn table a new table
 local file_to_tbl = function (file)
-  local _, fd = pcall(io.open, file, "re")
-  if fd then
-    io.flush(fd)
-    local tbl = {}
-    for ln in fd:lines("*L") do
-      tbl[#tbl + 1] = ln
+    local _, fd = pcall(io.open, file, "re")
+    if fd then
+        io.flush(fd)
+        local tbl = {}
+        for ln in fd:lines("*L") do
+            tbl[#tbl + 1] = ln
+        end
+        io.close(fd)
+        return tbl
     end
-    io.close(fd)
-    return tbl
-  end
 end
 
 --- Find a string in a table value.
@@ -216,14 +250,14 @@ end
 -- @tparam bool plain set to true if true, turns of pattern matching facilities
 -- @treturn number the matching index if string is found, nil otherwise
 local find_in_tbl = function (tbl, str, plain)
-  plain = plain or nil
-  local ok, found
-  for n = 1, #tbl do
-    ok, found = pcall(Lua.find, tbl[n], str, 1, plain)
-    if ok and found then
-      return n
+    plain = plain or nil
+    local ok, found
+    for n = 1, #tbl do
+        ok, found = pcall(Lua.find, tbl[n], str, 1, plain)
+        if ok and found then
+            return n
+        end
     end
-  end
 end
 
 --- Do a shallow copy of a table.
@@ -231,15 +265,15 @@ end
 -- @tparam table tbl table to be copied
 -- @treturn table a new table
 local shallow_cp = function (tbl)
-  local copy = {}
-  for f, v in next, tbl do
-    if type(v) == "table" then
-      copy[f] = {} -- first level only
-    else
-      copy[f] = v
+    local copy = {}
+    for f, v in next, tbl do
+        if type(v) == "table" then
+            copy[f] = {} -- first level only
+        else
+            copy[f] = v
+        end
     end
-  end
-  return copy
+    return copy
 end
 
 --- Split a path into its immediate location and file/directory components.
@@ -247,17 +281,17 @@ end
 -- @treturn string location
 -- @treturn string file/directory
 local split_path = function (path)
-  local l = string.len(path)
-  local c = string.sub(path, l, l)
-  while l > 0 and c ~= "/" do
-    l = l - 1
-    c = string.sub(path, l, l)
-  end
-  if l == 0 then
-    return '', path
-  else
-    return string.sub(path, 1, l - 1), string.sub(path, l + 1)
-  end
+    local l = string.len(path)
+    local c = string.sub(path, l, l)
+    while l > 0 and c ~= "/" do
+        l = l - 1
+        c = string.sub(path, l, l)
+    end
+    if l == 0 then
+        return '', path
+    else
+        return string.sub(path, 1, l - 1), string.sub(path, l + 1)
+    end
 end
 
 
@@ -265,24 +299,38 @@ end
 -- @tparam string file path to the file
 -- @return true if path is a file, nil otherwise
 local test_open = function (file)
-  local fd = io.open(file, "rb")
-  if fd then
-    io.close(fd)
-    return true
-  end
+    local fd = io.open(file, "rb")
+    if fd then
+        io.close(fd)
+        return true
+    end
 end
 
 --- Read a file/path.
 -- @tparam string file path to the file
 -- @treturn string the contents of the file, nil if the file cannot be read or opened
 local fopen = function (file)
-  local str
-  for s in io.lines(file, 2^12) do
-    str = string.format("%s%s", str or "", s)
-  end
-  if string.len(str) ~= 0 then
-    return str
-  end
+    local str
+    for s in io.lines(file, 2^12) do
+        str = string.format("%s%s", str or "", s)
+    end
+    if string.len(str) ~= 0 then
+        return str
+    end
+end
+
+--- Return the first string.match result from a given file/path.
+-- @tparam string file path to the file
+-- @tparam string pattern string or pattern to look for
+-- @treturn string results of string.match, nil otherwise
+local match_from_file = function(file, pattern)
+    local str
+    for s in io.lines(file, 2^12) do
+        str = string.match(s, pattern)
+        if str then
+            return str
+        end
+    end
 end
 
 --- Write a string to a file/path.
@@ -291,19 +339,19 @@ end
 -- @tparam string mode io.open mode
 -- @return true if the write succeeded, nil and the error message otherwise
 local fwrite = function (path, str, mode)
-  local setvbuf, write = io.setvbuf, io.write
-  mode = mode or "we+"
-  local fd = io.open(path, mode)
-  if fd then
-    fd:setvbuf("no")
-    local _, err = fd:write(str)
-    io.flush(fd)
-    io.close(fd)
-    if err then
-      return nil, err
+    local setvbuf, write = io.setvbuf, io.write
+    mode = mode or "we+"
+    local fd = io.open(path, mode)
+    if fd then
+        fd:setvbuf("no")
+        local _, err = fd:write(str)
+        io.flush(fd)
+        io.close(fd)
+        if err then
+            return nil, err
+        end
+        return true
     end
-    return true
-  end
 end
 
 --- Get line.
@@ -312,12 +360,12 @@ end
 -- @tparam string file
 -- @treturn string the line
 local get_ln = function (ln, file)
-  local str = fopen(file)
-  local i = 0
-  for line in string.gmatch(str, "([^\n]*)\n") do
-    i = i + 1
-    if i == ln then return line end
-  end
+    local str = fopen(file)
+    local i = 0
+    for line in string.gmatch(str, "([^\n]*)\n") do
+        i = i + 1
+        if i == ln then return line end
+    end
 end
 
 --- Simple string interpolation.
@@ -330,26 +378,26 @@ end
 -- @tparam table tbl table (record) to deduce values from
 -- @treturn string processed string
 local sub = function (str, tbl)
-  local t, _ = {}, nil
-  _, str = pcall(string.gsub, str, "{{[%s]-([%g]+)[%s]-}}",
-    function (s)
-      t.type = type
-      local code = [[
-        V=%s
-        if type(V) == "function" then
-          V=V()
-        end
-      ]]
-      local lua = string.format(code, s)
-      local chunk, err = load(lua, lua, "t", setmetatable(t, {__index=tbl}))
-      if chunk then
-        chunk()
-        return t.V
-      else
-        return s
-      end
-    end) -- pcall
-  return str
+    local t, _ = {}, nil
+    _, str = pcall(string.gsub, str, "{{[%s]-([%g]+)[%s]-}}",
+        function (s)
+            t.type = type
+            local code = [[
+                V=%s
+                if type(V) == "function" then
+                    V=V()
+                end
+            ]]
+            local lua = string.format(code, s)
+            local chunk, err = load(lua, lua, "t", setmetatable(t, {__index=tbl}))
+            if chunk then
+                chunk()
+                return t.V
+            else
+                return s
+            end
+        end) -- pcall
+    return str
 end
 
 --- Generate a string based on the values returned by os.execute or px.exec.
@@ -358,38 +406,38 @@ end
 -- @tparam number code exit code
 -- @treturn string a formatted string
 local exit_string = function (proc, status, code)
-  if status == "exit" or status == "exited" then
-    return string.format("%s: Exited with code %s", proc, code)
-  end
-  if status == "signal" or status == "killed" then
-    return string.format("%s: Caught signal %s", proc, code)
-  end
+    if status == "exit" or status == "exited" then
+        return string.format("%s: Exited with code %s", proc, code)
+    end
+    if status == "signal" or status == "killed" then
+        return string.format("%s: Caught signal %s", proc, code)
+    end
 end
 
 --- Convert the string "yes" or "true" to boolean true.
 -- @tparam string s string to evaluate
 -- @treturn bool the boolean true if the string matches, nil otherwise
 local truthy = function (s)
-  if s == "yes" or
-     s == "YES" or
-     s == "true" or
-     s == "True" or
-     s == "TRUE" then
-     return true
-  end
+    if s == "yes" or
+         s == "YES" or
+         s == "true" or
+         s == "True" or
+         s == "TRUE" then
+         return true
+    end
 end
 
 --- Convert the string "no" or "false" to boolean false.
 -- @tparam string s string to evaluate
 -- @treturn bool the boolean true if the string matches, nil otherwise
 local falsy = function (s)
-  if s == "no" or
-     s == "NO" or
-     s == "false" or
-     s == "False" or
-     s == "FALSE" then
-     return true
-  end
+    if s == "no" or
+         s == "NO" or
+         s == "false" or
+         s == "False" or
+         s == "FALSE" then
+         return true
+    end
 end
 
 --- Wrap io.popen also known as popen(3).
@@ -407,32 +455,33 @@ end
 -- @treturn string the output as a string if the command exits with a non-zero status, nil otherwise
 -- @treturn string a status output from cimicida.exit_string as a string
 local popen = function (str, cwd, _ignore_error, _return_code)
-  local result = {}
-  local header = [[  set -ef
-  export LC_ALL=C
-  exec 0>&- 2>&1
-  ]]
-  if cwd then
-    str = string.format("%scd %s\n%s", header, cwd, str)
-  else
-    str = string.format("%s%s", header, str)
-  end
-  local pipe = io.popen(str, "re")
-  io.flush(pipe)
-  local tbl = {}
-  for ln in pipe:lines() do
-    tbl[#tbl + 1] = ln
-  end
-  local _
-  _, result.status, result.code = io.close(pipe)
-  result.bin = "io.popen"
-  if _return_code then
-    return result.code, result
-  elseif _ignore_error or result.code == 0 then
-    return tbl, result
-  else
-    return nil, result
-  end
+    local result = {}
+    local header = [[  set -ef
+    export LC_ALL=C
+    export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin
+    exec 0>&- 2>&1
+    ]]
+    if cwd then
+        str = string.format("%scd %s\n%s", header, cwd, str)
+    else
+        str = string.format("%s%s", header, str)
+    end
+    local pipe = io.popen(str, "re")
+    io.flush(pipe)
+    local tbl = {}
+    for ln in pipe:lines() do
+        tbl[#tbl + 1] = ln
+    end
+    local _
+    _, result.status, result.code = io.close(pipe)
+    result.bin = "io.popen"
+    if _return_code then
+        return result.code, result
+    elseif _ignore_error or result.code == 0 then
+        return tbl, result
+    else
+        return nil, result
+    end
 end
 
 --- Wrap io.popen also known as popen(3).
@@ -448,21 +497,21 @@ end
 -- @treturn bool true if the command exits with a non-zero status, nil otherwise
 -- @treturn string a status output from cimicida.exit_string as a string
 local pwrite = function (str, data)
-  local result = {}
-  local write = io.write
-  str = [[  set -ef
-  export LC_ALL=C
-  exec ]] .. str
-  local pipe = io.popen(str, "we")
-  io.flush(pipe)
-  pipe:write(data)
-  local _
-  _, result.status, result.code = io.close(pipe)
-  if result.code == 0 then
-    return true, result
-  else
-    return nil, result
-  end
+    local result = {}
+    local write = io.write
+    str = [[    set -ef
+    export LC_ALL=C
+    exec ]] .. str
+    local pipe = io.popen(str, "we")
+    io.flush(pipe)
+    pipe:write(data)
+    local _
+    _, result.status, result.code = io.close(pipe)
+    if result.code == 0 then
+        return true, result
+    else
+        return nil, result
+    end
 end
 
 --- Wrap os.execute also known as system(3).
@@ -476,20 +525,21 @@ end
 -- @treturn bool true if exit code is equal to zero, nil otherwise
 -- @treturn string a status output from cimicida.exit_string as a string
 local system = function (str)
-  local result = {}
-  local set = [[  set -ef
-  export LC_ALL=C
-  exec 0>&- 2>&- 1>/dev/null
-  exec ]]
-  local redir = [[ 0>&- 2>&- 1>/dev/null ]]
-  local _
-  _, result.status, result.code = os.execute(set .. str .. redir)
-  result.bin = "os.execute"
-  if result.code == 0 then
-    return true, result
-  else
-    return nil, result
-  end
+    local result = {}
+    local set = [[  set -ef
+    export LC_ALL=C
+    export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin
+    exec 0>&- 2>&- 1>/dev/null
+    exec ]]
+    local redir = [[ 0>&- 2>&- 1>/dev/null ]]
+    local _
+    _, result.status, result.code = os.execute(set .. str .. redir)
+    result.bin = "os.execute"
+    if result.code == 0 then
+        return true, result
+    else
+        return nil, result
+    end
 end
 
 --- Wrap os.execute also known as system(3).
@@ -499,36 +549,37 @@ end
 -- @treturn bool true if exit code is equal to zero, nil otherwise
 -- @treturn string a status output from cimicida.exit_string as a string
 local execute = function (str)
-  local result = {}
-  local set = [[  set -ef
-  exec 0>&- 2>&- 1>/dev/null
-  ]]
-  local _
-  _, result.status, result.code = os.execute(set .. str)
-  if result.code == 0 then
-    return true, result
-  else
-    return nil, result
-  end
+    local result = {}
+    local set = [[  set -ef
+    export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin
+    exec 0>&- 2>&- 1>/dev/null
+    ]]
+    local _
+    _, result.status, result.code = os.execute(set .. str)
+    if result.code == 0 then
+        return true, result
+    else
+        return nil, result
+    end
 end
 
 --- Run a shell pipe.
 -- @tparam varargs ... a vararg containing the command pipe. The first argument should be popen or execute
 -- @treturn string the output from cimicida.popen or cimicida.execute, nil if popen or execute was not passed
 local pipeline = function (...)
-  local pipe = {}
-  local cmds = {...}
-  for n = 2, #cmds do
-    pipe[#pipe + 1] = table.concat(cmds[n], " ")
-    if n ~= #cmds then pipe[#pipe + 1] = " | " end
-  end
-  if cmds[1] == "popen" then
-    return popen(table.concat(pipe))
-  elseif cmds[1] == "execute" then
-    return execute(table.concat(pipe))
-  else
-    return
-  end
+    local pipe = {}
+    local cmds = {...}
+    for n = 2, #cmds do
+        pipe[#pipe + 1] = table.concat(cmds[n], " ")
+        if n ~= #cmds then pipe[#pipe + 1] = " | " end
+    end
+    if cmds[1] == "popen" then
+        return popen(table.concat(pipe))
+    elseif cmds[1] == "execute" then
+        return execute(table.concat(pipe))
+    else
+        return
+    end
 end
 
 --- Time a function run.
@@ -537,18 +588,18 @@ end
 -- @return the return value(s) of f(...)
 -- @treturn number the seconds elapsed as a number
 local time = function (f, ...)
-  local t1 = os.time()
-  local fn = {f(...)}
-  return table.unpack(fn), os.diff_time(os.time() , t1)
+    local t1 = os.time()
+    local fn = {f(...)}
+    return table.unpack(fn), os.diff_time(os.time() , t1)
 end
 
 --- Escape quotes ",'.
 -- @tparam string str string to quote
 -- @treturn string quoted string
 local escape_quotes = function (str)
-  str = string.gsub(str, [["]], [[\"]])
-  str = string.gsub(str, [[']], [[\']])
-  return str
+    str = string.gsub(str, [["]], [[\"]])
+    str = string.gsub(str, [[']], [[\']])
+    return str
 end
 
 --- Log to a file.
@@ -557,24 +608,24 @@ end
 -- @tparam string msg string to log (STRING)
 -- @treturn bool a boolean value, true if no errors, nil otherwise
 local flog = function (file, ident, msg)
-  local setvbuf = io.setvbuf
-  local openlog = function (f)
-    local fd = io.open(f, "ae+")
-    if fd then
-      return fd
+    local setvbuf = io.setvbuf
+    local openlog = function (f)
+        local fd = io.open(f, "ae+")
+        if fd then
+            return fd
+        end
     end
-  end
-  local fd = openlog(file)
-  local log = "%s %s: %s\n"
-  local timestamp = os.date("%a %b %d %T")
-  fd:setvbuf("line")
-  local _, err = fprintf(fd, log, timestamp, ident, msg)
-  io.flush(fd)
-  io.close(fd)
-  if err then
-    return nil, err
-  end
-  return true
+    local fd = openlog(file)
+    local log = "%s %s: %s\n"
+    local timestamp = os.date("%a %b %d %T")
+    fd:setvbuf("line")
+    local _, err = fprintf(fd, log, timestamp, ident, msg)
+    io.flush(fd)
+    io.close(fd)
+    if err then
+        return nil, err
+    end
+    return true
 end
 
 --- Insert a value to a table position if the first argument is not nil or not false.
@@ -584,16 +635,16 @@ end
 -- @tparam number pos position index in the table
 -- @param value value to insert (VALUE)
 local insert_if = function (bool, list, pos, value)
-  if bool then
-    if type(value) == "table" then
-      for n, i in ipairs(value) do
-        local p = n - 1
-        table.insert(list, pos + p, i)
-      end
-    else
-      table.insert(list, pos, value)
+    if bool then
+        if type(value) == "table" then
+            for n, i in ipairs(value) do
+                local p = n - 1
+                table.insert(list, pos + p, i)
+            end
+        else
+            table.insert(list, pos, value)
+        end
     end
-  end
 end
 
 --- Return the second argument if the first argument is not nil or not false.
@@ -602,9 +653,9 @@ end
 -- @param value value to return if first argument does not evaluate to nil or false
 -- @return value if first argument does not evaluate to nil or false
 local return_if = function (bool, value)
-  if bool then
-    return (value)
-  end
+    if bool then
+        return (value)
+    end
 end
 
 --- Return the second argument if the first argument is nil or false.
@@ -612,51 +663,101 @@ end
 -- @param value value to return if first argument evaluates to nil or false
 -- @return value if first argument evaluates to nil or false
 local return_if_not = function (bool, value)
-  if bool == false or bool == nil then
-    return value
-  end
+    if bool == false or bool == nil then
+        return value
+    end
+end
+
+--- Set up a table so that missing keys are created automatically as autotables.
+-- From Luapower/glue
+-- @return a new table with automatic keys
+local autotable
+local auto_meta = {
+    __index = function(t, k)
+        t[k] = autotable()
+        return t[k]
+    end
+}
+autotable = function(t)
+    t = t or {}
+    local meta = getmetatable(t)
+    if meta then
+        assert(not meta.__index or meta.__index == auto_meta.__index,
+            '__index already set')
+        meta.__index = auto_meta.__index
+    else
+        setmetatable(t, auto_meta)
+    end
+    return t
+end
+
+--- Count the number of keys in table.
+-- From Luapower/glue.<br/>
+-- @tparam table t table to count keys from
+-- @tparam number maxn only count up to this number of keys
+local count_keys = function(t, maxn)
+    local n = 0
+    if maxn then
+        for _ in pairs(t) do
+            n = n + 1
+            if n >= maxn then break end
+        end
+    else
+        for _ in pairs(t) do
+            n = n + 1
+        end
+    end
+    return n
 end
 
 --- @export
 return {
-  printf = printf,
-  fprintf = fprintf,
-  errorf = errorf,
-  assertf = assertf,
-  warn = warn,
-  append = append,
-  time_hm = time_hm,
-  date_ymd = date_ymd,
-  timestamp = timestamp,
-  find_string = find_string,
-  string_find = find_string,
-  arr_to_rec = arr_to_rec,
-  ln_to_tbl = ln_to_tbl,
-  word_to_tbl = word_to_tbl,
-  str_to_tbl = str_to_tbl,
-  escape_pattern = escape_pattern,
-  filter_tbl_value = filter_tbl_value,
-  file_to_tbl = file_to_tbl,
-  find_in_tbl = find_in_tbl,
-  shallow_cp = shallow_cp,
-  split_path = split_path,
-  test_open = test_open,
-  fopen = fopen,
-  fwrite = fwrite,
-  get_ln = get_ln,
-  sub = sub,
-  exit_string = exit_string,
-  truthy = truthy,
-  falsy = falsy,
-  popen = popen,
-  pwrite = pwrite,
-  system = system,
-  execute = execute,
-  pipeline = pipeline,
-  time = time,
-  escape_quotes = escape_quotes,
-  flog = flog,
-  insert_if = insert_if,
-  return_if = return_if,
-  return_if_not = return_if_not
+    pcall_f = pcall_f, Pcall_F = pcall_f,
+    try_f = try_f, Try_F = try_f,
+    require = xrequire, Require = xrequire,
+    printf = printf, Print = printf,
+    fprintf = fprintf, Fprint = fprintf,
+    errorf = errorf, Error = errorf,
+    assertf = assertf, Assert = assertf,
+    warn = warn, Warn = warn,
+    append = append, Append = append,
+    time_hm = time_hm, Time_HM = time_hm,
+    date_ymd = date_ymd, Date_YMD = date_ymd,
+    timestamp = timestamp, Timestamp = timestamp,
+    find_string = find_string, Find_String = find_string,
+    string_find = find_string,
+    seq_to_dict = seq_to_dict, Seq_To_Dict = seq_to_dict,
+    arr_to_rec = seq_to_dict,
+    ln_to_tbl = ln_to_tbl, Line_To_Table = ln_to_tbl,
+    word_to_tbl = word_to_tbl, Word_To_Table = word_to_tbl,
+    str_to_tbl = str_to_tbl, String_To_Table = str_to_tbl,
+    escape_pattern = escape_pattern, Escape_Pattern = escape_pattern,
+    filter_tbl_value = filter_tbl_value, Filter_Table_Value = filter_tbl_value,
+    file_to_tbl = file_to_tbl, File_To_Table = file_to_tbl,
+    find_in_tbl = find_in_tbl, Find_In_Table = find_in_tbl,
+    shallow_cp = shallow_cp, Shallow_Copy = shallow_cp,
+    split_path = split_path, Split_Path = split_path,
+    test_open = test_open, Test_Open = test_open,
+    fopen = fopen, Fopen = fopen,
+    match_from_file = match_from_file, Match_From_File = match_from_file,
+    fwrite = fwrite, Fwrite = fwrite,
+    get_ln = get_ln, Get_Ln = get_ln,
+    get_line = get_ln, Get_Line = get_ln,
+    sub = sub, Sub = sub,
+    exit_string = exit_string, Exit_String = exit_string,
+    truthy = truthy, Truthy = truthy,
+    falsy = falsy, Falsy = falsy,
+    popen = popen, Popen = popen,
+    pwrite = pwrite, Pwrite = pwrite,
+    system = system, System = system,
+    execute = execute, Execute = execute,
+    pipeline = pipeline, Pipeline = pipeline,
+    time = time, Time = time,
+    escape_quotes = escape_quotes, Escape_Quotes = escape_quotes,
+    flog = flog, Flog = flog,
+    insert_if = insert_if, Insert_If = insert_if,
+    return_if = return_if, Return_If = return_if,
+    return_if_not = return_if_not, Return_If_Not = return_if_not,
+    autotable = autotable, Autotable = autotable,
+    count_keys = count_keys, Count_Keys = count_keys
 }
