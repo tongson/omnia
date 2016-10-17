@@ -27,7 +27,6 @@ TARGET_STRIP= $(CROSS)$(STRIP)
 ifneq (,$(findstring openwrt,$(TARGET_STCC)))
   TARGET_CCOPT:= -Os -fomit-frame-pointer -pipe
   TARGET_LDFLAGS= -Wl,--gc-sections -Wl,--strip-all
-  DEFINES+= -DHAVE_UCLIBC
 endif
 
 # Append -static-libgcc to CFLAGS if GCC is detected.
