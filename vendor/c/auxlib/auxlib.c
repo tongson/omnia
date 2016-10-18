@@ -70,3 +70,51 @@ luaX_pusherrno(lua_State *L, char *error)
         lua_pushinteger(L, errno);
         return 3;
 }
+
+static int
+luaX_assert(lua_State *L)
+{
+	const char *msg;
+	msg = 0;
+	int fargs = lua_gettop(L);
+	if (fargs >= 2) {
+		msg = lua_tolstring(L, 2, 0);
+	}
+	if (lua_toboolean(L, 1)) {
+		return fargs;
+	} else {
+		luaL_checkany(L, 1);
+		lua_remove(L, 1);
+		lua_Debug info;
+		lua_getstack(L, 1, &info);
+		const char *failed = "Assertion failed";
+		if (!msg) {
+			msg = "false";
+		}
+		const char *name;
+		name = 0;
+		lua_getinfo(L, "Snl", &info);
+		if (info.name) {
+			name = info.name;
+		} else {
+			name = "?";
+		}
+		lua_pushfstring(L, "%s:<%s.lua:%d:%s:%s> %s", \
+				failed, info.source, info.currentline, info.namewhat, name,  msg);
+		return lua_error(L);
+	}
+}
+
+static const
+luaL_Reg auxlib_funcs[] =
+{
+        {"assert", luaX_assert},
+        {NULL, NULL}
+};
+
+int
+luaopen_auxlib(lua_State *L)
+{
+        luaL_newlib(L, auxlib_funcs);
+        return 1;
+}
