@@ -7,6 +7,11 @@ LUA_O:= one.o
 LUA_A:= liblua.a
 HOST_LUA_O:= host_one.o
 HOST_LUA_A:= host_liblua.a
+ifeq ($(CROSS),)
+  LIBLUA_A:= $(HOST_LUA_A)
+else
+  LIBLUA_A:= $(LUA_)
+endif
 LUA_T:= bin/lua
 LUACFLAGS?= -s
 ECHO:= @printf '%s\n'
