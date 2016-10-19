@@ -103,6 +103,7 @@ Module                                                          | Version       
 [inspect.lua](https://github.com/kikito/inspect.lua)            | 3.1.0           | MIT
 [cimicida](https://github.com/Configi/configi)                  | c3919b6         | MIT
 [lib](https://github.com/Configi/configi)                       | 03a197b         | MIT
+[tapered](https://bitbucket.org/telemachus/tapered)             | 2.1.0           | BSD 3C
 
 
 [1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.3)<br/>
