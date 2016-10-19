@@ -2,16 +2,19 @@ T = require"tapered"
 
 with T
    lfs = require"lfs"
-   what "Function from a vendor/c module(lfs)"
-   .same type(lfs.rmdir), "function", what
+   M = "Function from a vendor/c module(lfs)"
+   .same type(lfs.rmdir), "function", M
 with T
    src = require"src"
-   .same type(src.src), "function", "Function from a src/lua module(src)"
+   M = "Function from a src/lua module(src)"
+   .same type(src.src), "function", M
 with T
    moon_slash_src = require"moon.src"
-   .same type(moon_slash_src.moon_slash_src), "function", "Function from a src/lua module directory (moonscript) (moon.src)"
+   M = "Function from a src/lua module directory (moonscript) (moon.src)"
+   .same type(moon_slash_src.moon_slash_src), "function", M
 with T
    moon_src = require"moon_src"
-   .same type(moon_src.moon_src), "function", "Function from a src/lua module (moonscript) (moon_src)"
+   M = "Function from a src/lua module (moonscript) (moon_src)"
+   .same type(moon_src.moon_src), "function", M
 
 T.done(4)
