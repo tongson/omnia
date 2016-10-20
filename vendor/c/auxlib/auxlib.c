@@ -20,15 +20,12 @@ char
 *strncpy_x(char *dest, const char *src, size_t n)
 {
 	size_t len = strlen(src);
-	if (len != 0)
-	{
-		if (len > n)
-		{
+	if (len != 0) {
+		if (len > n) {
 			len = n;
 		}
 		memmove(dest, src, len);
-		if (len < n)
-		{
+		if (len < n) {
 			bzero_x(dest + len, n - len);
 		}
 	}
@@ -38,13 +35,10 @@ char
 char
 *strnmove(char *dest, const char *src, size_t n)
 {
-	if (n > 0)
-	{
+	if (n > 0) {
 		size_t len = strlen(src);
-		if (len != 0)
-		{
-			if (len + 1 > n)
-			{
+		if (len != 0) {
+			if (len + 1 > n) {
 				len = n - 1;
 			}
 			memmove(dest, src, len);
