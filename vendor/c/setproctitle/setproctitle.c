@@ -264,9 +264,8 @@ string(lua_State *L)
         const char *name = luaL_checkstring(L, 1);
         /* Only allowed up to SPT_MAXTITLE bytes*/
         size_t len = strlen(name);
-        if (len > (SPT_MAXTITLE-1))
-        {
-		return luaX_pusherror(L, "Argument to setproctitle.set_name() cannot exceed 254 characters.");
+        if (len > (SPT_MAXTITLE-1)) {
+		return luaX_pusherror(L, "Argument to setproctitle.string() cannot exceed 254 characters.");
         }
 	/* luaL_checkstring adds a NUL terminator. Only copy up to 255 characters. */
 	char psname[SPT_MAXTITLE];
