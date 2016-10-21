@@ -276,6 +276,31 @@ local shallow_cp = function (tbl)
     return copy
 end
 
+--- Clone a table.
+-- From <http://stackoverflow.com/questions/640642/how-do-you-copy-a-lua-table-by-value/16077650#16077650>
+-- @tparam table tbl table to be cloned
+-- @treturn table a new table
+local clone
+clone = function(tbl, seen)
+    seen = seen or {}
+    if tbl == nil then
+        return nil, "Table to be copied required."
+    end
+    local new
+    local clone = clone
+    if type(tbl) == "table" then
+        new = {}
+        seen[tbl] = new
+        for k, v in next, tbl, nil do
+            new[clone(k, seen)] = clone(v, seen)
+        end
+        setmetatable(new, clone(getmetatable(tbl), seen))
+    else -- not a table
+        new = tbl
+    end
+    return new
+end
+
 --- Split a path into its immediate location and file/directory components.
 -- @tparam string path path to split
 -- @treturn string location
@@ -457,6 +482,7 @@ end
 local popen = function (str, cwd, _ignore_error, _return_code)
     local result = {}
     local header = [[  set -ef
+    unset IFS
     export LC_ALL=C
     export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin
     exec 0>&- 2>&1
@@ -500,6 +526,7 @@ local pwrite = function (str, data)
     local result = {}
     local write = io.write
     str = [[    set -ef
+    unset IFS
     export LC_ALL=C
     exec ]] .. str
     local pipe = io.popen(str, "we")
@@ -527,6 +554,7 @@ end
 local system = function (str)
     local result = {}
     local set = [[  set -ef
+    unset IFS
     export LC_ALL=C
     export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin
     exec 0>&- 2>&- 1>/dev/null
@@ -578,7 +606,7 @@ local pipeline = function (...)
     elseif cmds[1] == "execute" then
         return execute(table.concat(pipe))
     else
-        return
+        return nil, "pipeline: First argument should be 'popen' or 'execute'."
     end
 end
 
@@ -736,6 +764,7 @@ return {
     file_to_tbl = file_to_tbl, File_To_Table = file_to_tbl,
     find_in_tbl = find_in_tbl, Find_In_Table = find_in_tbl,
     shallow_cp = shallow_cp, Shallow_Copy = shallow_cp,
+    clone = clone, Clone = clone,
     split_path = split_path, Split_Path = split_path,
     test_open = test_open, Test_Open = test_open,
     fopen = fopen, Fopen = fopen,
