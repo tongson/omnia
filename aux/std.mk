@@ -17,6 +17,8 @@ LUACFLAGS?= -s
 ECHO:= @printf '%s\n'
 ECHON:= @printf '%s'
 ECHOT:= @printf ' %s\t%s\n'
+INSTALL:= @install
+PREFIX?= /usr/local
 CP:= cp
 CPR:= cp -R
 STRIPFLAGS:= --strip-all
@@ -72,4 +74,4 @@ has-%:
 		exit -1; \
 	}
 
-.PHONY: all new clean print-% vprint-% has-%
+.PHONY: all new clean install print-% vprint-% has-%

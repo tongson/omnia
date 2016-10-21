@@ -51,6 +51,12 @@ clean: $(CLEAN)
 	$(RMRF) *.a
 	$(ECHO) "Done!"
 
+install: $(EXE_T)
+	$(ECHO) "Installing..."
+	$(INSTALL) -d $(PREFIX)/bin
+	$(INSTALL) -c $(EXE_T) $(PREFIX)/$(EXE_T)
+	$(ECHO) "Done!"
+
 new:
 	$(RMRF) vendor/lua/* vendor/c/* src/lua/* src/c/* bin/test.moon bin/main.lua Makefile
 	$(CP) aux/Makefile.pristine Makefile
