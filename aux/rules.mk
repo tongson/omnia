@@ -58,6 +58,7 @@ install: $(EXE_T)
 	$(ECHO) "Done!"
 
 new:
-	$(RMRF) vendor/lua/* vendor/c/* src/lua/* src/c/* bin/test.moon bin/main.lua Makefile
+	$(RMRF) vendor/lua/* vendor/c/* src/lua/* src/c/* \
+		bin/test.moon bin/moonc.lua bin/moonpick.lua bin/moor.moon Makefile
 	$(CP) aux/Makefile.pristine Makefile
 
