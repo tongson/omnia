@@ -101,9 +101,14 @@ Module                                                          | Version       
 [cwtest](https://github.com/catwell/cwtest)                     | b027449         | MIT
 [lua-linenoise](https://github.com/hoelzro/lua-linenoise)       | f30fa48         | MIT
 [inspect.lua](https://github.com/kikito/inspect.lua)            | 3.1.0           | MIT
-[cimicida](https://github.com/Configi/configi)                  | c3919b6         | MIT
-[lib](https://github.com/Configi/configi)                       | 03a197b         | MIT
+[cimicida](https://github.com/Configi/configi)                  | HEAD            | MIT
+[lib](https://github.com/Configi/configi)                       | HEAD            | MIT
 [tapered](https://bitbucket.org/telemachus/tapered)             | 2.1.0           | BSD 3C
+[px](https://github.com/Configi/configi)                        | HEAD            | MIT
+[factid](https://github.com/Configi/configi)                    | HEAD            | MIT
+[crc32lua](https://github.com/davidm/lua-digest-crc32lua)       | 0.3.20111128-1  | MIT
+[sha2](http://lua-users.org/wiki/SecureHashAlgorithm)           | 201412011639-r7 | MIT
+
 
 
 [1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.3)<br/>
