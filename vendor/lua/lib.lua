@@ -18,8 +18,7 @@ local fcntl = require"posix.fcntl"
 local stdlib = require"posix.stdlib"
 local syslog = require"posix.syslog"
 local libgen = require"posix.libgen"
-local px = require"px"
-local lib = px
+local lib = require"px"
 local ENV = {}
 _ENV = ENV
 
@@ -407,31 +406,32 @@ end
 -- @treturn string successful message string; otherwise, return a string describing the error
 function lib.awrite (path, str, mode)
     mode = mode or 384
+    local ok, err
+    -- O_WRONLY and F_WRLCK for an advisory lock on the given path
+    local fd = lib.open(path, (fcntl.O_CREAT | fcntl.O_WRONLY | fcntl.O_TRUNC), mode)
     local lock = {
         l_type = fcntl.F_WRLCK,
         l_whence = unistd.SEEK_SET,
         l_start = 0,
         l_len = 0
     }
-    local ok, err
-    local fd = lib.open(path, (fcntl.O_CREAT | fcntl.O_WRONLY | fcntl.O_TRUNC), mode)
     ok = pcall(lib.fcntl, fd, fcntl.F_SETLK, lock)
     if not ok then
-        return nil
+        return nil, "lib.awrite: fcntl(2) error."
     end
-    local tmp, temp = stdlib.mkstemp(lc.split_path(path) .. "/._configiXXXXXX")
-    --local tmp = lib.open(temp, fcntl.O_WRONLY)
+    local dirname = libgen.dirname(path)
+    local tmp, temp = stdlib.mkstemp(dirname .. "/._configiXXXXXX")
     lib.write(tmp, str)
     lib.fsync(tmp)
     ok, err = os.rename(temp, path)
     if not ok then
         return nil, err
     end
-    lib.fsync(fd)
+    unistd.close(tmp)
     lock.l_type = fcntl.F_UNLCK
     lib.fcntl(fd, fcntl.F_SETLK, lock)
+    lib.fsync(fd)
     unistd.close(fd)
-    unistd.close(tmp)
     return true, string.format("Successfully wrote %s", path)
 end
 
@@ -605,8 +605,6 @@ function lib.retry_f(on_fail, delay, retries)
     end
 end
 
-return setmetatable(lib, { __index =
-    function(_, func)
-        return lib[string.lower(func)] or lc[func] or lc[string.lower(func)]
-    end
-})
+return setmetatable({}, { __index = function(_, func)
+    return lib[func] or lib[string.lower(func)] or lc[func] or lc[string.lower(func)]
+end})
