@@ -582,7 +582,7 @@ function lib.decomp_path(str)
 end
 
 --- Retry factory.
--- @tparam function on_fail function to run in case of failure. Takes in the second return value from the retried function.
+-- @tparam function on_fail function to run in case of failure. Takes in the second return value from the retried function as an argument.
 -- @tparam number delay seconds to sleep after a failure. Default is 30 seconds.
 -- @tparam number retries number of tries. Default is to retry indefinitely.
 -- @treturn function a function that runs ...
@@ -599,12 +599,15 @@ function lib.retry_f(on_fail, delay, retries)
             if not ok then
                 i = i + 1
                 on_fail(err)
-                unistd.sleep(delay)
+                if delay > 0 then
+                    unistd.sleep(delay)
+                end
             end
         until(ok or (i == retries))
     end
 end
 
+lib.Retry_Factory = lib.retry_f
 return setmetatable({}, { __index = function(_, func)
     return lib[func] or lib[string.lower(func)] or lc[func] or lc[string.lower(func)]
 end})
