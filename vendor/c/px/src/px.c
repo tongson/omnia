@@ -126,26 +126,6 @@ static int Cclosefrom (lua_State *L)
 	return 1;
 }
 
-/***
-Wrapper to pipe2(2).
-@function pipe2
-@tparam int file descriptor
-@treturn int fd read end descriptor
-@treturn int fd write end descriptor
-*/
-static int Cpipe2(lua_State *L)
-{
-	int pipefd[2];
-	int flags = luaL_checkinteger(L, 1);
-	int rc = pipe2(pipefd, flags);
-	if(rc < 0) {
-		return pusherror(L, "pipe2(2) error");
-	}
-	lua_pushinteger(L, pipefd[0]);
-	lua_pushinteger(L, pipefd[1]);
-	return 2;
-}
-
 /* Derived from luaposix runexec(). Modified to take in the environment. */
 /***
 Execute a program using execve(2)
@@ -210,7 +190,6 @@ static const luaL_Reg syslib[] =
 	{"flopen", Cflopen},
 	{"closefrom", Cclosefrom},
 	{"fdopen", Cfdopen},
-	{"pipe2", Cpipe2},
 	{"execve", Cexecve},
 	{NULL, NULL}
 
