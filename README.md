@@ -94,7 +94,7 @@ Module                                                          | Version       
 ----------------------------------------------------------------|-----------------|---------
 [Luaposix](https://github.com/luaposix/luaposix)[2]             | 33.4.0          | MIT
 [Linotify](https://github.com/hoelzro/linotify)                 | 0.4             | MIT
-[LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)                | 1.0.0           | MIT
+[LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)                | 1.0.1           | MIT
 [lsocket](http://tset.de/lsocket/)[3]                           | 1.4             | MIT
 [luafilesystem](https://github.com/keplerproject/luafilesystem) | 1.6.3           | MIT
 [md5](http://www.rjek.com/luahash-0.00.tar.bz2)                 | 0.00            | PD
