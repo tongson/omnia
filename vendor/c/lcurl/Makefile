@@ -1,0 +1,17 @@
+lcurlOBJs= vendor/c/lcurl/l52util.o vendor/c/lcurl/lceasy.o vendor/c/lcurl/lchttppost.o vendor/c/lcurl/lcerror.o vendor/c/lcurl/lcmulti.o vendor/c/lcurl/lcshare.o vendor/c/lcurl/lcutils.o vendor/c/lcurl/lcurl.o
+lcurlA= lcurl.a
+CLEAN+= clean_lcurl
+
+$(lcurlA): $(lcurlOBJs)
+	$(ECHOT) [AR] $@
+	$(TARGET_AR) $(ARFLAGS) $@ $^ >/dev/null 2>&1
+	$(TARGET_RANLIB) $@
+
+vendor/c/lcurl/%.o: vendor/c/lcurl/%.c
+	$(ECHOT) [CC] $@
+	$(TARGET_DYNCC) -o $@ $(lcurlDEFINES) -Ivendor/c/lcurl $(TARGET_FLAGS) -c $<
+
+clean_lcurl:
+	$(RM) $(RMFLAGS) $(lcurlOBJs) $(lcurlA)
+
+.PHONY: clean_lcurl

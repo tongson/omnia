@@ -108,6 +108,7 @@ Module                                                          | Version       
 [factid](https://github.com/Configi/configi)                    | HEAD            | MIT
 [crc32lua](https://github.com/davidm/lua-digest-crc32lua)       | 0.3.20111128-1  | MIT
 [sha2](http://lua-users.org/wiki/SecureHashAlgorithm)           | 201412011639-r7 | MIT
+[Lua-cURLv3](https://github.com/Lua-cURL/Lua-cURLv3)            | 0.3.5           | MIT
 
 
 
