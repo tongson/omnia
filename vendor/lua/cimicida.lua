@@ -1,8 +1,8 @@
 --- Additional functions. Can also be called from the `lib` module.
 -- @module lib
 local io, string, os, table = io, string, os, table
-local type, pcall, load, setmetatable, ipairs, next, pairs, error, require =
-      type, pcall, load, setmetatable, ipairs, next, pairs, error, require
+local type, pcall, load, setmetatable, ipairs, next, pairs, error, require, getmetatable =
+      type, pcall, load, setmetatable, ipairs, next, pairs, error, require, getmetatable
 local ENV = {}
 _ENV = ENV
 
@@ -155,7 +155,7 @@ local ln_to_tbl = function (str)
     if not str then
         return tbl
     end
-    for ln in string.gmatch(str, "([^\n]*)\n") do
+    for ln in string.gmatch(str, "([^\n]*)\n*") do
         tbl[#tbl + 1] = ln
     end
     return tbl
@@ -350,7 +350,7 @@ end
 -- @treturn string results of string.match, nil otherwise
 local match_from_file = function(file, pattern)
     local str
-    for s in io.lines(file, 2^12) do
+    for s in io.lines(file) do
         str = string.match(s, pattern)
         if str then
             return str
@@ -738,55 +738,80 @@ local count_keys = function(t, maxn)
     return n
 end
 
+--- Truncate a file
+-- @tparam string file to truncate
+local truncate = function(file)
+    local o = io.output()
+    local fd = io.open(file, "w+")
+    io.output(fd)
+    io.write("")
+    io.close()
+    io.output(o)
+end
+
+--- Read a file in one shot
+-- @tparam string file to read
+-- @treturn string contents of file
+local read_all = function(file)
+    local o = io.input()
+    local fd = io.open(file)
+    io.input(fd)
+    local str = io.read("*a")
+    io.close()
+    io.input(o)
+    return str
+end
+
 --- @export
 return {
-    pcall_f = pcall_f, Pcall_Factory = pcall_f,
-    try_f = try_f, Try_Factory = try_f,
-    require = xrequire, Require = xrequire,
-    printf = printf, Print = printf,
-    fprintf = fprintf, Fprint = fprintf,
-    errorf = errorf, Error = errorf,
-    assertf = assertf, Assert = assertf,
-    warn = warn, Warn = warn,
-    append = append, Append = append,
-    time_hm = time_hm, Time_HM = time_hm,
-    date_ymd = date_ymd, Date_YMD = date_ymd,
-    timestamp = timestamp, Timestamp = timestamp,
-    find_string = find_string, Find_String = find_string,
+    pcall_f = pcall_f,
+    try_f = try_f,
+    require = xrequire,
+    printf = printf,
+    fprintf = fprintf,
+    errorf = errorf,
+    assertf = assertf,
+    warn = warn,
+    append = append,
+    time_hm = time_hm,
+    date_ymd = date_ymd,
+    timestamp = timestamp,
+    find_string = find_string,
     string_find = find_string,
-    seq_to_dict = seq_to_dict, Seq_To_Dict = seq_to_dict,
+    seq_to_dict = seq_to_dict,
     arr_to_rec = seq_to_dict,
-    ln_to_tbl = ln_to_tbl, Line_To_Table = ln_to_tbl,
-    word_to_tbl = word_to_tbl, Word_To_Table = word_to_tbl,
-    str_to_tbl = str_to_tbl, String_To_Table = str_to_tbl,
-    escape_pattern = escape_pattern, Escape_Pattern = escape_pattern,
-    filter_tbl_value = filter_tbl_value, Filter_Table_Value = filter_tbl_value,
-    file_to_tbl = file_to_tbl, File_To_Table = file_to_tbl,
-    find_in_tbl = find_in_tbl, Find_In_Table = find_in_tbl,
-    shallow_cp = shallow_cp, Shallow_Copy = shallow_cp,
-    clone = clone, Clone = clone,
-    split_path = split_path, Split_Path = split_path,
-    test_open = test_open, Test_Open = test_open,
-    fopen = fopen, Fopen = fopen,
-    match_from_file = match_from_file, Match_From_File = match_from_file,
-    fwrite = fwrite, Fwrite = fwrite,
-    get_ln = get_ln, Get_Ln = get_ln,
-    get_line = get_ln, Get_Line = get_ln,
-    sub = sub, Sub = sub,
-    exit_string = exit_string, Exit_String = exit_string,
-    truthy = truthy, Truthy = truthy,
-    falsy = falsy, Falsy = falsy,
-    popen = popen, Popen = popen,
-    pwrite = pwrite, Pwrite = pwrite,
-    system = system, System = system,
-    execute = execute, Execute = execute,
-    pipeline = pipeline, Pipeline = pipeline,
-    time = time, Time = time,
-    escape_quotes = escape_quotes, Escape_Quotes = escape_quotes,
-    flog = flog, Flog = flog,
-    insert_if = insert_if, Insert_If = insert_if,
-    return_if = return_if, Return_If = return_if,
-    return_if_not = return_if_not, Return_If_Not = return_if_not,
-    autotable = autotable, Autotable = autotable,
-    count_keys = count_keys, Count_Keys = count_keys
+    ln_to_tbl = ln_to_tbl,
+    word_to_tbl = word_to_tbl,
+    str_to_tbl = str_to_tbl,
+    escape_pattern = escape_pattern,
+    filter_tbl_value = filter_tbl_value,
+    file_to_tbl = file_to_tbl,
+    find_in_tbl = find_in_tbl,
+    shallow_cp = shallow_cp,
+    clone = clone,
+    split_path = split_path,
+    test_open = test_open,
+    fopen = fopen,
+    match_from_file = match_from_file,
+    fwrite = fwrite,
+    get_ln = get_ln,
+    sub = sub,
+    exit_string = exit_string,
+    truthy = truthy,
+    falsy = falsy,
+    popen = popen,
+    pwrite = pwrite,
+    system = system,
+    execute = execute,
+    pipeline = pipeline,
+    time = time,
+    escape_quotes = escape_quotes,
+    flog = flog,
+    insert_if = insert_if,
+    return_if = return_if,
+    return_if_not = return_if_not,
+    autotable = autotable,
+    count_keys = count_keys,
+    truncate = truncate,
+    read_all = read_all,
 }
