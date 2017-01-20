@@ -4,6 +4,8 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/select.h>
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -27,31 +29,50 @@ Simple HTTP GET to an IP
 static int
 get(lua_State *L)
 {
-	const char *ip = luaL_checkstring(L, 1);
+	const char *arg_ip = luaL_checkstring(L, 1);
 	const char *uri = luaL_checkstring(L, 2);
-	char ip4[15] = {0};
+	char ip[16] = {0};
 	int fd, read;
 	struct sockaddr_in target = {0};
 	char buf[BUFSZ] = {0};
 	size_t len;
-	if ((len = strlen(ip)) > 15) {
+	if ((len = strlen(arg_ip)) > 15) {
 		return luaX_pusherror(L, "IP argument cannot exceed 15 characters.");
 	}
 	if ((len = strlen(uri)) > MAXURI) {
 		return luaX_pusherror(L, "URI too long.");
 	}
-	strnmove(ip4, ip, 15);
+	strnmove(ip, arg_ip, 16);
 	target.sin_family = AF_INET;
 	target.sin_port = htons(80);
-	if (inet_pton(AF_INET, ip4, &target.sin_addr.s_addr) == 0) {
+	if (inet_pton(AF_INET, ip, &target.sin_addr.s_addr) == 0) {
 		return luaX_pusherror(L, "inet_pton(3) error. Invalid IP address.");
 	}
 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		return luaX_pusherrno(L, "socket(2) error.");
 	}
+
+	struct timeval timeout;
+	timeout.tv_sec = 10;
+	timeout.tv_usec = 0;
+	fd_set set;
+	FD_ZERO(&set);
+	FD_SET(fd, &set);
+	fcntl(fd, F_SETFL, O_NONBLOCK);
 	if (connect(fd, (struct sockaddr*)&target, sizeof(target)) != 0) {
-		return luaX_pusherrno(L, "connect(2) error.");
+		if (errno != EINPROGRESS) {
+			return luaX_pusherrno(L, "connect(2) error.");
+		}
 	}
+	int status;
+	status = select(fd + 1, NULL, &set, NULL, &timeout);
+	if (status == 0) {
+		return luaX_pusherror(L, "select(2) timeout.");
+	}
+	if (status < 0) {
+		return luaX_pusherrno(L, "select(2) error.");
+	}
+	fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
 
 	ssize_t send_bytes = strlen(uri) + 19;
 	ssize_t sent_bytes;
