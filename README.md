@@ -82,7 +82,7 @@ A copy of the MoonScript REPL `moor` is also included. To compile, run `make bin
 Project                                                     | Version         | License
 ------------------------------------------------------------|-----------------|---------
 [Lua](http://www.lua.org)[1]                                | 5.3.3           | MIT
-[luastatic](https://github.com/ers35/luastatic)             | 0.0.4           | CC0
+[luastatic](https://github.com/ers35/luastatic)             | 0.0.5           | CC0
 [MoonScript](http://moonscript.org)                         | 0.5.0           | MIT
 [moor](https://github.com/Nymphium/moor)                    | 9329bd4         | MIT
 [linenoise](http://github.com/antirez/linenoise)            | c894b9e         | BSD 2C

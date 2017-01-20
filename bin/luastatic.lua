@@ -34,7 +34,7 @@ end
 local function shared_library_exists(lib)
   local cmd = ([[
 echo "int main(int argc, char *argv[]) { return 0; }" |\
-%s -l%s -o /dev/null -xc - 1>/dev/null 2> /dev/null
+%s -l%s -o /dev/null -xc - 1>/dev/null 2>/dev/null
 ]]):format(CC, lib)
   local str, errnum = shellout(cmd)
   return errnum == 0
@@ -43,11 +43,11 @@ end
 -- parse arguments
 for i, name in ipairs(arg) do
   local extension = name:match("%.(%a+)$")
-  if 
-    extension == "lua" or 
-    extension == "a" or 
-    extension == "so" or 
-    extension == "dylib" 
+  if
+    extension == "lua" or
+    extension == "a" or
+    extension == "so" or
+    extension == "dylib"
   then
     if not file_exists(name) then
       print("file does not exist: ", name)
@@ -67,12 +67,12 @@ for i, name in ipairs(arg) do
 
     if extension == "lua" then
       table.insert(lua_source_files, info)
-    elseif 
-      extension == "a" or 
-      extension == "so" or 
-      extension == "dylib" 
+    elseif
+      extension == "a" or
+      extension == "so" or
+      extension == "dylib"
     then
-      -- the library either a Lua module or a library dependency
+      -- the library is either a Lua module or a library dependency
       local nmout = shellout(NM .. " " .. info.path)
       if not nmout then
         print("nm not found")
@@ -80,7 +80,7 @@ for i, name in ipairs(arg) do
       end
       local is_module = false
       if not nmout:find("T _?luaL_newstate") then
-        for luaopen in nmout:gmatch("luaopen_([%a%p%d]+)") do
+        for luaopen in nmout:gmatch("[^dD] _?luaopen_([%a%p%d]+)") do
           local modinfo = {}
           modinfo.path = info.path
           modinfo.dotpath_underscore = luaopen
@@ -105,9 +105,16 @@ end
 local otherflags_str = table.concat(otherflags, " ")
 
 if #lua_source_files == 0 then
-  local version = "0.0.4"
+  local version = "0.0.5"
   print("luastatic " .. version)
-  print("usage: luastatic main.lua /path/to/liblua.a -I/directory/containing/lua.h/")
+  print([[
+usage: luastatic main.lua[1] require.lua[2] liblua.a[3] module.a[4] -I/include/lua[5] [6]
+  [1]: The entry point to the Lua program
+  [2]: One or more required Lua source files
+  [3]: The path to the Lua interpreter static library
+  [4]: One or more static libraries for a required Lua binary module
+  [5]: The path to the directory containing lua.h
+  [6]: Additional arguments are passed to the C compiler]])
   os.exit()
 end
 mainlua = lua_source_files[1]
@@ -128,7 +135,7 @@ local lua_module_require_template = [[struct module
   char *name;
   unsigned char *buf;
   unsigned int len;
-} const static lua_bundle[] = 
+} const static lua_bundle[] =
 {
 %s
 };
@@ -154,7 +161,7 @@ for i, v in ipairs(lua_source_files) do
   local hexstr = binToHexString(strdata)
   local fmt = [[static unsigned char lua_require_%s[] = {%s};]]
   table.insert(luaprogramcdata, fmt:format(i, hexstr))
-  table.insert(lua_module_require, 
+  table.insert(lua_module_require,
     ("\t{\"%s\", lua_require_%s, %s},"):format(v.dotpath_noextension, i, #strdata)
   )
 end
@@ -262,7 +269,7 @@ int main(int argc, char *argv[])
 {
   lua_State *L = luaL_newstate();
   luaL_openlibs(L);
-  
+
   // add loader to package.searchers after the package.preload loader
   lua_getglobal(L, "table");
   lua_getfield(L, -1, "insert");
@@ -282,9 +289,9 @@ int main(int argc, char *argv[])
   // table.insert(package.searchers, 2, lua_loader);
   lua_call(L, 3, 0);
   assert(lua_gettop(L) == 0);
-  
+
 %s
-  
+
   if (luaL_loadbuffer(L, (const char*)lua_bundle[0].buf, lua_bundle[0].len, "%s"))
   {
     puts(lua_tostring(L, 1));
@@ -303,7 +310,7 @@ int main(int argc, char *argv[])
   return 0;
 }
 ]]):format(
-  luaprogramcdatastr, lua_module_requirestr, bin_module_requirestr, 
+  luaprogramcdatastr, lua_module_requirestr, bin_module_requirestr,
   mainlua.basename_underscore
 )
 local infilename = lua_source_files[1].path
@@ -337,7 +344,7 @@ if shellout(CC .. " -dumpmachine"):match("mingw") then
   binary_extension = ".exe"
 end
 local ccstr = ccformat:format(
-  CC, infilename, linklibstr, rdynamic, ldl, otherflags_str, 
+  CC, infilename, linklibstr, rdynamic, ldl, otherflags_str,
   mainlua.basename_noextension, binary_extension
 )
 print(ccstr)
