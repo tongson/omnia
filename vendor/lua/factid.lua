@@ -7,6 +7,7 @@ local dirent = require"posix.dirent"
 local lib = require"lib"
 local cmd = lib.cmd
 local factid = require"factidC"
+local qhttp = require"qhttp"
 local return_false = { __index = function() return false end }
 local ipairs, pairs, tonumber, next, setmetatable = ipairs, pairs, tonumber, next, setmetatable
 local ENV = {}
@@ -17,7 +18,8 @@ _ENV = ENV
 function factid.osfamily ()
     local id
     if sysstat.stat("/etc/os-release") then
-        id = util.match_from_file("/etc/os-release", [[^ID=[%p]*(%w+)[%p]*$]])
+        id = util.match_from_file("/etc/os-release", [[^ID_LIKE=[%p]*(%w+)[%p]*]])
+            or util.match_from_file("/etc/os-release", [[^ID=[%p]*(%w+)[%p]*]])
     elseif sysstat.stat("/etc/openwrt_release") then
         id = "openwrt"
     else
@@ -75,24 +77,10 @@ function factid.interfaces ()
 end
 
 function factid.aws_instance_id ()
-    local ok, err, res
-    local curl, wget = lib.bin_path("curl"), lib.bin_path("wget")
-    local url = "http://169.254.169.254/latest/meta-data/instance-id"
-    if curl then
-        ok, err, res = cmd[curl]{ url }
-    elseif wget then
-        ok, err, res = cmd[wget]{ "-q", "-O-", url }
-    end
+    local ok, err = qhttp.get("169.254.169.254", "/latest/meta-data/instance-id")
+    ok = lib.ln_to_tbl(ok)
     if ok then
-        if not next(res.stdout) then
-            return nil, "factid.aws_instance_id: No stdout."
-        end
-        local id = res.stdout[1]
-        if string.len(id) == 0 then
-            return nil, "factid.aws_instance_id: Empty stdout."
-        else
-            return id
-        end
+        return ok[#ok]
     else
         return nil, err
     end
@@ -241,6 +229,13 @@ function factid.gather ()
                 fact.interfaces[interface][proto][ip] = true
             end
         end
+    end
+
+    do
+        local id = factid.aws_instance_id() or factid.hostname()
+        fact.aws_instance_id = setmetatable({}, return_false)
+        fact.aws_instance_id.string = id
+        fact.aws_instance_id[id] = true
     end
 
     -- { dir, type, freq, opts, passno, fsname }
