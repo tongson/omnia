@@ -81,7 +81,7 @@ A copy of the MoonScript REPL `moor` is also included. To compile, run `make bin
 
 Project                                                     | Version         | License
 ------------------------------------------------------------|-----------------|---------
-[Lua](http://www.lua.org)[1]                                | 5.3.3           | MIT
+[Lua](http://www.lua.org)                                   | 5.3.4           | MIT
 [luastatic](https://github.com/ers35/luastatic)             | 0.0.5           | CC0
 [MoonScript](http://moonscript.org)                         | 0.5.0           | MIT
 [moor](https://github.com/Nymphium/moor)                    | 9329bd4         | MIT
@@ -92,10 +92,10 @@ Project                                                     | Version         | 
 
 Module                                                          | Version         | License
 ----------------------------------------------------------------|-----------------|---------
-[Luaposix](https://github.com/luaposix/luaposix)[2]             | 33.4.0          | MIT
+[Luaposix](https://github.com/luaposix/luaposix)[1]             | 33.4.0          | MIT
 [Linotify](https://github.com/hoelzro/linotify)                 | 0.4             | MIT
 [LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)                | 1.0.1           | MIT
-[lsocket](http://tset.de/lsocket/)[3]                           | 1.4             | MIT
+[lsocket](http://tset.de/lsocket/)[2]                           | 1.4             | MIT
 [luafilesystem](https://github.com/keplerproject/luafilesystem) | 1.6.3           | MIT
 [md5](http://www.rjek.com/luahash-0.00.tar.bz2)                 | 0.00            | PD
 [cwtest](https://github.com/catwell/cwtest)                     | b027449         | MIT
@@ -112,6 +112,5 @@ Module                                                          | Version       
 
 
 
-[1] Patched with bug fixes #1,#2,#3 from the Lua bugs [page](http://www.lua.org/bugs.html#5.3.3)<br/>
-[2] posix.deprecated and posix.compat removed<br/>
-[3] Does not include the async resolver<br/>
+[1] posix.deprecated and posix.compat removed<br/>
+[2] Does not include the async resolver<br/>
