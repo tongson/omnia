@@ -10,7 +10,7 @@ HOST_LUA_A:= host_liblua.a
 ifeq ($(CROSS),)
   LIBLUA_A:= $(HOST_LUA_A)
 else
-  LIBLUA_A:= $(LUA_)
+  LIBLUA_A:= $(LUA_A)
 endif
 LUA_T:= bin/lua
 LUACFLAGS?= -s
