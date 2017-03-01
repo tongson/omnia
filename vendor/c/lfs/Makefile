@@ -20,6 +20,6 @@ $(lfsSO): $(lfsOBJ)
 	$(TARGET_DYNCC) -shared -o $@ $<
 
 clean_lfs:
-	$(RM) $(RMFLAGS) $(lfsOBJ) $(lfsA)
+	$(RM) $(RMFLAGS) $(lfsOBJ) $(lfsA) $(lfsSO)
 
 .PHONY: clean_lfs
