@@ -1,5 +1,6 @@
 setproctitleOBJ= vendor/c/setproctitle/setproctitle.o
 setproctitleA= setproctitle.a
+setproctitleSO= setproctitle.so
 CLEAN+= clean_setproctitle
 
 $(setproctitleA): $(setproctitleOBJ)
@@ -11,7 +12,11 @@ vendor/c/setproctitle/%.o: vendor/c/setproctitle/%.c
 	$(ECHOT) CC $@
 	$(TARGET_DYNCC) -o $@ -Ivendor/c/setproctitle -Ivendor/c/auxlib $(TARGET_FLAGS) -c $<
 
+$(setproctitleSO): $(setproctitleOBJ)
+	$(ECHOT) CC $@
+	$(TARGET_DYNCC) -shared -o $@ $<
+
 clean_setproctitle:
-	$(RM) $(RMFLAGS) $(setproctitleOBJ) $(setproctitleA)
+	$(RM) $(RMFLAGS) $(setproctitleOBJ) $(setproctitleA) $(setproctitleSO)
 
 .PHONY: clean_setproctitle
