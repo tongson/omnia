@@ -1,6 +1,7 @@
 lsocketSRC= vendor/c/lsocket/lsocket.c
 lsocketOBJ= vendor/c/lsocket/lsocket.o
 lsocketA= lsocket.a
+lsocketSO= lsocket.so
 CLEAN+= clean_lsocket
 CCWARN=
 
@@ -13,7 +14,11 @@ $(lsocketOBJ): $(lsocketSRC)
 	$(ECHOT) CC $@
 	$(TARGET_DYNCC) -o $@ $(TARGET_FLAGS) -c $<
 
+$(lsocketSO): $(lsocketOBJ)
+	$(ECHOT) CC $@
+	$(TARGET_DYNCC) -shared -o $@ $<
+
 clean_lsocket:
-	$(RM) $(RMFLAGS) $(lsocketOBJ) $(lsocketA)
+	$(RM) $(RMFLAGS) $(lsocketOBJ) $(lsocketA) $(lsocketSO)
 
 .PHONY: clean_lsocket
