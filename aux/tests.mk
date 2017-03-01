@@ -40,6 +40,9 @@ IS_APPLE:= $(shell $(CONFIGURE_P)/test-mac.sh $(TARGET_STCC))
 ifeq ($(IS_APPLE), APPLE)
   LDFLAGS:= -Wl,-dead_strip
   TARGET_LDFLAGS:= -Wl,-dead_strip
+  TARGET_DYNCC+= -undefined dynamic_lookup
+else
+  LUAT_FLAGS:= -ldl -Wl,-E
 endif
 
 # luaposix needs to link to lrt < glibc 2.17

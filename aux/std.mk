@@ -44,6 +44,8 @@ SRC_MOON+= $(foreach m, $(VENDOR_DIR), $(wildcard vendor/lua/$m/*.moon))
 COMPILED:= $(foreach m, $(SRC_MOON), $(addsuffix .lua, $(basename $m)))
 C_MODULES+= $(foreach m, $(VENDOR_C), $m.a)
 C_MODULES+= $(foreach m, $(SRC_C), $m.a)
+C_SHARED+= $(foreach m, $(VENDOR_C), $m.so)
+C_SHARED+= $(foreach m, $(SRC_C), $m.so)
 BUILD_DEPS= has-$(TARGET_STCC) has-$(TARGET_RANLIB) has-$(TARGET_NM) has-$(TARGET_AR) has-$(TARGET_STRIP)
 
 all: $(EXE_T)
@@ -74,4 +76,4 @@ has-%:
 		exit -1; \
 	}
 
-.PHONY: all new clean install print-% vprint-% has-%
+.PHONY: all dev new clean install print-% vprint-% has-%
