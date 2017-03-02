@@ -47,13 +47,14 @@ $(EXE_T): $(BUILD_DEPS) $(LIBLUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(VENDOR_T
 	$(RMRF) $(VENDOR_DIRS) $(SRC_DIRS)
 
 dev: $(LUA_T) $(C_SHARED) $(COMPILED) $(VENDOR_TOP) $(SRC_TOP) $(SRC_LUA) $(VENDOR_LUA)
+	$(CPR) aux/luacheck .
 	bin/lua bin/luacheck.lua $(SRC_TOP) $(COMPILED) $(SRC_LUA) --exclude-files 'vendor/lua/*'
 
 clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
 	$(RM) $(RMFLAGS) $(MAIN).c $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(EXE_T) \
 	   $(HOST_LUA_A) $(HOST_LUA_O) $(COMPILED) $(VENDOR_TOP) $(SRC_TOP)
-	$(RMRF) $(SRC_DIRS) $(VENDOR_DIRS)
+	$(RMRF) $(SRC_DIRS) $(VENDOR_DIRS) luacheck
 	$(RMRF) *.a
 	$(ECHO) "Done!"
 
