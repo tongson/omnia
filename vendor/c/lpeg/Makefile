@@ -30,7 +30,7 @@ vendor/c/lpeg/host_%.o: vendor/c/lpeg/%.c
 
 $(lpegSO): $(host_lpegOBJS)
 	$(ECHOT) CC $@
-	$(HOST_CC) -shared -o $@ $^
+	$(TARGET_DYNCC) -shared -o $@ $^
 
 clean_lpeg:
 	$(RM) $(RMFLAGS) $(lpegOBJS) $(lpegA) $(lpegSO) $(host_lpegOBJS) $(host_lpegA) vendor/c/lpeg/lpprint.o lpprint.o
