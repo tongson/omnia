@@ -44,7 +44,7 @@ $(EXE_T): $(BUILD_DEPS) $(LIBLUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(MODULES)
 	$(RMRF) $(VENDOR_DIRS) $(SRC_DIRS)
 
 dev: $(LUA_T) $(C_SHARED) $(COMPILED) $(MODULES) $(SRC_LUA) $(VENDOR_LUA)
-	bin/lua bin/luacheck.lua $(COMPILED) $(MODULES)
+	bin/lua bin/luacheck.lua $(COMPILED) $(SRC_LUA) --exclude-files 'vendor/lua/*'
 
 clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
