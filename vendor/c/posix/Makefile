@@ -39,7 +39,7 @@ $(posixSO): $(posixOBJS)
 	$(TARGET_DYNCC) -shared -o $@ $^
 
 clean_posix:
-	$(RM) $(RMFLAGS) $(posix_P)/*.o $(C_MODULES)
+	$(RM) $(RMFLAGS) $(posix_P)/*.o $(C_MODULES) $(posixSO)
 
 .PHONY: clean_posix
 
