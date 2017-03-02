@@ -1,11 +1,18 @@
-LUAPOSIX= ctype dirent errno fcntl fnmatch getopt glob grp \
+posix_P= vendor/c/posix/src
+posixA= ctype dirent errno fcntl fnmatch getopt glob grp \
   libgen poll pwd sched signal stdio stdlib sys.msg \
   sys.resource sys.socket sys.stat sys.statvfs sys.time \
   sys.times sys.utsname sys.wait syslog termio time \
   unistd utime
-posix_P= vendor/c/posix/src
-C_MODULES+= $(foreach m, $(LUAPOSIX), posix.$m.a)
-C_MODULES:= $(filter-out posix.a,$(C_MODULES))
+posixO= ctype dirent errno fcntl fnmatch getopt glob grp \
+  libgen poll pwd sched signal stdio stdlib	sys/msg  \
+  sys/resource sys/socket sys/stat sys/statvfs sys/time \
+  sys/times sys/utsname sys/wait syslog termio time \
+  unistd utime
+posixOBJS= $(foreach m, $(posixO), $(posix_P)/$m.o)
+posixSO= posix.so
+C_MODULES+= $(foreach m, $(posixA), posix.$m.a)
+C_MODULES:= $(filter-out posix.a, $(C_MODULES))
 VENDOR+= posix
 CLEAN+= clean_posix
 
@@ -26,6 +33,10 @@ posix.%.a: $(posix_P)/%.o
 	$(ECHOT) AR $@
 	$(TARGET_AR) $(ARFLAGS) $@ $^ >/dev/null 2>&1
 	$(TARGET_RANLIB) $@
+
+$(posixSO): $(posixOBJS)
+	$(ECHOT) CC $@
+	$(TARGET_DYNCC) -shared -o $@ $^
 
 clean_posix:
 	$(RM) $(RMFLAGS) $(posix_P)/*.o $(C_MODULES)
