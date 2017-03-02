@@ -24,9 +24,12 @@ $(LUA_A): $(LUA_O)
 	$(TARGET_AR) $(ARFLAGS) $@ $< >/dev/null 2>&1
 	$(TARGET_RANLIB) $@
 
-$(MODULES):
-	$(ECHOT) CP MODULES
+$(VENDOR_TOP):
+	$(ECHOT) CP VENDOR MODULES
 	for f in $(VENDOR); do $(CP) $(VENDOR_P)/$$f.lua .; done
+
+$(SRC_TOP):
+	$(ECHOT) CP SRC MODULES
 	for f in $(SRC); do $(CP) $(SRC_P)/$$f.lua .; done
 
 $(SRC_LUA):
@@ -35,21 +38,21 @@ $(SRC_LUA):
 $(VENDOR_LUA):
 	for d in $(VENDOR_DIRS); do [ -d $$d ] || $(CPR) $(VENDOR_P)/$$d .; done
 
-$(EXE_T): $(BUILD_DEPS) $(LIBLUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(MODULES) $(SRC_LUA) $(VENDOR_LUA)
+$(EXE_T): $(BUILD_DEPS) $(LIBLUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(VENDOR_TOP) $(SRC_TOP) $(SRC_LUA) $(VENDOR_LUA)
 	$(ECHOT) LN $(EXE_T)
 	CC=$(TARGET_STCC) NM=$(TARGET_NM) $(LUA_T) $(LUASTATIC) $(MAIN) \
-	   $(SRC_LUA) $(VENDOR_LUA) $(MODULES) $(C_MODULES) $(LIBLUA_A) \
+	   $(SRC_LUA) $(VENDOR_LUA) $(VENDOR_TOP) $(SRC_TOP) $(C_MODULES) $(LIBLUA_A) \
 	   $(TARGET_FLAGS) $(PIE) $(TARGET_LDFLAGS) 2>&1 >/dev/null
-	$(RM) $(RMFLAGS) $(MAIN).c $(MODULES)
+	$(RM) $(RMFLAGS) $(MAIN).c $(VENDOR_TOP) $(SRC_TOP)
 	$(RMRF) $(VENDOR_DIRS) $(SRC_DIRS)
 
-dev: $(LUA_T) $(C_SHARED) $(COMPILED) $(MODULES) $(SRC_LUA) $(VENDOR_LUA)
-	bin/lua bin/luacheck.lua $(COMPILED) $(SRC_LUA) --exclude-files 'vendor/lua/*'
+dev: $(LUA_T) $(C_SHARED) $(COMPILED) $(VENDOR_TOP) $(SRC_TOP) $(SRC_LUA) $(VENDOR_LUA)
+	bin/lua bin/luacheck.lua $(SRC_TOP) $(COMPILED) $(SRC_LUA) --exclude-files 'vendor/lua/*'
 
 clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
 	$(RM) $(RMFLAGS) $(MAIN).c $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(EXE_T) \
-	   $(HOST_LUA_A) $(HOST_LUA_O) $(COMPILED) $(MODULES)
+	   $(HOST_LUA_A) $(HOST_LUA_O) $(COMPILED) $(VENDOR_TOP) $(SRC_TOP)
 	$(RMRF) $(SRC_DIRS) $(VENDOR_DIRS)
 	$(RMRF) *.a
 	$(ECHO) "Done!"
