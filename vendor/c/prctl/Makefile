@@ -1,6 +1,7 @@
 prctlSRC= vendor/c/prctl/prctl.c
 prctlOBJ= vendor/c/prctl/prctl.o
 prctlA= prctl.a
+prctlSO= prctl.so
 CLEAN+= clean_prctl
 
 $(prctlA): $(prctlOBJ)
@@ -12,7 +13,11 @@ $(prctlOBJ): $(prctlSRC)
 	$(ECHOT) CC $@
 	$(TARGET_DYNCC) -o $@ -Ivendor/c/auxlib -Ivendor/c/prctl $(TARGET_FLAGS) -c $<
 
+$(prctlSO): $(prctlOBJ)
+	$(ECHOT) CC $@
+	$(TARGET_DYNCC) -shared -o $@ $<
+
 clean_prctl:
-	$(RM) $(RMFLAGS) $(prctlOBJ) $(prctlA)
+	$(RM) $(RMFLAGS) $(prctlOBJ) $(prctlA) $(prctlSO)
 
 .PHONY: clean_prctl

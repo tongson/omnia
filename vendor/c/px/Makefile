@@ -3,6 +3,7 @@ pxOBJ= vendor/c/px/src/px.o
 pxdepsSRC = vendor/c/px/src/flopen.c vendor/c/px/src/closefrom.c
 pxdepsOBJ= vendor/c/px/src/flopen.o vendor/c/px/src/closefrom.o
 pxA= px.a
+pxSO= px.so
 CLEAN+= clean_px
 
 $(pxA): $(pxOBJ) $(pxdepsOBJ)
@@ -18,8 +19,12 @@ vendor/c/px/src/%.o: vendor/c/px/src/%.c
 	$(ECHOT) CC $@
 	$(TARGET_DYNCC) -o $@ $(pxDEFINES) $(TARGET_FLAGS) -c $<
 
+$(pxSO): $(pxOBJ) $(pxdepsOBJ)
+	$(ECHOT) CC $@
+	$(TARGET_DYNCC) -shared -o $@ $^
+
 clean_px:
-	$(RM) $(RMFLAGS) $(pxA) $(pxOBJ) $(pxdepsOBJ)
+	$(RM) $(RMFLAGS) $(pxA) $(pxOBJ) $(pxdepsOBJ) $(pxSO)
 
 .PHONY: clean_px
 

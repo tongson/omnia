@@ -1,6 +1,7 @@
 qhttpSRC= vendor/c/qhttp/qhttp.c
 qhttpOBJ= vendor/c/qhttp/qhttp.o
 qhttpA= qhttp.a
+qhttpSO= qhttp.so
 CLEAN+= clean_qhttp
 
 $(qhttpA): $(qhttpOBJ)
@@ -12,7 +13,11 @@ $(qhttpOBJ): $(qhttpSRC)
 	$(ECHOT) CC $@
 	$(TARGET_DYNCC) -o $@ -Ivendor/c/qhttp -Ivendor/c/auxlib $(TARGET_FLAGS) -c $<
 
+$(qhttpSO): $(qhttpOBJ)
+	$(ECHOT) CC $@
+	$(TARGET_DYNCC) -shared -o $@ $<
+
 clean_qhttp:
-	$(RM) $(RMFLAGS) $(qhttpOBJ) $(qhttpA)
+	$(RM) $(RMFLAGS) $(qhttpOBJ) $(qhttpA) $(qhttpSO)
 
 .PHONY: clean_qhttp

@@ -4,7 +4,7 @@ $(LUAC_T):
 
 $(LUA_T):
 	$(ECHOT) CC $@
-	$(HOST_CC) -o $@ -DMAKE_LUA $(luaDEFINES) $(FLAGS) $(ONE).c -lm
+	$(HOST_CC) -o $@ -DMAKE_LUA -DLUA_USE_DLOPEN $(luaDEFINES) $(FLAGS) $(ONE).c -lm $(LUAT_FLAGS)
 
 $(HOST_LUA_O):
 	$(ECHOT) CC $@
@@ -42,6 +42,8 @@ $(EXE_T): $(BUILD_DEPS) $(LIBLUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(MODULES)
 	   $(TARGET_FLAGS) $(PIE) $(TARGET_LDFLAGS) 2>&1 >/dev/null
 	$(RM) $(RMFLAGS) $(MAIN).c $(MODULES)
 	$(RMRF) $(VENDOR_DIRS) $(SRC_DIRS)
+
+dev: $(C_SHARED) $(COMPILED) $(MODULES) $(SRC_LUA) $(VENDOR_LUA)
 
 clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
