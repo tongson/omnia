@@ -135,12 +135,5 @@ else
   endif
 endif
 
-ifeq ($(ASAN), 1)
-  TARGET_CFLAGS:= -fsanitize=address -O1 -fno-omit-frame-pointer -g
-  TARGET_CCOPT:= $(NULSTRING)
-  TARGET_LDFLAGS:= $(NULSTRING)
-  MAKEFLAGS:= $(NULSTRING)
-endif
-
 TARGET_FLAGS:= $(DEFINES) $(INCLUDES_P) $(TARGET_CFLAGS) $(TARGET_CCOPT) $(CCWARN) $(CFLAGS_LRT)
 FLAGS:= $(DEFINES) $(INCLUDES_P) $(CFLAGS) $(CCOPT) $(CCWARN)
