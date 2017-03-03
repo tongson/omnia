@@ -76,4 +76,4 @@ has-%:
 		exit -1; \
 	}
 
-.PHONY: dev release new clean clean_mac install print-% vprint-% has-%
+.PHONY: dev release new clean install print-% vprint-% has-%

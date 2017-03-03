@@ -41,7 +41,6 @@ ifeq ($(IS_APPLE), APPLE)
   LDFLAGS:= -Wl,-dead_strip
   TARGET_LDFLAGS:= -Wl,-dead_strip
   TARGET_DYNCC+= -undefined dynamic_lookup
-  CLEAN+= clean_mac
 else
   LUAT_FLAGS:= -ldl -Wl,-E
 endif
