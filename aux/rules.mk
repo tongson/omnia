@@ -25,17 +25,19 @@ $(LUA_A): $(LUA_O)
 	$(TARGET_RANLIB) $@
 
 $(VENDOR_TOP):
-	$(ECHOT) CP VENDOR MODULES
+	$(ECHOT) CP VENDOR
 	for f in $(VENDOR); do $(CP) $(VENDOR_P)/$$f.lua .; done
 
 $(SRC_TOP):
-	$(ECHOT) CP SRC MODULES
+	$(ECHOT) CP SRC
 	for f in $(SRC); do $(CP) $(SRC_P)/$$f.lua .; done
 
 $(SRC_LUA):
+	$(ECHOT) CP SRC_DIR
 	for d in $(SRC_DIRS); do [ -d $$d ] || $(CPR) $(SRC_P)/$$d .; done
 
 $(VENDOR_LUA):
+	$(ECHOT) CP VENDOR_DIR
 	for d in $(VENDOR_DIRS); do [ -d $$d ] || $(CPR) $(VENDOR_P)/$$d .; done
 
 $(EXE_T): $(BUILD_DEPS) $(LIBLUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(VENDOR_TOP) $(SRC_TOP) $(SRC_LUA) $(VENDOR_LUA)
