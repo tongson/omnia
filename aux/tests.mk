@@ -41,6 +41,7 @@ ifeq ($(IS_APPLE), APPLE)
   LDFLAGS:= -Wl,-dead_strip
   TARGET_LDFLAGS:= -Wl,-dead_strip
   TARGET_DYNCC+= -undefined dynamic_lookup
+  CLEAN+= clean_mac
 else
   LUAT_FLAGS:= -ldl -Wl,-E
 endif
@@ -108,12 +109,17 @@ ifeq ($(HAVE_FCNTL_CLOSEM), true)
   pxDEFINES+= -DHAVE_FCNTL_CLOSEM
 endif
 
-ifeq ($(DEBUG), 1)
+ifneq ($(MAKECMDGOALS), release)
   CCWARN:= -Wall -Wextra -Wdeclaration-after-statement -Wredundant-decls -Wshadow -Wpointer-arith
-  TARGET_CFLAGS:= $(CCWARN) -O1 -fno-omit-frame-pointer -g
+  TARGET_CFLAGS:= -O1 -fno-omit-frame-pointer -g
+  CFLAGS:= -O1 -fno-omit-frame-pointer -g
+  ifeq ($(shell $(CONFIGURE_P)/test-gcc48.sh $(CC)), true)
+	CFLAGS+= -fsanitize=address
+  endif
   TARGET_CCOPT:= $(NULSTRING)
+  CCOPT:= $(NULSTRING)
   TARGET_LDFLAGS:= $(NULSTRING)
-  MAKEFLAGS:= $(NULSTRING)
+  LDFLAGS:= $(NULSTRING)
 else
   DEFINES+= -DNDEBUG
 endif

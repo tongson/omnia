@@ -48,7 +48,7 @@ C_SHARED+= $(foreach m, $(VENDOR_C), $m.so)
 C_SHARED+= $(foreach m, $(SRC_C), $m.so)
 BUILD_DEPS= has-$(TARGET_STCC) has-$(TARGET_RANLIB) has-$(TARGET_NM) has-$(TARGET_AR) has-$(TARGET_STRIP)
 
-all: $(EXE_T)
+release: $(EXE_T)
 
 ifneq ($(SRC_C),)
   include $(eval _d:=src/c/$(SRC_C) $(_d)) $(call _lget,$(SRC_C))
@@ -76,4 +76,4 @@ has-%:
 		exit -1; \
 	}
 
-.PHONY: all dev new clean install print-% vprint-% has-%
+.PHONY: dev release new clean clean_mac install print-% vprint-% has-%
