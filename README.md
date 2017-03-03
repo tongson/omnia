@@ -111,6 +111,7 @@ Module                                                          | Version       
 [sha2](http://lua-users.org/wiki/SecureHashAlgorithm)           | 201412011639-r7 | MIT
 [Lua-cURLv3](https://github.com/Lua-cURL/Lua-cURLv3)            | 0.3.5           | MIT
 [rabbit](https://github.com/philanc/plc)                        | 9c37954         | MIT
+[argparse](https://github.com/mpeterv/argparse)                 | 0.5.0           | MIT
 
 
 [1] posix.deprecated and posix.compat removed<br/>
