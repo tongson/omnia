@@ -4,7 +4,6 @@ lfsOBJ= $(lfsP)/lfs.o
 lfsSO= lfs.so
 lfsA= lfs.a
 CLEAN+= clean_lfs
-CCWARN=
 
 $(lfsA): $(lfsOBJ)
 	$(ECHOT) AR $@

@@ -3,7 +3,6 @@ lsocketOBJ= vendor/c/lsocket/lsocket.o
 lsocketA= lsocket.a
 lsocketSO= lsocket.so
 CLEAN+= clean_lsocket
-CCWARN=
 
 $(lsocketA): $(lsocketOBJ)
 	$(ECHOT) AR $@
