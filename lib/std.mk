@@ -1,6 +1,6 @@
 EXE_T:= bin/$(EXE)
 MAIN:= $(EXE_T).lua
-ONE:= aux/one
+ONE:= lib/one
 LUASTATIC:= bin/luastatic.lua
 LUAC_T:= bin/luac
 LUA_O:= one.o
@@ -59,7 +59,7 @@ ifneq ($(VENDOR_C),)
 endif
 
 ifneq ($(SRC_MOON),)
-  include aux/moonscript.mk
+  include lib/moonscript.mk
 endif
 
 print-%: ; @echo $*=$($*)

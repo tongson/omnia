@@ -1,8 +1,8 @@
 .POSIX:
 .SUFFIXES:
 NULSTRING:=
-CONFIGURE_P:= aux/configure
-INCLUDES_P:= -Iaux/lua
+CONFIGURE_P:= lib/configure
+INCLUDES_P:= -Ilib/lua
 ifeq ($(CROSS),)
   CROSS:= $(NULSTRING)
 endif

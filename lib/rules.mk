@@ -8,7 +8,7 @@ $(LUA_T):
 
 $(HOST_LUA_O):
 	$(ECHOT) CC $@
-	$(HOST_CC) -o $@ -c -Iaux -DMAKE_LIB $(luaDEFINES) -fPIC $(FLAGS) $(ONE).c
+	$(HOST_CC) -o $@ -c -Ilib -DMAKE_LIB $(luaDEFINES) -fPIC $(FLAGS) $(ONE).c
 
 $(HOST_LUA_A): $(HOST_LUA_O)
 	$(ECHOT) AR $@
@@ -17,7 +17,7 @@ $(HOST_LUA_A): $(HOST_LUA_O)
 
 $(LUA_O):
 	$(ECHOT) CC $@
-	$(TARGET_DYNCC) -o $@ -c -Iaux -DMAKE_LIB $(luaDEFINES) $(TARGET_FLAGS) $(ONE).c
+	$(TARGET_DYNCC) -o $@ -c -Ilib -DMAKE_LIB $(luaDEFINES) $(TARGET_FLAGS) $(ONE).c
 
 $(LUA_A): $(LUA_O)
 	$(ECHOT) AR $@
@@ -49,7 +49,7 @@ $(EXE_T): $(BUILD_DEPS) $(LIBLUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(VENDOR_T
 	$(RMRF) $(VENDOR_DIRS) $(SRC_DIRS)
 
 dev: $(LUA_T) $(C_SHARED) $(COMPILED) $(VENDOR_TOP) $(SRC_TOP) $(SRC_LUA) $(VENDOR_LUA)
-	$(CPR) aux/luacheck .
+	$(CPR) lib/luacheck .
 	bin/lua bin/luacheck.lua $(SRC_TOP) $(COMPILED) $(SRC_LUA) --exclude-files 'vendor/lua/*'
 
 clean: $(CLEAN)
@@ -69,5 +69,5 @@ install: $(EXE_T)
 new:
 	$(RMRF) vendor/lua/* vendor/c/* src/lua/* src/c/* \
 		bin/test.moon bin/moonc.lua bin/moonpick.lua bin/moor.moon Makefile
-	$(CP) aux/Makefile.pristine Makefile
+	$(CP) lib/Makefile.pristine Makefile
 
