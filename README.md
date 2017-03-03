@@ -33,11 +33,9 @@ Note: Linux and OS X only. xBSD soon.
 
 The SRC, VENDOR split is just for organization. Underneath they are using the same Make routines.
 
-1. Run `make`<br/>
+Run `make` or `make release` for the final executable without debug symbols in `bin/`.<br/>
 If you want to link statically run `make STATIC=1`<br/>
-During developlement or debugging run `make DEBUG=1`
 
-2. The executable will be located under the `bin/` directory
 
 #### Adding plain Lua and MoonScript modules. (NOTE: VENDOR and SRC are interchangeable.)
 
