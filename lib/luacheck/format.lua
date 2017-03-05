@@ -4,6 +4,16 @@ local format = {}
 
 local color_support = not utils.is_windows or os.getenv("ANSICON")
 
+local function prefix_if_indirect(fmt)
+   return function(w)
+      if w.indirect then
+         return "indirectly " .. fmt
+      else
+         return fmt
+      end
+   end
+end
+
 local message_formats = {
    ["011"] = "{msg}",
    ["021"] = "invalid inline option",
@@ -19,14 +29,10 @@ local message_formats = {
    ["112"] = "mutating non-standard global variable {name!}",
    ["113"] = "accessing undefined variable {name!}",
    ["121"] = "setting read-only global variable {name!}",
-   ["122"] = function(w)
-      if w.indirect then
-         return "indirectly mutating read-only global variable {name!}"
-      else
-         return "mutating read-only global variable {name!}"
-      end
-   end,
+   ["122"] = prefix_if_indirect("setting read-only field {field!} of global {name!}"),
    ["131"] = "unused global variable {name!}",
+   ["142"] = prefix_if_indirect("setting undefined field {field!} of global {name!}"),
+   ["143"] = prefix_if_indirect("accessing undefined field {field!} of global {name!}"),
    ["211"] = function(w)
       if w.func then
          if w.recursive then
@@ -81,8 +87,10 @@ local message_formats = {
    ["551"] = "empty statement",
    ["611"] = "line contains only whitespace",
    ["612"] = "line contains trailing whitespace",
-   --["613"] = "trailing whitespace after comment", -- RESERVED for future use
+   ["613"] = "trailing whitespace in a string",
+   ["614"] = "trailing whitespace in a comment",
    ["621"] = "inconsistent indentation (SPACE followed by TAB)",
+   ["631"] = "line is too long ({end_column} > {max_length})"
 }
 
 local function get_message_format(warning)
@@ -325,11 +333,13 @@ function formatters.JUnit(report, file_names)
 
    for file_i, file_report in ipairs(report) do
       if file_report.fatal then
-         table.insert(buf, ([[    <testcase name="%s" classname="%s">]]):format(escape_xml(file_names[file_i]), escape_xml(file_names[file_i])))
+         table.insert(buf, ([[    <testcase name="%s" classname="%s">]]):format(
+            escape_xml(file_names[file_i]), escape_xml(file_names[file_i])))
          table.insert(buf, ([[        <error type="%s"/>]]):format(escape_xml(fatal_type(file_report))))
          table.insert(buf, [[    </testcase>]])
       elseif #file_report == 0 then
-         table.insert(buf, ([[    <testcase name="%s" classname="%s"/>]]):format(escape_xml(file_names[file_i]), escape_xml(file_names[file_i])))
+         table.insert(buf, ([[    <testcase name="%s" classname="%s"/>]]):format(
+            escape_xml(file_names[file_i]), escape_xml(file_names[file_i])))
       else
          for event_i, event in ipairs(file_report) do
             table.insert(buf, ([[    <testcase name="%s:%d" classname="%s">]]):format(

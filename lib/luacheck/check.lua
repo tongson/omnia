@@ -1,4 +1,4 @@
-local parse = require "luacheck.parser"
+local parser = require "luacheck.parser"
 local linearize = require "luacheck.linearize"
 local analyze = require "luacheck.analyze"
 local reachability = require "luacheck.reachability"
@@ -40,21 +40,37 @@ local type_codes = {
 }
 
 -- `index` describes an indexing, where `index[1]` is a global node
--- and other items descrive keys: each one is a string node, "not_string",
+-- and other items describe keys: each one is a string node, "not_string",
 -- or "unknown". `node` is literal base node that's indexed.
 -- E.g. in `local a = table.a; a.b = "c"` `node` is `a` node of the second
 -- statement and `index` describes `table.a.b`.
+-- `index.previous_indexing_len` is optional length of prefix of `index` array representing last assignment
+-- in the aliasing chain, e.g. `2` in the previous example (because last indexing
+-- is `table.a`).
 function ChState:warn_global(node, index, is_lhs, is_top_scope)
    local global = index[1]
    local action = is_lhs and (#index == 1 and "set" or "mutate") or "access"
-   -- TODO: actually use information about keys.
-   -- TODO: accept information about length of last indexing,
+
+   local indexing = {}
+
+   for i, field in ipairs(index) do
+      if field == "unknown" then
+         indexing[i] = true
+      elseif field == "not_string" then
+         indexing[i] = false
+      else
+         indexing[i] = field[1]
+      end
+   end
+
    -- and filter out the warning if the base of last indexing is already
    -- undefined and has been reported.
    -- E.g. avoid useless warning in the second statement of `local t = tabell; t.concat(...)`.
    self:warn({
       code = "11" .. action_codes[action],
       name = global[1],
+      indexing = indexing,
+      previous_indexing_len = index.previous_indexing_len,
       line = node.location.line,
       column = node.location.column,
       end_column = node.location.column + #node[1] - 1,
@@ -203,7 +219,7 @@ function ChState:warn_empty_statement(location)
 end
 
 local function check_or_throw(src)
-   local ast, comments, code_lines, semicolons = parse(src)
+   local ast, comments, code_lines, line_endings, semicolons = parser.parse(src)
    local chstate = ChState()
    local line = linearize(chstate, ast)
 
@@ -211,12 +227,14 @@ local function check_or_throw(src)
       chstate:warn_empty_statement(location)
    end
 
-   check_whitespace(chstate, src)
+   local lines = utils.split_lines(src)
+   local line_lengths = utils.map(function(s) return #s end, lines)
+   check_whitespace(chstate, lines, line_endings)
    analyze(chstate, line)
    reachability(chstate, line)
    detect_globals(chstate, line)
    local events, per_line_opts = inline_options.get_events(ast, comments, code_lines, chstate.warnings)
-   return {events = events, per_line_options = per_line_opts}
+   return {events = events, per_line_options = per_line_opts, line_lengths = line_lengths}
 end
 
 --- Checks source.
@@ -224,20 +242,22 @@ end
 --    `events`: array of issues and inline option events (options, push, or pop).
 --    `per_line_options`: map from line numbers to arrays of inline option events.
 local function check(src)
-   local res, err = utils.pcall(check_or_throw, src)
+   local ok, res = utils.try(check_or_throw, src)
 
-   if res then
+   if ok then
       return res
-   else
+   elseif utils.is_instance(res.err, parser.SyntaxError) then
       local syntax_error = {
          code = "011",
-         line = err.line,
-         column = err.column,
-         end_column = err.end_column,
-         msg = err.msg
+         line = res.err.line,
+         column = res.err.column,
+         end_column = res.err.end_column,
+         msg = res.err.msg
       }
 
-      return {events = {syntax_error}, per_line_options = {}}
+      return {events = {syntax_error}, per_line_options = {}, line_lengths = {}}
+   else
+      error(res, 0)
    end
 end
 

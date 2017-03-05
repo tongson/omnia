@@ -1,5 +1,5 @@
 local options = require "luacheck.options"
-local stds = require "luacheck.stds"
+local builtin_standards = require "luacheck.builtin_standards"
 local fs = require "luacheck.fs"
 local globbing = require "luacheck.globbing"
 local utils = require "luacheck.utils"
@@ -10,7 +10,7 @@ local config = {}
 -- autovivification for `files`, fallback to built-in stds for `stds`.
 
 local special_mts = {
-   stds = {__index = stds},
+   stds = {__index = builtin_standards},
    files = {__index = function(files, key)
       files[key] = {}
       return files[key]
@@ -149,14 +149,14 @@ local function add_relative_loader(conf)
       return try_load(modpath..".lua") or try_load(modpath..utils.dir_sep.."init.lua"), modname
    end
 
-   table.insert(package.loaders or package.searchers, 1, loader)
+   table.insert(package.loaders or package.searchers, 1, loader) -- luacheck: compat
    return loader
 end
 
 local function remove_relative_loader(loader)
-   for i, func in ipairs(package.loaders or package.searchers) do
+   for i, func in ipairs(package.loaders or package.searchers) do -- luacheck: compat
       if func == loader then
-         table.remove(package.loaders or package.searchers, i)
+         table.remove(package.loaders or package.searchers, i) -- luacheck: compat
          return
       end
    end
@@ -207,9 +207,9 @@ function config.load_config(path)
 
    -- Update stds before validating config - std validation relies on that.
    if type(env.stds) == "table" then
-      -- Ideally config shouldn't mutate global stds, not if `luacheck.config` becomes public
-      -- interface.
-      utils.update(stds, env.stds)
+      -- Ideally config shouldn't mutate global builtin standards module,
+      -- not if `luacheck.config` becomes public interface.
+      utils.update(builtin_standards, env.stds)
    end
 
    local err = validate_config(env)
