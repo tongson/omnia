@@ -13,9 +13,9 @@ $(qhttpOBJ): $(qhttpSRC)
 	$(ECHOT) CC $@
 	$(TARGET_DYNCC) -o $@ -Ivendor/c/qhttp -Ivendor/c/auxlib $(TARGET_FLAGS) -c $<
 
-$(qhttpSO): $(qhttpOBJ)
+$(qhttpSO): $(qhttpOBJ) vendor/c/auxlib/auxlib.o
 	$(ECHOT) CC $@
-	$(TARGET_DYNCC) -shared -o $@ $<
+	$(TARGET_DYNCC) -shared -o $@ $^
 
 clean_qhttp:
 	$(RM) $(RMFLAGS) $(qhttpOBJ) $(qhttpA) $(qhttpSO)
