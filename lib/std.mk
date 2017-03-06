@@ -29,6 +29,7 @@ VENDOR_P:= vendor/lua
 SRC_P:= src/lua
 VENDOR_LUA:= $(addsuffix /*.lua,$(VENDOR_DIR))
 SRC_LUA:= $(addsuffix /*.lua,$(SRC_DIR))
+SRC_CHECK:= $(foreach m, $(SRC_DIR), src/lua/$m/*.lua)
 VENDOR_DIRS:= $(sort $(foreach f, $(VENDOR_DIR), $(firstword $(subst /, ,$f))))
 SRC_DIRS:= $(sort $(foreach f, $(SRC_DIR), $(firstword $(subst /, ,$f))))
 _rest= $(wordlist 2,$(words $(1)),$(1))
