@@ -56,7 +56,7 @@ $(EXE_T): $(BUILD_DEPS) $(LIBLUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(VENDOR_T
 	$(RM) $(RMFLAGS) $(MAIN).c $(VENDOR_TOP) $(SRC_TOP)
 	$(RMRF) $(VENDOR_DIRS) $(SRC_DIRS)
 
-dev: $(LUA_T) $(C_SHARED) luacheck luacov $(COMPILED) $(VENDOR_LUA) $(VENDOR_TOP)
+development: $(LUA_T) $(C_SHARED) luacheck luacov $(COMPILED) $(VENDOR_LUA) $(VENDOR_TOP)
 	for f in $(SRC); do $(CP) $(SRC_P)/$$f.lua .; done
 	$(RMRF) $(SRC_DIRS)
 	for d in $(SRC_DIRS); do $(CPR) $(SRC_P)/$$d .; done

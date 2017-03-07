@@ -1,5 +1,5 @@
 .PHONY: default
-default: dev
+default: development
 EXE:= test
 SRC:= src moon_src
 SRC_DIR:= moon
