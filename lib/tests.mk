@@ -110,8 +110,8 @@ endif
 
 ifneq ($(MAKECMDGOALS), release)
   CCWARN:= -Wall -Wextra -Wdeclaration-after-statement -Wredundant-decls -Wshadow -Wpointer-arith
-  TARGET_CFLAGS:= -O0 -fno-omit-frame-pointer -g
-  CFLAGS:= -O0 -fno-omit-frame-pointer -g
+  TARGET_CFLAGS:= -O0 -fno-omit-frame-pointer -ggdb
+  CFLAGS:= -O0 -fno-omit-frame-pointer -ggdb
   ifeq ($(shell $(CONFIGURE_P)/test-gcc48.sh $(CC)), true)
 	CFLAGS+= -fsanitize=address
   endif
