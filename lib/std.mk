@@ -77,4 +77,4 @@ has-%:
 		exit -1; \
 	}
 
-.PHONY: dev release new clean install print-% vprint-% has-%
+.PHONY: development release new clean install print-% vprint-% has-%
