@@ -86,6 +86,7 @@ Project                                                     | Version         | 
 [linenoise](http://github.com/antirez/linenoise)            | c894b9e         | BSD 2C
 [moonpick](https://github.com/nilnor/moonpick)              | 2e390b3         | MIT
 [luacheck](https://github.com/mpeterv/luacheck)             | 0.19.0          | MIT
+[luacov](https://github.com/keplerproject/luacov)           | 0.12.0          | MIT
 
 #### Available modules (Feel free to open a Github issue if you want help with adding a new Lua module.)
 
