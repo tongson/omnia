@@ -1,5 +1,5 @@
 .PHONY: default
-default: dev
+default: development
 EXE:=
 SRC:=
 SRC_DIR:=
