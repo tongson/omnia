@@ -63,6 +63,12 @@ Lua does not have facilities to traverse directories and I'd like to avoid shell
 1. Provide a Makefile in `vendor/c/$(NAME)/Makefile`. See existing modules such as luaposix and lpeg for pointers.
 1. Add `$(NAME)` to `VENDOR_C`
 
+#### Development
+
+The default make target is development which runs Luacheck against your Lua source code.
+
+Luacov is also integrated. Just run the your test code with Luacov loaded e.g. `bin/lua -lluacov tests.lua`. Then `bin/luacov.lua` to generate the report.
+
 #### Example application using omnia
 
 The included Lua script might be too simplistic to demonstrate Omnia. For a more complicated application check my 'fork' of [LDoc](https://github.com/tongson/LDoc)
