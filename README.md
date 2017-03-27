@@ -1,11 +1,9 @@
-Omnia
+Omnia -- Batteries included Lua
 =====
 
-Compile Lua and MoonScript source code into standalone executables. This makes it easy to use them for general purpose scripting.
+Compile Lua and MoonScript source code into standalone executables. This makes it easy to Lua for general purpose scripting.
 
-Ideally you would do development with Lua and Luarocks then deploy to production using Omnia.
-
-It's another Lua 5.3 build system for standalone executables. My main use case is for ELF platforms and statically linking with [musl libc](http://www.musl-libc.org/).
+Another Lua 5.3 build system for standalone executables. Targets ELF platforms and statically linking with [musl libc](http://www.musl-libc.org/).
 
 This was made possible by [luastatic](https://github.com/ers35/luastatic)
 
