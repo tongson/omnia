@@ -94,28 +94,29 @@ Project                                                     | Version         | 
 
 #### Available modules (Feel free to open a Github issue if you want help with adding a new Lua module.)
 
-Module                                                          | Version         | License
-----------------------------------------------------------------|-----------------|---------
-[Luaposix](https://github.com/luaposix/luaposix)[1]             | 33.4.0          | MIT
-[Linotify](https://github.com/hoelzro/linotify)                 | 0.4             | MIT
-[LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)                | 1.0.1           | MIT
-[lsocket](http://tset.de/lsocket/)[2]                           | 1.4             | MIT
-[luafilesystem](https://github.com/keplerproject/luafilesystem) | 1.6.3           | MIT
-[md5](http://www.rjek.com/luahash-0.00.tar.bz2)                 | 0.00            | PD
-[cwtest](https://github.com/catwell/cwtest)                     | b027449         | MIT
-[lua-linenoise](https://github.com/hoelzro/lua-linenoise)       | f30fa48         | MIT
-[inspect.lua](https://github.com/kikito/inspect.lua)            | 3.1.0           | MIT
-[cimicida](https://github.com/Configi/configi)                  | HEAD            | MIT
-[lib](https://github.com/Configi/configi)                       | HEAD            | MIT
-[tapered](https://bitbucket.org/telemachus/tapered)             | 2.1.0           | BSD 3C
-[px](https://github.com/Configi/configi)                        | HEAD            | MIT
-[factid](https://github.com/Configi/configi)                    | HEAD            | MIT
-[crc32lua](https://github.com/davidm/lua-digest-crc32lua)       | 0.3.20111128-1  | MIT
-[sha2](http://lua-users.org/wiki/SecureHashAlgorithm)           | 201412011639-r7 | MIT
-[Lua-cURLv3](https://github.com/Lua-cURL/Lua-cURLv3)            | 0.3.5           | MIT
-[rabbit](https://github.com/philanc/plc)                        | 9c37954         | MIT
-[argparse](https://github.com/mpeterv/argparse)                 | 0.5.0           | MIT
-[dkjson](http://dkolf.de/src/dkjson-lua.fsl/home)               | c23a579         | MIT
+Module                                                                          | Version         | License
+--------------------------------------------------------------------------------|-----------------|---------
+[Luaposix](https://github.com/luaposix/luaposix)[1]                             | 33.4.0          | MIT
+[Linotify](https://github.com/hoelzro/linotify)                                 | 0.4             | MIT
+[LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)                                | 1.0.1           | MIT
+[lsocket](http://tset.de/lsocket/)[2]                                           | 1.4             | MIT
+[luafilesystem](https://github.com/keplerproject/luafilesystem)                 | 1.6.3           | MIT
+[md5](http://www.rjek.com/luahash-0.00.tar.bz2)                                 | 0.00            | PD
+[cwtest](https://github.com/catwell/cwtest)                                     | b027449         | MIT
+[lua-linenoise](https://github.com/hoelzro/lua-linenoise)                       | f30fa48         | MIT
+[inspect.lua](https://github.com/kikito/inspect.lua)                            | 3.1.0           | MIT
+[cimicida](https://github.com/Configi/configi)                                  | HEAD            | MIT
+[lib](https://github.com/Configi/configi)                                       | HEAD            | MIT
+[tapered](https://bitbucket.org/telemachus/tapered)                             | 2.1.0           | BSD 3C
+[px](https://github.com/Configi/configi)                                        | HEAD            | MIT
+[factid](https://github.com/Configi/configi)                                    | HEAD            | MIT
+[crc32lua](https://github.com/davidm/lua-digest-crc32lua)                       | 0.3.20111128-1  | MIT
+[sha2](http://lua-users.org/wiki/SecureHashAlgorithm)                           | 201412011639-r7 | MIT
+[Lua-cURLv3](https://github.com/Lua-cURL/Lua-cURLv3)                            | 0.3.5           | MIT
+[rabbit](https://github.com/philanc/plc)                                        | 9c37954         | MIT
+[argparse](https://github.com/mpeterv/argparse)                                 | 0.5.0           | MIT
+[dkjson](http://dkolf.de/src/dkjson-lua.fsl/home)                               | c23a579         | MIT
+[lua-ConciseSerialization](https://github.com/fperrad/lua-ConciseSerialization) | 0.2.0           | MIT
 
 
 [1] posix.deprecated and posix.compat removed<br/>
