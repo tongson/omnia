@@ -1,8 +1,19 @@
 #include <string.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <lua.h>
 #include <lauxlib.h>
+
+void
+assertion_failed(const char *file, int line, const char *diag, const char *cond)
+{
+	fprintf(stderr, "Assertion failed on %s line %d: %s\n", file, line, cond);
+	fprintf(stderr, "Diagnostic: %s\n", diag);
+	fflush(stderr);
+	abort();
+}
 
 /*
  * From: https://boringssl.googlesource.com/boringssl/+/ad1907fe73334d6c696c8539646c21b11178f20f
