@@ -27,6 +27,16 @@ bzero_x(void *ptr, size_t len)
 	__asm__ __volatile__("" : : "r"(ptr) : "memory");
 }
 
+int
+assert_bzero_x(unsigned char *buf, size_t len)
+{
+	int z = 0;
+	int i;
+	for (i = 0; i < len; ++i)
+		z |= buf[i];
+	return z != 0;
+}
+
 char
 *strncpy_x(char *dest, const char *src, size_t n)
 {
