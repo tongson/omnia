@@ -93,6 +93,7 @@ get(lua_State *L)
 	lua_settop(L, 0);
 	while (1) {
 		bzero_x(buf, BUFSZ);
+		REQUIRE(assert_bzero_x(buf, BUFSZ) == 0, "bzero_x() failed. Compiler behavior changed!");
 		read = recv(fd, buf, sizeof(buf), 0);
 		if (read > 0) {
 			lua_pushlstring(L, buf, read);
