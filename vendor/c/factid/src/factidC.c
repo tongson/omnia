@@ -32,7 +32,6 @@
 # include <utmpx.h>
 #endif
 
-#include <assert.h>
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -171,11 +170,10 @@ static int Fsysconf(lua_State *L)
 
 	lua_createtable(L, 0, 6);
 	int c;
-	for (c = 0; c < sizeof m/sizeof *m; c++) {
+	for (c = 0; c < 7; c++) {
 		lua_pushinteger(L, m[c].sc);
 		lua_setfield(L, -2, m[c].name);
 	}
-	assert(c == 6);
 	return 1;
 }
 
@@ -189,7 +187,6 @@ static int Fhostname(lua_State *L)
 	char hostname[1026]; // NI_MAXHOST + 1
 	if (!gethostname(hostname, (sizeof hostname)-1)) {
 		hostname[(sizeof hostname)-1] = '\0';
-		assert(hostname[1025] == '\0');
 		lua_pushstring(L, hostname);
 	} else {
 		return pusherrno(L, "gethostname(2) error");
@@ -257,7 +254,7 @@ static int Fhostid(lua_State *L)
 	char hostid[9];
 
 	snprintf(hostid, sizeof hostid, "%08lx", gethostid());
-	assert(hostid[8] == '\0');
+	hostid[8] = '\0';
 	lua_pushstring(L, hostid);
 	return 1;
 }
@@ -277,7 +274,7 @@ static int Ftimezone(lua_State *L)
 
         setlocale(LC_TIME, "C");
 	if (!strftime(tzbuf, sizeof tzbuf, "%Z", te)) return pusherror(L, "strftime(3) error");
-	assert(tzbuf[3] == '\0');
+	tzbuf[3] = '\0';
 	lua_pushstring(L, tzbuf);
 	return 1;
 }
