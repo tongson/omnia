@@ -492,7 +492,7 @@ static int Fmacaddrs(lua_State *L)
 			(unsigned char)cifr->ifr_hwaddr.sa_data[3],
 			(unsigned char)cifr->ifr_hwaddr.sa_data[4],
 			(unsigned char)cifr->ifr_hwaddr.sa_data[5]);
-		assert(mac[17] == '\0');
+		mac[17] = '\0';
 		lua_pushstring(L, mac);
 		lua_setfield(L, -2, cifr->ifr_name);
 	}
