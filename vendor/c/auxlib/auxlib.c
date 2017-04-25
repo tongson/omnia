@@ -31,7 +31,7 @@ int
 assert_bzero_x(unsigned char *buf, size_t len)
 {
 	int z = 0;
-	int i;
+	size_t i;
 	for (i = 0; i < len; ++i)
 		z |= buf[i];
 	return z != 0;
