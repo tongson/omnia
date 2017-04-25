@@ -15,7 +15,7 @@ set_name(lua_State *L)
 		return luaX_pusherror(L, "Argument to prctl.set_name() cannot exceed 15 characters.");
 	}
 	char psname[16];
-	strnmove(psname, name, 15);
+	auxL_strnmove(psname, name, 15);
 	if (prctl(PR_SET_NAME, (char *) psname, 0, 0, 0) == -1) {
 		return luaX_pusherrno(L, "prctl(2) error");
 	}

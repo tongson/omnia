@@ -269,7 +269,7 @@ string(lua_State *L)
         }
 	/* luaL_checkstring adds a NUL terminator. Only copy up to 255 characters. */
 	char psname[SPT_MAXTITLE];
-	strnmove(psname, name, (SPT_MAXTITLE-1));
+	auxL_strnmove(psname, name, (SPT_MAXTITLE-1));
 	setproctitle_impl("%s", psname);
         return 1;
 }

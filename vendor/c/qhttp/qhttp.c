@@ -42,7 +42,7 @@ get(lua_State *L)
 	if ((len = strlen(uri)) > MAXURI) {
 		return luaX_pusherror(L, "URI too long.");
 	}
-	strnmove(ip, arg_ip, 16);
+	auxL_strnmove(ip, arg_ip, 16);
 	target.sin_family = AF_INET;
 	target.sin_port = htons(80);
 	if (inet_pton(AF_INET, ip, &target.sin_addr.s_addr) == 0) {
@@ -92,8 +92,8 @@ get(lua_State *L)
 
 	lua_settop(L, 0);
 	while (1) {
-		bzero_x(buf, BUFSZ);
-		REQUIRE(assert_bzero_x(buf, BUFSZ) == 0, "bzero_x() failed. Compiler behavior changed!");
+		auxL_bzero(buf, BUFSZ);
+		REQUIRE(auxL_assert_bzero(buf, BUFSZ) == 0, "auxL_bzero() failed. Compiler behavior changed!");
 		read = recv(fd, buf, sizeof(buf), 0);
 		if (read > 0) {
 			lua_pushlstring(L, buf, read);
