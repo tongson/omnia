@@ -11,7 +11,7 @@ assertion_failed(const char *file, int line, const char *diag, const char *cond)
 {
 	fprintf(stderr, "Assertion failed on %s line %d: %s\n", file, line, cond);
 	fprintf(stderr, "Diagnostic: %s\n", diag);
-	fflush(stderr);
+	(void)fflush(stderr);
 	abort();
 }
 
