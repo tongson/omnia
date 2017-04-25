@@ -7,7 +7,7 @@
 #include <lauxlib.h>
 
 void
-assertion_failed(const char *file, int line, const char *diag, const char *cond)
+auxI_assertion_failed(const char *file, int line, const char *diag, const char *cond)
 {
 	fprintf(stderr, "Assertion failed on %s line %d: %s\n", file, line, cond);
 	fprintf(stderr, "Diagnostic: %s\n", diag);
@@ -21,14 +21,14 @@ assertion_failed(const char *file, int line, const char *diag, const char *cond)
  */
 
 void
-bzero_x(void *ptr, size_t len)
+auxL_bzero(void *ptr, size_t len)
 {
 	memset(ptr, 0, len);
 	__asm__ __volatile__("" : : "r"(ptr) : "memory");
 }
 
 int
-assert_bzero_x(unsigned char *buf, size_t len)
+auxL_assert_bzero(unsigned char *buf, size_t len)
 {
 	int z = 0;
 	size_t i;
@@ -38,7 +38,7 @@ assert_bzero_x(unsigned char *buf, size_t len)
 }
 
 char
-*strncpy_x(char *dest, const char *src, size_t n)
+*auxL_strncpy(char *dest, const char *src, size_t n)
 {
 	size_t len = strlen(src);
 	if (len != 0) {
@@ -47,14 +47,14 @@ char
 		}
 		memmove(dest, src, len);
 		if (len < n) {
-			bzero_x(dest + len, n - len);
+			auxL_bzero(dest + len, n - len);
 		}
 	}
 	return dest;
 }
 
 char
-*strnmove(char *dest, const char *src, size_t n)
+*auxL_strnmove(char *dest, const char *src, size_t n)
 {
 	if (n > 0) {
 		size_t len = strlen(src);
