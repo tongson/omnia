@@ -63,7 +63,7 @@ char
 				len = n - 1;
 			}
 			memmove(dest, src, len);
-			dest[len] = 0;
+			dest[len] = '\0';
 		}
 	}
 	return dest;
