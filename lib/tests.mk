@@ -109,11 +109,11 @@ ifeq ($(HAVE_FCNTL_CLOSEM), true)
 endif
 
 ifneq ($(MAKECMDGOALS), release)
-  CCWARN:= -Wall -Wextra -Wdeclaration-after-statement -Wredundant-decls -Wshadow -Wpointer-arith
-  TARGET_CFLAGS:= -O0 -fno-omit-frame-pointer -ggdb
-  CFLAGS:= -O0 -fno-omit-frame-pointer -ggdb
+  CCWARN:= -Wall -Wextra -Wredundant-decls -Wshadow -Wpointer-arith
+  TARGET_CFLAGS:= -std=c99 -O0 -fno-omit-frame-pointer -ggdb
+  CFLAGS:= -std=c99 -O0 -fno-omit-frame-pointer -ggdb
   ifeq ($(shell $(CONFIGURE_P)/test-gcc48.sh $(CC)), true)
-	CFLAGS+= -fsanitize=address
+	CFLAGS+= -fsanitize=address -fsanitize=leak -fsanitize=undefined
   endif
   TARGET_CCOPT:= $(NULSTRING)
   CCOPT:= $(NULSTRING)
