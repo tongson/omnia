@@ -74,8 +74,8 @@ clean: $(CLEAN)
 
 install: $(EXE_T)
 	$(ECHO) "Installing..."
-	$(INSTALL) -d $(PREFIX)/bin
-	$(INSTALL) -c $(EXE_T) $(PREFIX)/$(EXE_T)
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL) -c $(EXE_T) $(DESTDIR)$(PREFIX)/$(EXE_T)
 	$(ECHO) "Done!"
 
 new:
