@@ -108,7 +108,7 @@ ifeq ($(HAVE_FCNTL_CLOSEM), true)
   pxDEFINES+= -DHAVE_FCNTL_CLOSEM
 endif
 
-ifneq ($(MAKECMDGOALS), release)
+ifeq ($(or $(MAKECMDGOALS),$(.DEFAULT_GOAL)), development)
   CCWARN:= -Wall -Wextra -Wredundant-decls -Wshadow -Wpointer-arith
   TARGET_CFLAGS:= -std=c99 -O0 -fno-omit-frame-pointer -ggdb
   CFLAGS:= -std=c99 -O0 -fno-omit-frame-pointer -ggdb
