@@ -1,4 +1,4 @@
-.DEFAULT_GOAL: development
+.DEFAULT_GOAL= development
 EXE:= test
 SRC:= src moon_src
 SRC_DIR:= moon
