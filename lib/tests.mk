@@ -110,8 +110,8 @@ endif
 
 ifeq ($(or $(MAKECMDGOALS),$(.DEFAULT_GOAL)), development)
   CCWARN:= -Wall -Wextra -Wredundant-decls -Wshadow -Wpointer-arith
-  TARGET_CFLAGS:= -std=c99 -O0 -fno-omit-frame-pointer -ggdb
-  CFLAGS:= -std=c99 -O0 -fno-omit-frame-pointer -ggdb
+  TARGET_CFLAGS:= -O0 -fno-omit-frame-pointer -ggdb
+  CFLAGS:= -O0 -fno-omit-frame-pointer -ggdb
   ifeq ($(shell $(CONFIGURE_P)/test-gcc48.sh $(CC)), true)
 	CFLAGS+= -fsanitize=address -fsanitize=leak -fsanitize=undefined
   endif
