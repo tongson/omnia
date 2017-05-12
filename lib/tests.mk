@@ -113,7 +113,7 @@ ifeq ($(or $(MAKECMDGOALS),$(.DEFAULT_GOAL)), development)
   TARGET_CFLAGS:= -O0 -fno-omit-frame-pointer -ggdb
   CFLAGS:= -O0 -fno-omit-frame-pointer -ggdb
   ifeq ($(shell $(CONFIGURE_P)/test-gcc48.sh $(CC)), true)
-	CFLAGS+= -fsanitize=address -fsanitize=leak -fsanitize=undefined
+	CFLAGS+= -fsanitize=address
   endif
   TARGET_CCOPT:= $(NULSTRING)
   CCOPT:= $(NULSTRING)
