@@ -115,6 +115,9 @@ ifeq ($(or $(MAKECMDGOALS),$(.DEFAULT_GOAL)), development)
   ifeq ($(shell $(CONFIGURE_P)/test-gcc48.sh $(CC)), true)
 	CFLAGS+= -fsanitize=address
   endif
+  ifeq ($(IS_CC), CLANG)
+	CFLAGS+= -fsanitize=address
+  endif
   TARGET_CCOPT:= $(NULSTRING)
   CCOPT:= $(NULSTRING)
   TARGET_LDFLAGS:= $(NULSTRING)
