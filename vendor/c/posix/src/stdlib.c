@@ -1,6 +1,6 @@
 /*
  * POSIX library for Lua 5.1, 5.2 & 5.3.
- * Copyright (C) 2013-2016 Gary V. Vaughan
+ * Copyright (C) 2013-2017 Gary V. Vaughan
  * Copyright (C) 2010-2013 Reuben Thomas <rrt@sc3d.org>
  * Copyright (C) 2008-2010 Natanael Copa <natanael.copa@gmail.com>
  * Clean up and bug fixes by Leo Razoumov <slonik.az@gmail.com> 2006-10-11
@@ -14,8 +14,6 @@
 
 @module posix.stdlib
 */
-
-#include <config.h>
 
 #include <fcntl.h>	/* for open(2) */
 #include <stdlib.h>
@@ -143,12 +141,14 @@ Create a unique temporary file.
 @function mkstemp
 @string templ pattern that ends in six 'X' characters
 @treturn[1] int open file descriptor
-@treturn[2] string path to file, if successful
+@treturn[1] string path to file, if successful
 @return[2] nil
 @treturn[2] string error message
 @treturn[2] int errnum
 @see mkstemp(3)
-@usage P.mkstemp 'wooXXXXXX'
+@usage
+local stdlib = require "posix.stdlib"
+stdlib.mkstemp 'wooXXXXXX'
 */
 static int
 Pmkstemp(lua_State *L)
@@ -323,7 +323,7 @@ LUALIB_API int
 luaopen_posix_stdlib(lua_State *L)
 {
 	luaL_register(L, "posix.stdlib", posix_stdlib_fns);
-	lua_pushliteral(L, "posix.stdlib for " LUA_VERSION " / " PACKAGE_STRING);
+	lua_pushstring(L, LPOSIX_VERSION_STRING("stdlib"));
 	lua_setfield(L, -2, "version");
 
 	return 1;

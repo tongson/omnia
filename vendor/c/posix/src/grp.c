@@ -1,6 +1,6 @@
 /*
  * POSIX library for Lua 5.1, 5.2 & 5.3.
- * Copyright (C) 2013-2016 Gary V. Vaughan
+ * Copyright (C) 2013-2017 Gary V. Vaughan
  * Copyright (C) 2010-2013 Reuben Thomas <rrt@sc3d.org>
  * Copyright (C) 2008-2010 Natanael Copa <natanael.copa@gmail.com>
  * Clean up and bug fixes by Leo Razoumov <slonik.az@gmail.com> 2006-10-11
@@ -17,8 +17,6 @@
 @see posix.pwd
 @module posix.grp
 */
-
-#include <config.h>
 
 #include <grp.h>
 
@@ -79,12 +77,13 @@ Fetch next group.
 @treturn PosixGroup next group record
 @see endgrent
 @usage
-  t = P.getgrent ()
+  local grp = require "posix.grp"
+  t = grp.getgrent ()
   while t ~= nil do
     process (t)
-    t = P.getgrent ()
+    t = grp.getgrent ()
   end
-  P.endgrent ()
+  grp.endgrent ()
 */
 static int
 Pgetgrent(lua_State *L)
@@ -104,7 +103,8 @@ Fetch group with given group id.
 @int gid group id
 @treturn PosixGroup group record for *gid*
 @usage
-  t = P.getgrgid (0)
+  local grp = require "posix.grp"
+  t = grp.getgrgid (0)
 */
 static int
 Pgetgrgid(lua_State *L)
@@ -127,7 +127,8 @@ Fetch named group.
 @string name group name
 @treturn PosixGroup group record for *name*
 @usage
-  t = P.getgrnam "wheel"
+  local grp = require "posix.grp"
+  t = grp.getgrnam "wheel"
 */
 static int
 Pgetgrnam(lua_State *L)
@@ -173,7 +174,7 @@ LUALIB_API int
 luaopen_posix_grp(lua_State *L)
 {
 	luaL_register(L, "posix.grp", posix_grp_fns);
-	lua_pushliteral(L, "posix.grp for " LUA_VERSION " / " PACKAGE_STRING);
+	lua_pushstring(L, LPOSIX_VERSION_STRING("grp"));
 	lua_setfield(L, -2, "version");
 
 	return 1;

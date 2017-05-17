@@ -1,15 +1,18 @@
 --[[
  POSIX library for Lua 5.1, 5.2 & 5.3.
- Copyright (C) 2013-2016 Gary V. Vaughan
+ Copyright (C) 2013-2017 Gary V. Vaughan
  Copyright (C) 2010-2013 Reuben Thomas <rrt@sc3d.org>
  Copyright (C) 2008-2010 Natanael Copa <natanael.copa@gmail.com>
 ]]
 --[[--
  Lua POSIX bindings.
 
- In addition to the convenience functions documented in this module, all
- APIs from submodules are copied into the return table for convenience and
- backwards compatibility.
+ In addition to the convenience functions documented in this module, many
+ APIs from submodules are copied into the return table for backwards
+ compatibility and, if necessary, wrapped to match the deprecated API.
+
+ This means that your old code will continue to work, but that you can
+ use the improved documented APIs in new code.
 
  @module posix
 ]]
@@ -20,7 +23,7 @@ local M = {}
 
 -- For backwards compatibility, copy all table entries into M namespace.
 for _, sub in ipairs {
-  "ctype", "dirent", "errno", "fcntl", "fnmatch", "getopt", "glob", "grp",
+  "ctype", "dirent", "errno", "fcntl", "fnmatch", "glob", "grp",
   "libgen", "poll", "pwd", "sched", "signal", "stdio", "stdlib", "sys.msg",
   "sys.resource", "sys.socket", "sys.stat", "sys.statvfs", "sys.time",
   "sys.times", "sys.utsname", "sys.wait", "syslog", "termio", "time",
@@ -43,8 +46,6 @@ end
 for k, v in pairs (require "posix.compat") do
   M[k] = v
 end
-
-M.version = "posix for " .. _VERSION .. " / luaposix 33.4.0"
 
 
 local argerror, argtypeerror, checkstring, checktable, toomanyargerror =
@@ -197,9 +198,9 @@ end
 
 --- Exec a command or Lua function.
 -- @function execx
--- @param task, a table of arguments to `P.execp` or a Lua function, which
---   should read from standard input, write to standard output, and return
---   an exit code
+-- @tparam table task argument list for @{posix.unistd.execp} or a Lua
+--   function, which should read from standard input, write to standard
+--   output, and return an exit code
 -- @param ... positional arguments to the function
 -- @treturn nil on error (normally does not return)
 -- @treturn string error message
@@ -233,11 +234,13 @@ else
 end
 
 
---- Run a command or function in a sub-process using `P.execx`.
+--- Run a command or function in a sub-process using @{posix.execx}.
 -- @function spawn
--- @param task, as for `P.execx`.
--- @param ... as for `P.execx`
--- @return values as for `P.wait`
+-- @tparam table task argument list for @{posix.unistd.execp} or a Lua
+--   function, which should read from standard input, write to standard
+--   output, and return an exit code
+-- @param ... as for @{posix.execx}
+-- @return values as for @{posix.sys.wait.wait}
 
 local unpack = table.unpack or unpack -- 5.3 compatibility
 
@@ -276,7 +279,8 @@ local STDIN_FILENO, STDOUT_FILENO = M.STDIN_FILENO, M.STDOUT_FILENO
 --- Close a pipeline opened with popen or popen_pipeline.
 -- @function pclose
 -- @tparam table pfd pipeline object
--- @return values as for `P.wait`, for the last (or only) stage of the pipeline
+-- @return values as for @{posix.sys.wait.wait}, for the last (or only)
+--   stage of the pipeline
 
 local function pclose (pfd)
   close (pfd.fd)
@@ -310,11 +314,15 @@ end
 
 --- Run a commands or Lua function in a sub-process.
 -- @function popen
--- @tparam task, as for @{execx}
+-- @tparam table task argument list for @{posix.unistd.execp} or a Lua
+--   function, which should read from standard input, write to standard
+--   output, and return an exit code
 -- @tparam string mode `"r"` for read or `"w"` for write
 -- @func[opt] pipe_fn function returning a paired read and
 --   write file descriptor (*default* @{posix.unistd.pipe})
 -- @treturn pfd pipeline object
+-- @see posix.execx
+-- @see posix.spawn
 
 local function popen (task, mode, pipe_fn)
   local read_fd, write_fd = (pipe_fn or pipe) ()
@@ -361,7 +369,7 @@ end
 
 --- Perform a series of commands and Lua functions as a pipeline.
 -- @function popen_pipeline
--- @tparam table t tasks for @{execx}
+-- @tparam table t tasks for @{posix.execx}
 -- @tparam string mode `"r"` for read or `"w"` for write
 -- @func[opt] pipe_fn function returning a paired read and
 --   write file descriptor (*default* @{posix.unistd.pipe})
@@ -512,5 +520,45 @@ if _DEBUG ~= false then
   end
 end
 
+--- Find all files in this directory matching a shell pattern.
+-- The flag MARK appends a trailing slash to matches that are directories.
+-- @function glob
+-- @tparam table|string|nil args the three possible parameters can be used to
+-- override the default values for `pattern` and `MARK`, which are `"*"` and
+-- `false` respectively. A table will be checked for optional keys `pattern`
+-- and `MARK`. A string will be used as the glob pattern.
+-- @treturn table matching files and directories
+local posix_glob = require "posix.glob"
+
+local function glob (args)
+  -- Support previous `glob ".*"` style calls.
+  if type(args) == "string" then
+    args = {pattern=args}
+  elseif type(args) ~= "table" then
+    args = {}
+  end
+  local flags = 0
+  if args.MARK then
+    flags = posix_glob.GLOB_MARK
+  end
+  return posix_glob.glob(args.pattern, flags)
+end
+
+if _DEBUG ~= false then
+  local validtypes = { ["table"] = true, ["string"] = true, ["nil"] = true }
+
+  M.glob = function (...)
+    local argt = {...}
+    local argtype = type(argt[1])
+    if validtypes[argtype] ~= true then
+      argtypeerror ("glob", 1, "table, string or nil", argt[1])
+    elseif #argt > 1 then
+      toomanyargerror ("glob", 1, #argt)
+    end
+    return glob (...)
+  end
+else
+  M.glob = glob
+end
 
 return M

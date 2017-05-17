@@ -1,6 +1,6 @@
 /*
  * POSIX library for Lua 5.1, 5.2 & 5.3.
- * Copyright (C) 2013-2016 Gary V. Vaughan
+ * Copyright (C) 2013-2017 Gary V. Vaughan
  * Copyright (C) 2010-2013 Reuben Thomas <rrt@sc3d.org>
  * Copyright (C) 2008-2010 Natanael Copa <natanael.copa@gmail.com>
  * Clean up and bug fixes by Leo Razoumov <slonik.az@gmail.com> 2006-10-11
@@ -17,8 +17,6 @@
 
 @module posix.unistd
 */
-
-#include <config.h>
 
 #if HAVE_CRYPT_H
 #  include <crypt.h>
@@ -88,7 +86,9 @@ Check real user's permissions for a file.
 @treturn[2] string error message
 @treturn[2] int errnum
 @see access(2)
-@usage status, errstr, errno = P.access("/etc/passwd", "rw")
+@usage
+  local unistd = require "posix.unistd"
+  status, errstr, errno = unistd.access("/etc/passwd", "rw")
 */
 static int
 Paccess(lua_State *L)
@@ -117,7 +117,9 @@ Schedule an alarm signal.
 @int seconds number of seconds to send SIGALRM in
 @return int number of seconds remaining in previous alarm or `0`
 @see alarm(2)
-@usage seconds = P.alarm(10)
+@usage
+  local unistd = require "posix.unistd"
+  seconds = unistd.alarm(10)
 */
 static int
 Palarm(lua_State *L)
@@ -135,7 +137,9 @@ Set the working directory.
 @treturn[2] string error message
 @treturn[2] int errnum
 @see chdir(2)
-@usage status, errstr, errno = P.chdir("/var/tmp")
+@usage
+  local unistd = require "posix.unistd"
+  status, errstr, errno = unistd.chdir ("/var/tmp")
 */
 static int
 Pchdir(lua_State *L)
@@ -158,8 +162,9 @@ Change ownership of a file.
 @treturn[2] int errnum
 @see chown(2)
 @usage
--- will fail for a normal user, and print an error
-print(P.chown("/etc/passwd",100,200))
+  local unistd = require "posix.unistd"
+  -- will fail for a normal user, and print an error
+  print(unistd.chown ("/etc/passwd", 100, 200))
 */
 static int
 Pchown(lua_State *L)
@@ -182,8 +187,9 @@ Close an open file descriptor.
 @treturn[2] int errnum
 @see close(2)
 @usage
-local ok, errmsg = P.close (log)
-if not ok then error (errmsg) end
+  local unistd = require "posix.unistd"
+  local ok, errmsg = unistd.close (log)
+  if not ok then error (errmsg) end
 */
 static int
 Pclose(lua_State *L)
@@ -204,10 +210,13 @@ Not recommended for general encryption purposes.
 @return encrypted string
 @see crypt(3)
 @usage
-local salt, hash = pwent:match ":$6$(.-)$([^:]+)"
-if P.crypt (trypass, salt) ~= hash then
-  error "wrong password"
-end
+  local pwd = require "posix.pwd"
+  local unistd = require "posix.unistd"
+
+  local salt, hash = pwd.pwent:match ":$6$(.-)$([^:]+)"
+  if unistd.crypt (trypass, salt) ~= hash then
+    error "wrong password"
+  end
 */
 static int
 Pcrypt(lua_State *L)
@@ -237,7 +246,10 @@ Duplicate an open file descriptor.
 @treturn[2] int errnum
 @see dup(2)
 @usage
-local outfd = P.dup (P.fileno (io.stdout))
+  local stdio = require "posix.stdio"
+  local unistd = require "posix.unistd"
+
+  outfd = unistd.dup (stdio.fileno (io.stdout))
 */
 static int
 Pdup(lua_State *L)
@@ -316,7 +328,7 @@ Execute a program without using the shell.
 @return nil
 @treturn string error message
 @see execve(2)
-@usage exec ("/bin/bash", {[0] = "-sh", "--norc})
+@usage exec ("/bin/bash", {[0] = "-sh", "--norc"})
 */
 static int
 Pexec(lua_State *L)
@@ -379,15 +391,17 @@ Fork this program.
 @see fork.lua
 @see fork2.lua
 @usage
-local pid, errmsg = P.fork ()
-if pid == nil then
-  error (errmsg)
-elseif pid == 0 then
-  print ("in child:", P.getpid "pid")
-else
-  print (P.wait (pid))
-end
-os.exit ()
+  local unistd = require "posix.unistd"
+
+  local pid, errmsg = unistd.fork ()
+  if pid == nil then
+    error (errmsg)
+  elseif pid == 0 then
+    print ("in child:", unistd.getpid "pid")
+  else
+    print (require "posix.sys.wait".wait (pid))
+  end
+  os.exit ()
 */
 static int
 Pfork(lua_State *L)
@@ -554,6 +568,79 @@ Pgetlogin(lua_State *L)
 }
 
 
+static int
+iter_getopt(lua_State *L)
+{
+	int r, argc = lua_tointeger(L, lua_upvalueindex(1));
+	char **argv = (char **)lua_touserdata(L, lua_upvalueindex(3));
+	char c;
+
+	if (argv == NULL) /* If we have already completed, return now. */
+		return 0;
+
+	/* Fetch upvalues to pass to getopt. */
+	r = getopt(argc, argv, lua_tostring(L, lua_upvalueindex(2)));
+	if (r == -1)
+		return 0;
+
+	c = (char) r;
+	lua_pushlstring(L, &c, 1);
+	lua_pushstring(L, optarg);
+	lua_pushinteger(L, optind);
+	return 3;
+}
+
+
+/***
+Parse command-line options.
+@function getopt
+@param arg command line arguments
+@string opts short option specifier
+@int[opt=0] opterr index of the option with an error
+@int[opt=1] optind index of the next unprocessed option
+@treturn option iterator, returning 3 values
+@see getopt(3)
+@see getopt.lua
+@usage
+local getopt = require "posix.getopt".getopt
+for opt, opterr, i in getopt (arg, "ho:v", opterr, i) do
+  process (arg, opterr, i)
+end
+*/
+static int
+Pgetopt(lua_State *L)
+{
+	int argc, i;
+	const char *optstring;
+	char **argv;
+
+	checknargs(L, 4);
+	checktype(L, 1, LUA_TTABLE, "list");
+	optstring = luaL_checkstring(L, 2);
+	opterr = optint(L, 3, 0);
+	optind = optint(L, 4, 1);
+
+	argc = (int)lua_objlen(L, 1) + 1;
+
+	lua_pushinteger(L, argc);
+	lua_pushstring(L, optstring);
+
+	argv = lua_newuserdata(L, (argc + 1) * sizeof(char *));
+	argv[argc] = NULL;
+	for (i = 0; i < argc; i++)
+	{
+		lua_pushinteger(L, i);
+		lua_gettable(L, 1);
+		argv[i] = (char *)luaL_checkstring(L, -1);
+	}
+
+	/* Push remaining upvalues, and make and push closure. */
+	lua_pushcclosure(L, iter_getopt, 3 + argc);
+
+	return 1;
+}
+
+
 /***
 Return process group id of calling process.
 @function getpgrp
@@ -650,6 +737,37 @@ Pisatty(lua_State *L)
 }
 
 
+#if LPOSIX_2001_COMPLIANT
+/***
+This is like `chown`, but does not dereference symbolic links.
+In other words, if a file is a symlink, then it changes ownership of the
+symlink itself.
+@function lchown
+@string path existing file path
+@tparam string|int uid new owner user id
+@tparam string|int gid new owner group id
+@treturn[1] int `0`, if successful
+@return[2] nil
+@treturn[2] string error messoge
+@treturn[2] int errnum
+@see lchown(2)
+@usage
+  local unistd = require "posix.unistd"
+  -- will fail for a normal user, and print an error
+  print(unistd.lchown ("/etc/passwd", 100, 200))
+*/
+static int
+Plchown(lua_State *L)
+{
+	const char *path = luaL_checkstring(L, 1);
+	uid_t uid = mygetuid(L, 2);
+	gid_t gid = mygetgid(L, 3);
+	checknargs(L, 3);
+	return pushresult(L, lchown(path, uid, gid), path);
+}
+#endif
+
+
 /***
 Create a link.
 @function link
@@ -724,7 +842,9 @@ Get a value for a configuration option for a filename.
   `_PC_VDISABLE`
 @treturn int associated path configuration value
 @see pathconf(3)
-@usage for a, b in pairs (P.pathconf "/dev/tty") do print(a, b) end
+@usage
+  local unistd = require "posix.unistd"
+  for a, b in pairs (unistd.pathconf "/dev/tty") do print(a, b) end
 */
 static int
 Ppathconf(lua_State *L)
@@ -966,7 +1086,7 @@ Get configuration information at runtime.
 @function sysconf
 @int key one of `_SC_ARG_MAX`, `_SC_CHILD_MAX`, `_SC_CLK_TCK`, `_SC_JOB_CONTROL`,
   `_SC_OPEN_MAX`, `_SC_NGROUPS_MAX`, `_SC_SAVED_IDS`, `_SC_STREAM_MAX`,
-  `_SC_TZNAME_MAX` or `_SC_VERSION`,
+  `_SC_PAGESIZE`, `_SC_TZNAME_MAX` or `_SC_VERSION`,
 @treturn int associated system configuration value
 @see sysconf(3)
 */
@@ -989,8 +1109,16 @@ static int
 Pttyname(lua_State *L)
 {
 	int fd=optint(L, 1, 0);
+	char *name;
 	checknargs(L, 1);
-	return pushstringresult(ttyname(fd));
+	name = ttyname(fd);
+	if (name != NULL)
+		return pushstringresult(name);
+	if (errno != 0)
+		return pusherror(L, "ttyname");
+	lua_pushnil(L);
+	lua_pushliteral(L, "not a tty");
+	return 2;
 }
 
 
@@ -1073,6 +1201,45 @@ Pwrite(lua_State *L)
 	return pushresult(L, write(fd, buf, lua_objlen(L, 2)), NULL);
 }
 
+/***
+Truncate a file to a specified length.
+@function ftruncate
+@int fd the file descriptor to act on
+@int length the length to truncate to
+@treturn[1] int `0`, if successful
+@return[2] nil
+@treturn[2] string error message
+@treturn[2] int errnum
+@see ftruncate(2)
+*/
+static int
+Pftruncate(lua_State *L)
+{
+	int fd = checkint(L, 1);
+	off_t length = checkint(L, 2);
+	checknargs(L, 2);
+	return pushresult(L, ftruncate(fd, length), NULL);
+}
+
+/***
+Truncate a file to a specified length.
+@function truncate
+@string path file to act on
+@int length the length to truncate to
+@treturn[1] int `0`, if successful
+@return[2] nil
+@treturn[2] string error message
+@treturn[2] int errnum
+@see ftruncate(2)
+*/
+static int
+Ptruncate(lua_State *L)
+{
+	const char *path = luaL_checkstring(L, 1);
+	off_t length = checkint(L, 2);
+	checknargs(L, 2);
+	return pushresult(L, truncate(path, length), NULL);
+}
 
 static const luaL_Reg posix_unistd_fns[] =
 {
@@ -1102,12 +1269,16 @@ static const luaL_Reg posix_unistd_fns[] =
 	LPOSIX_FUNC( Pgeteuid		),
 	LPOSIX_FUNC( Pgetgid		),
 	LPOSIX_FUNC( Pgetlogin		),
+	LPOSIX_FUNC( Pgetopt		),
 	LPOSIX_FUNC( Pgetpgrp		),
 	LPOSIX_FUNC( Pgetpid		),
 	LPOSIX_FUNC( Pgetppid		),
 	LPOSIX_FUNC( Pgetuid		),
 	LPOSIX_FUNC( Pgethostid		),
 	LPOSIX_FUNC( Pisatty		),
+#if LPOSIX_2001_COMPLIANT
+	LPOSIX_FUNC( Plchown		),
+#endif
 	LPOSIX_FUNC( Plink		),
 	LPOSIX_FUNC( Plseek		),
 	LPOSIX_FUNC( Pnice		),
@@ -1127,6 +1298,8 @@ static const luaL_Reg posix_unistd_fns[] =
 #endif
 	LPOSIX_FUNC( Punlink		),
 	LPOSIX_FUNC( Pwrite		),
+	LPOSIX_FUNC( Pftruncate		),
+	LPOSIX_FUNC( Ptruncate		),
 	{NULL, NULL}
 };
 
@@ -1178,7 +1351,7 @@ LUALIB_API int
 luaopen_posix_unistd(lua_State *L)
 {
 	luaL_register(L, "posix.unistd", posix_unistd_fns);
-	lua_pushliteral(L, "posix.unistd for " LUA_VERSION " / " PACKAGE_STRING);
+	lua_pushstring(L, LPOSIX_VERSION_STRING("unistd"));
 	lua_setfield(L, -2, "version");
 
 	/* pathconf arguments */
@@ -1197,8 +1370,9 @@ luaopen_posix_unistd(lua_State *L)
 	LPOSIX_CONST( _SC_CHILD_MAX	);
 	LPOSIX_CONST( _SC_CLK_TCK	);
 	LPOSIX_CONST( _SC_JOB_CONTROL	);
-	LPOSIX_CONST( _SC_OPEN_MAX	);
 	LPOSIX_CONST( _SC_NGROUPS_MAX	);
+	LPOSIX_CONST( _SC_OPEN_MAX	);
+	LPOSIX_CONST( _SC_PAGESIZE	);
 	LPOSIX_CONST( _SC_SAVED_IDS	);
 	LPOSIX_CONST( _SC_STREAM_MAX	);
 	LPOSIX_CONST( _SC_TZNAME_MAX	);

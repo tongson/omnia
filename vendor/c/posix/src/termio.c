@@ -1,6 +1,6 @@
 /*
  * POSIX library for Lua 5.1, 5.2 & 5.3.
- * Copyright (C) 2013-2016 Gary V. Vaughan
+ * Copyright (C) 2013-2017 Gary V. Vaughan
  * Copyright (C) 2010-2013 Reuben Thomas <rrt@sc3d.org>
  * Copyright (C) 2008-2010 Natanael Copa <natanael.copa@gmail.com>
  * Clean up and bug fixes by Leo Razoumov <slonik.az@gmail.com> 2006-10-11
@@ -16,8 +16,6 @@
 
 @module posix.termio
 */
-
-#include <config.h>
 
 #include <termios.h>
 
@@ -204,7 +202,8 @@ Set termios state.
 @return error message if failed
 @see tcsetattr(3)
 @usage
-ok, errmsg = tcsetattr (fd, 0, { cc = { [P.VTIME] = 0, [P.VMIN] = 1 })
+  local termio = require "posix.termio"
+  ok, errmsg = tcsetattr (fd, 0, { cc = { [termio.VTIME] = 0, [termio.VMIN] = 1 })
 */
 static int
 Ptcsetattr(lua_State *L)
@@ -252,7 +251,7 @@ LUALIB_API int
 luaopen_posix_termio(lua_State *L)
 {
 	luaL_register(L, "posix.termio", posix_termio_fns);
-	lua_pushliteral(L, "posix.termio for " LUA_VERSION " / " PACKAGE_STRING);
+	lua_pushstring(L, LPOSIX_VERSION_STRING("termio"));
 	lua_setfield(L, -2, "version");
 
 	/* tcsetattr */

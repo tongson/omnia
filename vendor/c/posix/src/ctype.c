@@ -1,6 +1,6 @@
 /*
  * POSIX library for Lua 5.1, 5.2 & 5.3.
- * Copyright (C) 2013-2016 Gary V. Vaughan
+ * Copyright (C) 2013-2017 Gary V. Vaughan
  * Copyright (C) 2010-2013 Reuben Thomas <rrt@sc3d.org>
  * Copyright (C) 2008-2010 Natanael Copa <natanael.copa@gmail.com>
  * Clean up and bug fixes by Leo Razoumov <slonik.az@gmail.com> 2006-10-11
@@ -14,8 +14,6 @@
 
 @module posix.ctype
 */
-
-#include <config.h>
 
 #include <ctype.h>
 
@@ -73,7 +71,7 @@ LUALIB_API int
 luaopen_posix_ctype(lua_State *L)
 {
 	luaL_register(L, "posix.ctype", posix_ctype_fns);
-	lua_pushliteral(L, "posix.ctype for " LUA_VERSION " / " PACKAGE_STRING);
+	lua_pushstring(L, LPOSIX_VERSION_STRING("ctype"));
 	lua_setfield(L, -2, "version");
 
 	return 1;

@@ -41,6 +41,7 @@ ifeq ($(IS_APPLE), APPLE)
   LDFLAGS:= -Wl,-dead_strip
   TARGET_LDFLAGS:= -Wl,-dead_strip
   TARGET_DYNCC+= -undefined dynamic_lookup
+  luaposixDEFINES+= -D_DARWIN_C_SOURCE
 else
   LUAT_FLAGS:= -ldl -Wl,-E
 endif
@@ -67,7 +68,6 @@ endif
 ifeq ($(filter posix,$(VENDOR_C)), posix)
   HAVE_LINUX_NETLINK_H:= $(shell $(CONFIGURE_P)/test-netlinkh.sh $(TARGET_STCC))
   HAVE_POSIX_FADVISE:= $(shell $(CONFIGURE_P)/test-posix_fadvise.sh $(TARGET_STCC))
-  HAVE_STRLCPY:= $(shell $(CONFIGURE_P)/test-strlcpy.sh $(TARGET_STCC))
 endif
 ifeq ($(filter px,$(VENDOR_C)), px)
   HAVE_FCNTL_CLOSEM:= $(shell $(CONFIGURE_P)/test-F_CLOSEM.sh $(TARGET_STCC))
@@ -93,9 +93,6 @@ ifeq ($(HAVE_LINUX_NETLINK_H), true)
 endif
 ifeq ($(HAVE_POSIX_FADVISE), true)
   luaposixDEFINES+= -DHAVE_POSIX_FADVISE
-endif
-ifeq ($(HAVE_STRLCPY), true)
-  luaposixDEFINES+= -DHAVE_STRLCPY
 endif
 
 ## lpeg

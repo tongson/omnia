@@ -1,6 +1,6 @@
 /*
  * POSIX library for Lua 5.1, 5.2 & 5.3.
- * Copyright (C) 2013-2016 Gary V. Vaughan
+ * Copyright (C) 2013-2017 Gary V. Vaughan
  * Copyright (C) 2010-2013 Reuben Thomas <rrt@sc3d.org>
  * Copyright (C) 2008-2010 Natanael Copa <natanael.copa@gmail.com>
  * Clean up and bug fixes by Leo Razoumov <slonik.az@gmail.com> 2006-10-11
@@ -14,8 +14,6 @@
 
 @module posix.sys.stat
 */
-
-#include <config.h>
 
 #include <sys/stat.h>
 
@@ -177,7 +175,9 @@ Change the mode of the path.
 @treturn[2] string error message
 @treturn[2] int errnum
 @see chmod(2)
-@usage P.chmod ('bin/dof', bit.bor (P.S_IRWXU, P.S_IRGRP))
+@usage
+  local sys_stat = require "posix.sys.stat"
+  sys_stat.chmod ('bin/dof', bit.bor (sys_stat.S_IRWXU, sys_stat.S_IRGRP))
 */
 static int
 Pchmod(lua_State *L)
@@ -196,7 +196,9 @@ If file is a symbolic link, return information about the link itself.
 @treturn PosixStat information about *path*
 @see lstat(2)
 @see stat
-@usage for a, b in pairs (P.lstat "/etc/") do print (a, b) end
+@usage
+  local sys_stat = require "posix.sys.stat"
+  for a, b in pairs (sys_stat.lstat "/etc/") do print (a, b) end
 */
 static int
 Plstat(lua_State *L)
@@ -206,6 +208,31 @@ Plstat(lua_State *L)
 	checknargs(L, 1);
 	if (lstat(path, &s) == -1)
 		return pusherror(L, path);
+	return pushstat(L, &s);
+}
+
+
+/***
+Information about a file descriptor.
+@function fstat
+@int fd file descriptor to act on
+@treturn PosixStat information about *fd*
+@see fstat(2)
+@see stat
+@usage
+  local fcntl = require "posix.fcntl"
+  local sys_stat = require "posix.sys.stat"
+  local fd = assert(fcntl.open("/etc/hostname", fcntl.O_RDONLY))
+  for a, b in pairs (sys_stat.fstat(fd)) do print (a, b) end
+*/
+static int
+Pfstat(lua_State *L)
+{
+	struct stat s;
+	int fd = checkint(L, 1);
+	checknargs(L, 1);
+	if (fstat(fd, &s) == -1)
+		return pusherror(L, "fstat");
 	return pushstat(L, &s);
 }
 
@@ -258,7 +285,9 @@ If file is a symbolic link, return information about the file the link points to
 @treturn PosixStat information about *path*
 @see stat(2)
 @see lstat
-@usage for a, b in pairs (P.stat "/etc/") do print (a, b) end
+@usage
+  local sys_stat = require "posix.sys.stat"
+  for a, b in pairs (sys_stat.stat "/etc/") do print (a, b) end
 */
 static int
 Pstat(lua_State *L)
@@ -299,6 +328,7 @@ static const luaL_Reg posix_sys_stat_fns[] =
 	LPOSIX_FUNC( PS_ISSOCK		),
 	LPOSIX_FUNC( Pchmod		),
 	LPOSIX_FUNC( Plstat		),
+	LPOSIX_FUNC( Pfstat		),
 	LPOSIX_FUNC( Pmkdir		),
 	LPOSIX_FUNC( Pmkfifo		),
 	LPOSIX_FUNC( Pstat		),
@@ -352,7 +382,7 @@ LUALIB_API int
 luaopen_posix_sys_stat(lua_State *L)
 {
 	luaL_register(L, "posix.sys.stat", posix_sys_stat_fns);
-	lua_pushliteral(L, "posix.sys.stat for " LUA_VERSION " / " PACKAGE_STRING);
+	lua_pushstring(L, LPOSIX_VERSION_STRING("sys.stat"));
 	lua_setfield(L, -2, "version");
 
 	LPOSIX_CONST( S_IFMT		);

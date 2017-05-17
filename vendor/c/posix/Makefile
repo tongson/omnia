@@ -1,11 +1,11 @@
 posix_P= vendor/c/posix/src
-posixA= ctype dirent errno fcntl fnmatch getopt glob grp \
+posixA= ctype dirent errno fcntl fnmatch glob grp \
   libgen poll pwd sched signal stdio stdlib sys.msg \
   sys.resource sys.socket sys.stat sys.statvfs sys.time \
   sys.times sys.utsname sys.wait syslog termio time \
   unistd utime
-posixO= ctype dirent errno fcntl fnmatch getopt glob grp \
-  libgen poll pwd sched signal stdio stdlib	sys/msg  \
+posixO= ctype dirent errno fcntl fnmatch glob grp \
+  libgen poll pwd sched signal stdio stdlib sys/msg  \
   sys/resource sys/socket sys/stat sys/statvfs sys/time \
   sys/times sys/utsname sys/wait syslog termio time \
   unistd utime
@@ -15,6 +15,7 @@ C_MODULES+= $(foreach m, $(posixA), posix.$m.a)
 C_MODULES:= $(filter-out posix.a, $(C_MODULES))
 VENDOR+= posix
 CLEAN+= clean_posix
+luaposixDEFINES+= -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DPACKAGE=\"luaposix\" -DVERSION=\"34.0-1\" -DHAVE_STATVFS -DHAVE_CRYPT -DHAVE_FDATASYNC -DHAVE_NET_IF_H
 
 $(posix_P)/sys/%.o:  $(posix_P)/sys/%.c
 	$(ECHOT) CC $@

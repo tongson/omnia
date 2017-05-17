@@ -5,6 +5,10 @@ with T
    M = "Function from a vendor/c module(lfs)"
    .same type(lfs.rmdir), "function", M
 with T
+   libgen = require"posix.libgen"
+   M = "Function from vendor/posix module(luaposix)"
+   .same type(libgen.basename), "function", M
+with T
    src = require"src"
    M = "Function from a src/lua module(src)"
    .same type(src.src), "function", M
@@ -17,4 +21,4 @@ with T
    M = "Function from a src/lua module (moonscript) (moon_src)"
    .same type(moon_src.moon_src), "function", M
 
-T.done(4)
+T.done(5)

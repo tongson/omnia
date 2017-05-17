@@ -1,6 +1,6 @@
 /*
  * POSIX library for Lua 5.1, 5.2 & 5.3.
- * Copyright (C) 2013-2016 Gary V. Vaughan
+ * Copyright (C) 2013-2017 Gary V. Vaughan
  * Copyright (C) 2010-2013 Reuben Thomas <rrt@sc3d.org>
  * Copyright (C) 2008-2010 Natanael Copa <natanael.copa@gmail.com>
  * Clean up and bug fixes by Leo Razoumov <slonik.az@gmail.com> 2006-10-11
@@ -20,8 +20,6 @@
 @module posix.sys.socket
 */
 
-#include <config.h>
-
 #include "_helpers.c"		/* For LPOSIX_2001_COMPLIANT */
 
 #include <sys/types.h>
@@ -39,10 +37,6 @@
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
 #include <sys/un.h>
-
-/* strlcpy() implementation for non-BSD based Unices.
-   strlcpy() is a safer less error-prone replacement for strncpy(). */
-#include "strlcpy.c"
 
 
 /***
@@ -131,7 +125,9 @@ Create an endpoint for communication.
 @treturn[2] string error message
 @treturn[2] int errnum
 @see socket(2)
-@usage sockd = P.socket (P.AF_INET, P.SOCK_STREAM, 0)
+@usage
+  local sys_sock = require "posix.sys.socket"
+  sockd = sys_sock.socket (sys_sock.AF_INET, sys_sock.SOCK_STREAM, 0)
 */
 static int
 Psocket(lua_State *L)
@@ -155,7 +151,9 @@ Create a pair of connected sockets.
 @return[2] nil
 @treturn[2] string error message
 @treturn[2] int errnum
-@usage sockr, sockw = P.socketpair (P.AF_INET, P.SOCK_STREAM, 0)
+@usage
+  local sys_sock = require "posix.sys.socket"
+  sockr, sockw = sys_sock.socketpair (sys_sock.AF_INET, sys_sock.SOCK_STREAM, 0)
 */
 static int
 Psocketpair(lua_State *L)
@@ -286,8 +284,9 @@ Network address and service translation.
 @treturn[2] int errnum
 @see getaddrinfo(2)
 @usage
-local res, errmsg, errcode = posix.getaddrinfo ("www.lua.org", "http",
-  { family = P.IF_INET, socktype = P.SOCK_STREAM }
+  local sys_sock = require "posix.sys.socket"
+  local res, errmsg, errcode = sys_sock.getaddrinfo ("www.lua.org", "http",
+    { family = sys_sock.IF_INET, socktype = sys_sock.SOCK_STREAM }
 )
 */
 static int
@@ -619,7 +618,9 @@ Shut down part of a full-duplex connection.
 @treturn[2] string error message
 @treturn[2] int errnum
 @see shutdown(2)
-@usage ok, errmsg = P.shutdown (sock, P.SHUT_RDWR)
+@usage
+  local sys_sock = require "posix.sys.socket"
+  ok, errmsg = sys_sock.shutdown (sock, sys_sock.SHUT_RDWR)
 */
 static int
 Pshutdown(lua_State *L)
@@ -644,7 +645,11 @@ Get and set options on sockets.
 @treturn[2] string error message
 @treturn[2] int errnum
 @see setsockopt(2)
-@usage ok, errmsg = P.setsockopt (sock, P.SOL_SOCKET, P.SO_SNDTIMEO, 1, 0)
+@usage
+  local sys_sock = require "posix.sys.socket"
+  ok, errmsg = sys_sock.setsockopt (
+    sock, sys_sock.SOL_SOCKET, sys_sock.SO_SNDTIMEO, 1, 0
+  )
 */
 static int
 Psetsockopt(lua_State *L)
@@ -656,7 +661,7 @@ Psetsockopt(lua_State *L)
 	struct timeval tv;
 	struct ipv6_mreq mreq6;
 #ifdef SO_BINDTODEVICE
-	struct ifreq ifr;
+	char ifname[IFNAMSIZ];
 #endif
 	int vint = 0;
 	void *val = NULL;
@@ -688,9 +693,11 @@ Psetsockopt(lua_State *L)
 				case SO_BINDTODEVICE:
 					checknargs(L, 4);
 
-					strlcpy(ifr.ifr_name, luaL_checkstring(L, 4), IFNAMSIZ);
-					val = &ifr;
-					len = sizeof(ifr);
+					strncpy(ifname, luaL_checkstring(L, 4), IFNAMSIZ - 1);
+					ifname[IFNAMSIZ - 1] = '\0';
+					val = ifname;
+					len = strlen(ifname);
+					break;
 #endif
 				default:
 					checknargs(L, 4);
@@ -741,6 +748,110 @@ Psetsockopt(lua_State *L)
 }
 
 
+#ifndef _DARWIN_C_SOURCE
+/***
+Get options on sockets.
+@function getsockopt
+@int fd socket descriptor
+@int level one of `SOL_SOCKET`, `IPPROTO_IPV6`, `IPPROTO_TCP`
+@int name option name, varies according to `level` value
+@return[1] the value of the requested socket option
+@return[2] nil
+@treturn[2] string error message
+@treturn[2] int errnum
+@see getsockopt(2)
+@usage
+  local sys_sock = require "posix.sys.socket"
+  val, errmsg, errnum = sys_sock.getsockopt(
+    sock, sys_sock.SOL_SOCKET, sys_sock.SO_SNDTIMEO
+  )
+  print('Send timeout ', val.tv_sec + val.tv_usec / 1000000)
+*/
+static int
+Pgetsockopt(lua_State *L)
+{
+	int fd = checkint(L, 1);
+	int level = checkint(L, 2);
+	int optname = checkint(L, 3);
+	checknargs(L, 3);
+	struct linger linger;
+	struct timeval tv;
+	int err = 0;
+#ifdef SO_BINDTODEVICE
+	char ifname[IFNAMSIZ];
+#endif
+	int vint = 0;
+	void *val = NULL;
+	socklen_t len = sizeof(vint);
+
+	switch (level)
+	{
+		case SOL_SOCKET:
+			switch (optname)
+			{
+				case SO_LINGER:
+					val = &linger;
+					len = sizeof(linger);
+					break;
+				case SO_RCVTIMEO:
+				case SO_SNDTIMEO:
+					val = &tv;
+					len = sizeof(tv);
+					break;
+#ifdef SO_BINDTODEVICE
+				case SO_BINDTODEVICE:
+					val = ifname;
+					len = IFNAMSIZ;
+					break;
+#endif
+				default:
+					break;
+			}
+			break;
+		default:
+			break;
+	}
+
+	/* Default fallback to int if no specific handling of type above */
+
+	if (val == NULL)
+	{
+		val = &vint;
+		len = sizeof(vint);
+	}
+
+	err = getsockopt(fd, level, optname, val, &len);
+	if (err == -1)
+	{
+		return pusherror(L, "getsockopt");
+	}
+
+	if (val == &ifname)
+	{
+		lua_pushlstring(L, ifname, len);
+	}
+	else if (val == &tv)
+	{
+		lua_createtable(L, 0, 2);
+		pushintegerfield("tv_sec", tv.tv_sec);
+		pushintegerfield("tv_usec", tv.tv_usec);
+		settypemetatable("PosixTimeval");
+	}
+	else if (val == &linger)
+	{
+	lua_createtable(L, 0, 2);
+		pushintegerfield("l_linger", linger.l_linger);
+		pushintegerfield("l_onoff", linger.l_onoff);
+		settypemetatable("PosixLinger");
+	}
+	else {
+		lua_pushinteger(L, vint);
+	}
+
+	return 1;
+}
+#endif
+
 /***
 Get socket name.
 @function getsockname
@@ -762,6 +873,29 @@ static int Pgetsockname(lua_State *L)
 		return pusherror(L, "getsockname");
 	return pushsockaddrinfo(L, sa.ss_family, (struct sockaddr *)&sa);
 }
+
+
+/***
+Get socket peer name.
+@function getpeername
+@see getpeername(2)
+@int sockfd socket descriptor
+@treturn[1] sockaddr the address to which the socket *sockfd* is connected to
+@return[2] nil
+@treturn[2] string error message
+@treturn[2] int errnum
+@usage sa, err = posix.getpeername (sockfd)
+*/
+static int Pgetpeername(lua_State *L)
+{
+	int fd = checkint(L, 1);
+	struct sockaddr_storage sa;
+	socklen_t salen;
+	checknargs (L, 1);
+	if (getpeername(fd, (struct sockaddr *)&sa, &salen) != 0)
+		return pusherror(L, "getpeername");
+	return pushsockaddrinfo(L, sa.ss_family, (struct sockaddr *)&sa);
+}
 #endif
 
 
@@ -781,7 +915,11 @@ static const luaL_Reg posix_sys_socket_fns[] =
 	LPOSIX_FUNC( Psendto		),
 	LPOSIX_FUNC( Pshutdown		),
 	LPOSIX_FUNC( Psetsockopt	),
+#ifndef _DARWIN_C_SOURCE
+	LPOSIX_FUNC( Pgetsockopt	),
+#endif
 	LPOSIX_FUNC( Pgetsockname	),
+	LPOSIX_FUNC( Pgetpeername	),
 #endif
 	{NULL, NULL}
 };
@@ -877,7 +1015,7 @@ LUALIB_API int
 luaopen_posix_sys_socket(lua_State *L)
 {
 	luaL_register(L, "posix.sys.socket", posix_sys_socket_fns);
-	lua_pushliteral(L, "posix.sys.socket for " LUA_VERSION " / " PACKAGE_STRING);
+	lua_pushstring(L, LPOSIX_VERSION_STRING("sys.socket"));
 	lua_setfield(L, -2, "version");
 
 #if LPOSIX_2001_COMPLIANT
