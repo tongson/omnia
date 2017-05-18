@@ -113,7 +113,7 @@ ifeq ($(or $(MAKECMDGOALS),$(.DEFAULT_GOAL)), development)
 	CFLAGS+= -fno-sanitize-recover -fsanitize=address
   endif
   ifeq ($(IS_CC), CLANG)
-	CFLAGS+= -fno-sanitize-recover -fsanitize=address -fsanitize=undefined -fsanitize=leak
+	CFLAGS+= -fno-sanitize-recover -fsanitize=address -fsanitize=undefined
   endif
   ifeq ($(shell $(CONFIGURE_P)/test-gcc49.sh $(CC)), true)
 	CFLAGS+= -fsanitize=undefined
