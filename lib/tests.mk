@@ -110,10 +110,10 @@ ifeq ($(or $(MAKECMDGOALS),$(.DEFAULT_GOAL)), development)
   TARGET_CFLAGS:= -D_FORTIFY_SOURCE=2 -O1 -fno-omit-frame-pointer -ggdb
   CFLAGS:= -D_FORTIFY_SOURCE=2 -O1 -fno-omit-frame-pointer -ggdb
   ifeq ($(shell $(CONFIGURE_P)/test-gcc48.sh $(CC)), true)
-	CFLAGS+= -fno-sanitize-recover -fsanitize=address
+	CFLAGS+= -fno-sanitize-recover=all -fsanitize=address
   endif
   ifeq ($(IS_CC), CLANG)
-	CFLAGS+= -fno-sanitize-recover -fsanitize=address -fsanitize=undefined
+	CFLAGS+= -fno-sanitize-recover=all -fsanitize=address -fsanitize=undefined
   endif
   ifeq ($(shell $(CONFIGURE_P)/test-gcc49.sh $(CC)), true)
 	CFLAGS+= -fsanitize=undefined
