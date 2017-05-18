@@ -107,13 +107,16 @@ endif
 
 ifeq ($(or $(MAKECMDGOALS),$(.DEFAULT_GOAL)), development)
   CCWARN:= -Wall -Wextra -Wredundant-decls -Wshadow -Wpointer-arith -Werror=implicit-function-declaration
-  TARGET_CFLAGS:= -O0 -fno-omit-frame-pointer -ggdb
-  CFLAGS:= -O0 -fno-omit-frame-pointer -ggdb
+  TARGET_CFLAGS:= -D_FORTIFY_SOURCE=2 -O1 -fno-omit-frame-pointer -ggdb
+  CFLAGS:= -D_FORTIFY_SOURCE=2 -O1 -fno-omit-frame-pointer -ggdb
   ifeq ($(shell $(CONFIGURE_P)/test-gcc48.sh $(CC)), true)
-	CFLAGS+= -fsanitize=address
+	CFLAGS+= -fno-sanitize-recover -fsanitize=address
   endif
   ifeq ($(IS_CC), CLANG)
-	CFLAGS+= -fsanitize=address
+	CFLAGS+= -fno-sanitize-recover -fsanitize=address -fsanitize=undefined -fsanitize=leak
+  endif
+  ifeq ($(shell $(CONFIGURE_P)/test-gcc49.sh $(CC)), true)
+	CFLAGS+= -fsanitize=undefined
   endif
   TARGET_CCOPT:= $(NULSTRING)
   CCOPT:= $(NULSTRING)
