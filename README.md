@@ -16,7 +16,9 @@ Note: Linux and OS X only. xBSD soon.
 
 #### Getting started
 
-1. Edit the following space delimited variables in the top-level Makefile<br/>
+1. Download a release or clone the repo: `git clone --depth 1 https://github.com/tongson/omnia`
+
+2. Edit the following space delimited variables in the top-level Makefile<br/>
      MAIN: The "main" script in the `bin/` directory<br/>
      SRC: Modules that are specific to your application. Copy these to `src/lua`. <br/>
      SRC_DIR: Directories containing modules that are specific to your application. Copy these to `src/lua`.</br>
@@ -25,9 +27,9 @@ Note: Linux and OS X only. xBSD soon.
      VENDOR_DIR: directories containing 3rd party modules<br/>
      VENDOR_C: 3rd party C modules<br/>
 
-2. Copy the main source file into the `bin/` directory.
+3. Copy the main source file into the `bin/` directory.
 
-3. Copy modules into `src/lua/` or `vendor/lua/`.
+4. Copy modules into `src/lua/` or `vendor/lua/`.
 
 The SRC, VENDOR split is just for organization. Underneath they are using the same Make routines.
 
