@@ -109,16 +109,19 @@ ifeq ($(or $(MAKECMDGOALS),$(.DEFAULT_GOAL)), development)
   CCWARN:= -Wall -Wextra -Wredundant-decls -Wshadow -Wpointer-arith -Werror=implicit-function-declaration
   TARGET_CFLAGS:= -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -O1 -fno-omit-frame-pointer -ggdb
   CFLAGS:= -D_FORTIFY_SOURCE=2 -O1 -fno-omit-frame-pointer -ggdb
-  ifeq ($(shell $(CONFIGURE_P)/test-gcc48.sh $(CC)), true)
-	CFLAGS+= -fno-sanitize-recover=all -fsanitize=address
+  FOUND_ASAN:= $(shell $(CONFIGURE_P)/test-lasan.sh $(TARGET_STCC))
+  ifeq ($(FOUND_ASAN), 0)
+	CFLAGS+= -fsanitize=address
   endif
-  ifeq ($(IS_CC), CLANG)
-	CFLAGS+= -fno-sanitize-recover=all -fsanitize=address -fsanitize=undefined
-  endif
-  ifeq ($(shell $(CONFIGURE_P)/test-gcc49.sh $(CC)), true)
+  FOUND_UBSAN:= $(shell $(CONFIGURE_P)/test-lubsan.sh $(TARGET_STCC))
+  ifeq ($(FOUND_UBSAN), 0)
 	CFLAGS+= -fsanitize=undefined
   endif
   TARGET_CCOPT:= $(NULSTRING)
+  FOUND_LSAN:= $(shell $(CONFIGURE_P)/test-liblsan.sh $(TARGET_STCC))
+  ifeq ($(FOUND_LSAN), 0)
+	CFLAGS+= -fsanitize=leak
+  endif
   CCOPT:= $(NULSTRING)
   TARGET_LDFLAGS:= $(NULSTRING)
   LDFLAGS:= $(NULSTRING)
