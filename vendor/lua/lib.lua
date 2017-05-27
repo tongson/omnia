@@ -1,817 +1,611 @@
---- Additional functions. Can also be called from the `lib` module.
+--- Configi standard library.
+-- Lua extensions and some unix utilities.
+-- Depends on cimicida and Luaposix.
+--     VENDOR= lib cimicida
+--     VENDOR_C= posix
 -- @module lib
-local io, string, os, table = io, string, os, table
-local type, pcall, load, setmetatable, ipairs, next, pairs, error, require, getmetatable =
-      type, pcall, load, setmetatable, ipairs, next, pairs, error, require, getmetatable
+
+local string, table, os = string, table, os
+local setmetatable, pcall, type, next, ipairs = setmetatable, pcall, type, next, ipairs
+local lc = require"cimicida"
+local pwd = require"posix.pwd"
+local unistd = require"posix.unistd"
+local errno = require"posix.errno"
+local wait = require"posix.sys.wait"
+local stat = require"posix.sys.stat"
+local poll = require"posix.poll"
+local fcntl = require"posix.fcntl"
+local stdlib = require"posix.stdlib"
+local syslog = require"posix.syslog"
+local libgen = require"posix.libgen"
+local lib = require"px"
 local ENV = {}
 _ENV = ENV
 
-local fix_return_values = function(ok, ...)
-    if ok then
-        return ...
-    else
-        return nil, (...)
-    end
-end
-
---- Receives a function that might raise exceptions and returns a function that follows the Lua return value convention.
--- From http://lua-users.org/wiki/FinalizedExceptions
--- @tparam function function to wrap
--- @treturn function a function that follows the Lua return value convention
-local pcall_f = function(f)
-    return function(...)
-        return fix_return_values(pcall(f, ...))
-    end
-end
-
---- Returns a function similar to assert but does not mess with the error message and takes an optional finalizer function.
--- From http://lua-users.org/wiki/FinalizedExceptions
--- @tparam function finalizer function
--- @treturn function wrapped function
-local try_f = function(finalizer)
-    return function(ok, ...)
-        if ok then
-            return ok, ...
-        else
-            if finalizer then
-                finalizer()
+local retry = function (fn)
+    return function (...)
+        local ret, err, errnum, e, _
+        repeat
+            ret, err, errnum = fn(...)
+            if ret == -1 then
+                _, e = errno.errno()
             end
-            error((...), 0)
-        end
-   end
-end
-
---- ADA-style case insensitive calls to modules with lower case functions.
--- @tparam string module name
--- @treturn table module functions
-local xrequire = function(m)
-    local module = require(string.lower(m))
-    return setmetatable({}, { __index = function(_, func) return module[string.lower(func)] end })
-end
-
---- Output formatted string to the current output.
--- @tparam string str C-like string
--- @tparam varargs ... Variable number of arguments to interpolate str
-local printf = function (str, ...)
-    io.write(string.format(str, ...))
-end
-
---- Output formatted string to a specified output.
--- @tparam userdata fd stream/descriptor
--- @tparam string str C-like string
--- @tparam varargs ... Variable number of arguments to interpolate str
-local fprintf = function (fd, str, ...)
-    local o = io.output()
-    io.output(fd)
-    local ret, err = printf(str, ...)
-    io.output(o)
-    return ret, err
-end
-
---- Output formatted string to STDERR.
--- @tparam string str C-like string
--- @tparam varargs ... Variable number of arguments to interpolate str
-local warn = function (str, ...)
-    fprintf(io.stderr, str, ...)
-end
-
---- Output formatted string to STDERR and return 1 as the exit status.
--- @tparam string str C-like string
--- @tparam varargs ... Variable number of arguments to interpolate str
-local errorf = function (str, ...)
-    warn(str, ...)
-    os.exit(1)
-end
-
---- Call cimicida.errorf if the first argument is false (i.e. nil or false).
--- @tparam bool v value to evaluate
--- @tparam string str C-like string
--- @tparam varargs ... Variable number of arguments to interpolate str
-local assertf = function (v, str, ...)
-    if v then
-        return true
-    else
-        errorf(str, ...)
+        until(e ~= errno.EINTR)
+        return ret, err, errnum
     end
 end
 
---- Append a line break and string to an input string.
--- @tparam string str input string
--- @tparam string a string to append to str
--- @treturn string new string
-local append = function (str, a)
-    return string.format("%s\n%s", str, a)
-end
+-- Handle EINTR
+lib.fsync = retry(unistd.fsync)
+lib.chdir = retry(unistd.chdir)
+lib.fcntl = retry(fcntl.fcntl)
+lib.dup2 = retry(unistd.dup2)
+lib.wait = retry(wait.wait)
+lib.open = retry(fcntl.open)
 
---- Time in the strftime(3) format %H:%M.
--- @treturn string the time as a string
-local time_hm = function ()
-    return os.date("%H:%M")
-end
-
-
---- Date in the strftime(3) format %Y-%m-%d.
--- @treturn string the date as a string
-local date_ymd = function ()
-    return os.date("%Y-%m-%d")
-end
-
---- Timestamp in the strftime(3) format %Y-%m-%d %H:%M:%S %Z%z.
--- @treturn string the timestamp as a string
-local timestamp = function ()
-    return os.date("%Y-%m-%d %H:%M:%S %Z%z")
-end
-
---- Check if a table has an specified string.
--- @tparam table tbl table to search
--- @tparam string str plain string or pattern to look for in tbl
--- @tparam bool plain if true, turns off pattern matching facilities
--- @treturn bool a boolean value, true if v is found, nil otherwise
-local find_string = function (tbl, str, plain)
-    for _, tval in next, tbl do
-        tval = string.gsub(tval, '[%c]', '')
-        if string.find(tval, str, 1, plain) then return true end
-    end
-end
-
---- Convert a sequence into a dictionary.
--- Sequence values are converted into field names.
--- @warning Does not check if input table is a sequence.
--- @tparam table tbl the properly sequenced table to convert
--- @param def default value for each field in the record. Should not be nil
--- @treturn table the converted table
-local seq_to_dict = function (tbl, def)
-    local t = {}
-    for n = 1, #tbl do t[tbl[n]] = def end
-    return t
-end
-
---- Convert string to table.
--- Each line is a table value.
--- @tparam string str string to convert
--- @treturn table a new table
-local ln_to_tbl = function (str)
-    local tbl = {}
-    if not str then
-        return tbl
-    end
-    for ln in string.gmatch(str, "([^\n]*)\n*") do
-        tbl[#tbl + 1] = ln
-    end
-    return tbl
-end
-
---- Split alphanumeric matches of a string into table values.
--- @tparam string str string to convert
--- @treturn table a new
-local word_to_tbl = function (str)
-    local t = {}
-    for s in string.gmatch(str, "%w+") do
-        t[#t + 1] = s
-    end
-    return t
-end
-
---- Split non-space character matches of a string into table values.
--- @tparam string str string to convert
--- @treturn table a new table
-local str_to_tbl = function (str)
-    local t = {}
-    for s in string.gmatch(str, "%S+") do
-        t[#t + 1] = s
-    end
-    return t
-end
-
---- Escape magic characters of the string so that it can be used as a pattern to string matching functions.
--- Escapes embedded zeroes as the %z pattern.<br/>
--- From Luapower/glue.
--- @tparam string str string to escape
--- @tparam string mode optional mode argument (*i) if passed, also escapes alphabetical characters to that it matches both lowercase and uppercase
--- @treturn string a new escaped string
-local escape_pattern = function(str, mode)
-    local format_ci_pat = function(c)
-        return string.format('[%s%s]', c:lower(), c:upper())
-    end
-    str = str:gsub('%%','%%%%'):gsub('%z','%%z'):gsub('([%^%$%(%)%.%[%]%*%+%-%?])', '%%%1')
-    if mode == '*i' then
-        str = str:gsub('[%a]', format_ci_pat)
-    end
-    return str
-end
-
---- Filter table values.
--- Adapted from <http://stackoverflow.com/questions/12394841/safely-remove-items-from-an-array-table-while-iterating>
--- @tparam table tbl table to operate on
--- @tparam string patt pattern to filter
--- @tparam bool plain set to true if true, turns of pattern matching facilities
--- @treturn table modified table
-local filter_tbl_value = function (tbl, patt, plain)
-    plain = plain or nil
-    local s, c = #tbl, 0
-    for n = 1, s do
-        if string.find(tbl[n], patt, 1, plain) then
-            tbl[n] = nil
-        end
-    end
-    for n = 1, s do
-        if tbl[n] ~= nil then
-            c = c + 1
-            tbl[c] = tbl[n]
-        end
-    end
-    for n = c + 1, s do
-        tbl[n] = nil
-    end
-    return tbl
-end
-
---- Convert file into a table.
--- Each line is a table value
--- @tparam string file file to convert
--- @treturn table a new table
-local file_to_tbl = function (file)
-    local _, fd = pcall(io.open, file, "re")
-    if fd then
-        io.flush(fd)
-        local tbl = {}
-        for ln in fd:lines("*L") do
-            tbl[#tbl + 1] = ln
-        end
-        io.close(fd)
-        return tbl
-    end
-end
-
---- Find a string in a table value.
--- string is a plain string not a pattern
--- @tparam table tbl properly sequenced table to traverse
--- @tparam string str string or pattern to look for
--- @tparam bool plain set to true if true, turns of pattern matching facilities
--- @treturn number the matching index if string is found, nil otherwise
-local find_in_tbl = function (tbl, str, plain)
-    plain = plain or nil
-    local ok, found
-    for n = 1, #tbl do
-        ok, found = pcall(Lua.find, tbl[n], str, 1, plain)
-        if ok and found then
-            return n
-        end
-    end
-end
-
---- Do a shallow copy of a table.
--- An empty table is created in the copy when a table is encountered
--- @tparam table tbl table to be copied
--- @treturn table a new table
-local shallow_cp = function (tbl)
-    local copy = {}
-    for f, v in next, tbl do
-        if type(v) == "table" then
-            copy[f] = {} -- first level only
-        else
-            copy[f] = v
-        end
-    end
-    return copy
-end
-
---- Clone a table.
--- From <http://stackoverflow.com/questions/640642/how-do-you-copy-a-lua-table-by-value/16077650#16077650>
--- @tparam table tbl table to be cloned
--- @treturn table a new table
-local clone
-clone = function(tbl, seen)
-    seen = seen or {}
-    if tbl == nil then
-        return nil, "Table to be copied required."
-    end
-    local new
-    local clone = clone
-    if type(tbl) == "table" then
-        new = {}
-        seen[tbl] = new
-        for k, v in next, tbl, nil do
-            new[clone(k, seen)] = clone(v, seen)
-        end
-        setmetatable(new, clone(getmetatable(tbl), seen))
-    else -- not a table
-        new = tbl
-    end
-    return new
-end
-
---- Split a path into its immediate location and file/directory components.
--- @tparam string path path to split
--- @treturn string location
--- @treturn string file/directory
-local split_path = function (path)
-    local l = string.len(path)
-    local c = string.sub(path, l, l)
-    while l > 0 and c ~= "/" do
-        l = l - 1
-        c = string.sub(path, l, l)
-    end
-    if l == 0 then
-        return '', path
-    else
-        return string.sub(path, 1, l - 1), string.sub(path, l + 1)
-    end
-end
-
-
---- Check if a path is a file or not.
--- @tparam string file path to the file
--- @return true if path is a file, nil otherwise
-local test_open = function (file)
-    local fd = io.open(file, "rb")
-    if fd then
-        io.close(fd)
-        return true
-    end
-end
-
---- Read a file/path.
--- @tparam string file path to the file
--- @treturn string the contents of the file, nil if the file cannot be read or opened
-local fopen = function (file)
-    local str
-    for s in io.lines(file, 2^12) do
-        str = string.format("%s%s", str or "", s)
-    end
-    if string.len(str) ~= 0 then
-        return str
-    end
-end
-
---- Return the first string.match result from a given file/path.
--- @tparam string file path to the file
--- @tparam string pattern string or pattern to look for
--- @treturn string results of string.match, nil otherwise
-local match_from_file = function(file, pattern)
-    local str
-    for s in io.lines(file) do
-        str = string.match(s, pattern)
-        if str then
-            return str
-        end
-    end
-end
-
---- Write a string to a file/path.
--- @tparam string path path to the file
--- @tparam string str string to write
--- @tparam string mode io.open mode
--- @return true if the write succeeded, nil and the error message otherwise
-local fwrite = function (path, str, mode)
-    local setvbuf, write = io.setvbuf, io.write
-    mode = mode or "we+"
-    local fd = io.open(path, mode)
-    if fd then
-        fd:setvbuf("no")
-        local _, err = fd:write(str)
-        io.flush(fd)
-        io.close(fd)
-        if err then
+--- Write to a file descriptor.
+--  Wrapper to luaposix unistd.write.
+-- @tparam int fd file descriptor
+-- @tparam string buf string to write
+-- @return true if successfully written.
+function lib.write (fd, buf)
+    local size = string.len(buf)
+    local written, err
+    while (size > 0) do
+        written, err = unistd.write(fd, buf)
+        if written == -1 then
+            local _, errno = errno.errno()
+            if errno == errno.EINTR then
+                goto continue
+            end
             return nil, err
         end
-        return true
-    end
-end
-
---- Get line.
--- Given a line number return the line as a string.
--- @tparam number ln line number
--- @tparam string file
--- @treturn string the line
-local get_ln = function (ln, file)
-    local str = fopen(file)
-    local i = 0
-    for line in string.gmatch(str, "([^\n]*)\n") do
-        i = i + 1
-        if i == ln then return line end
-    end
-end
-
---- Simple string interpolation.
--- Given a record, interpolate by replacing field names with the respective value
--- Example:
--- tbl = { "field" = "value" }
--- str = [[ this is the {{ field }} ]]
--- If passed with these arguments 'this is the {{ field }}' becomes 'this is the value'
--- @tparam string str string to interpolate
--- @tparam table tbl table (record) to deduce values from
--- @treturn string processed string
-local sub = function (str, tbl)
-    local t, _ = {}, nil
-    _, str = pcall(string.gsub, str, "{{[%s]-([%g]+)[%s]-}}",
-        function (s)
-            t.type = type
-            local code = [[
-                V=%s
-                if type(V) == "function" then
-                    V=V()
-                end
-            ]]
-            local lua = string.format(code, s)
-            local chunk, err = load(lua, lua, "t", setmetatable(t, {__index=tbl}))
-            if chunk then
-                chunk()
-                return t.V
-            else
-                return s
-            end
-        end) -- pcall
-    return str
-end
-
---- Generate a string based on the values returned by os.execute or px.exec.
--- @tparam string proc process name
--- @tparam string status exit status
--- @tparam number code exit code
--- @treturn string a formatted string
-local exit_string = function (proc, status, code)
-    if status == "exit" or status == "exited" then
-        return string.format("%s: Exited with code %s", proc, code)
-    end
-    if status == "signal" or status == "killed" then
-        return string.format("%s: Caught signal %s", proc, code)
-    end
-end
-
---- Convert the string "yes" or "true" to boolean true.
--- @tparam string s string to evaluate
--- @treturn bool the boolean true if the string matches, nil otherwise
-local truthy = function (s)
-    if s == "yes" or
-         s == "YES" or
-         s == "true" or
-         s == "True" or
-         s == "TRUE" then
-         return true
-    end
-end
-
---- Convert the string "no" or "false" to boolean false.
--- @tparam string s string to evaluate
--- @treturn bool the boolean true if the string matches, nil otherwise
-local falsy = function (s)
-    if s == "no" or
-         s == "NO" or
-         s == "false" or
-         s == "False" or
-         s == "FALSE" then
-         return true
-    end
-end
-
---- Wrap io.popen also known as popen(3).
--- <br/>
--- 1. Exit immediately if a command exits with a non-zero status<br/>
--- 2. Pathname expansion is disabled<br/>
--- 3. STDIN is closed<br/>
--- 4. Copy STDERR to STDOUT<br/>
--- 5. Finally replace the shell with the command
--- @warning The command has a script preamble
--- @tparam string str command to popen(3)
--- @tparam string cwd current working directory
--- @tparam bool _ignore_error boolean setting to ignore errors
--- @tparam bool _return_code boolean setting to return exit code
--- @treturn string the output as a string if the command exits with a non-zero status, nil otherwise
--- @treturn string a status output from cimicida.exit_string as a string
-local popen = function (str, cwd, _ignore_error, _return_code)
-    local result = {}
-    local header = [[  set -ef
-    unset IFS
-    export LC_ALL=C
-    export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin
-    exec 0>&- 2>&1
-    ]]
-    if cwd then
-        str = string.format("%scd %s\n%s", header, cwd, str)
-    else
-        str = string.format("%s%s", header, str)
-    end
-    local pipe = io.popen(str, "re")
-    io.flush(pipe)
-    local tbl = {}
-    for ln in pipe:lines() do
-        tbl[#tbl + 1] = ln
-    end
-    local _
-    _, result.status, result.code = io.close(pipe)
-    result.bin = "io.popen"
-    if _return_code then
-        return result.code, result
-    elseif _ignore_error or result.code == 0 then
-        return tbl, result
-    else
-        return nil, result
-    end
-end
-
---- Wrap io.popen also known as popen(3).
--- Unlike cimicida.popen this writes to the pipe.
--- The command has a script preamble.<br/>
--- 1. Exit immediately if a command exits with a non-zero status<br/>
--- 2. Pathname expansion is disabled<br/>
--- 3. STDOUT is closed<br/>
--- 4. STDERR is closed<br/>
--- 5. Finally replace the shell with the command
--- @tparam string str command to popen(3)
--- @tparam string data string to feed to the pipe
--- @treturn bool true if the command exits with a non-zero status, nil otherwise
--- @treturn string a status output from cimicida.exit_string as a string
-local pwrite = function (str, data)
-    local result = {}
-    local write = io.write
-    str = [[    set -ef
-    unset IFS
-    export LC_ALL=C
-    exec ]] .. str
-    local pipe = io.popen(str, "we")
-    io.flush(pipe)
-    pipe:write(data)
-    local _
-    _, result.status, result.code = io.close(pipe)
-    if result.code == 0 then
-        return true, result
-    else
-        return nil, result
-    end
-end
-
---- Wrap os.execute also known as system(3).
--- The command has a script preamble.<br/>
--- 1. Exit immediately if a command exits with a non-zero status<br/>
--- 2. Pathname expansion is disabled<br/>
--- 3. STDERR and STDIN are closed<br/>
--- 4. STDOUT is piped to /dev/null<br/>
--- 5. Finally replace the shell with the command
--- @tparam string str command to pass to system(3)
--- @treturn bool true if exit code is equal to zero, nil otherwise
--- @treturn string a status output from cimicida.exit_string as a string
-local system = function (str)
-    local result = {}
-    local set = [[  set -ef
-    unset IFS
-    export LC_ALL=C
-    export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin
-    exec 0>&- 2>&- 1>/dev/null
-    exec ]]
-    local redir = [[ 0>&- 2>&- 1>/dev/null ]]
-    local _
-    _, result.status, result.code = os.execute(set .. str .. redir)
-    result.bin = "os.execute"
-    if result.code == 0 then
-        return true, result
-    else
-        return nil, result
-    end
-end
-
---- Wrap os.execute also known as system(3).
--- Similar to cimicida.system but it does not replace the shell.
--- Suitable for scripts.
--- @tparam string str string to pass to system(3)
--- @treturn bool true if exit code is equal to zero, nil otherwise
--- @treturn string a status output from cimicida.exit_string as a string
-local execute = function (str)
-    local result = {}
-    local set = [[  set -ef
-    export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin
-    exec 0>&- 2>&- 1>/dev/null
-    ]]
-    local _
-    _, result.status, result.code = os.execute(set .. str)
-    if result.code == 0 then
-        return true, result
-    else
-        return nil, result
-    end
-end
-
---- Run a shell pipe.
--- @tparam varargs ... a vararg containing the command pipe. The first argument should be popen or execute
--- @treturn string the output from cimicida.popen or cimicida.execute, nil if popen or execute was not passed
-local pipeline = function (...)
-    local pipe = {}
-    local cmds = {...}
-    for n = 2, #cmds do
-        pipe[#pipe + 1] = table.concat(cmds[n], " ")
-        if n ~= #cmds then pipe[#pipe + 1] = " | " end
-    end
-    if cmds[1] == "popen" then
-        return popen(table.concat(pipe))
-    elseif cmds[1] == "execute" then
-        return execute(table.concat(pipe))
-    else
-        return nil, "pipeline: First argument should be 'popen' or 'execute'."
-    end
-end
-
---- Time a function run.
--- @tparam func f the function
--- @tparam varargs ... a vararg containing the arguments for the function
--- @return the return value(s) of f(...)
--- @treturn number the seconds elapsed as a number
-local time = function (f, ...)
-    local t1 = os.time()
-    local fn = {f(...)}
-    return table.unpack(fn), os.diff_time(os.time() , t1)
-end
-
---- Escape quotes ",'.
--- @tparam string str string to quote
--- @treturn string quoted string
-local escape_quotes = function (str)
-    str = string.gsub(str, [["]], [[\"]])
-    str = string.gsub(str, [[']], [[\']])
-    return str
-end
-
---- Log to a file.
--- @tparam string file path name of the file
--- @tparam string ident identification
--- @tparam string msg string to log (STRING)
--- @treturn bool a boolean value, true if no errors, nil otherwise
-local flog = function (file, ident, msg)
-    local setvbuf = io.setvbuf
-    local openlog = function (f)
-        local fd = io.open(f, "ae+")
-        if fd then
-            return fd
-        end
-    end
-    local fd = openlog(file)
-    local log = "%s %s: %s\n"
-    local timestamp = os.date("%a %b %d %T")
-    fd:setvbuf("line")
-    local _, err = fprintf(fd, log, timestamp, ident, msg)
-    io.flush(fd)
-    io.close(fd)
-    if err then
-        return nil, err
+        size = size - written
+        ::continue::
     end
     return true
 end
 
---- Insert a value to a table position if the first argument is not nil or not false.
--- Wraps table.insert().
--- @tparam bool bool value to evaluate
--- @tparam table list table to insert into
--- @tparam number pos position index in the table
--- @param value value to insert (VALUE)
-local insert_if = function (bool, list, pos, value)
-    if bool then
-        if type(value) == "table" then
-            for n, i in ipairs(value) do
-                local p = n - 1
-                table.insert(list, pos + p, i)
-            end
+-- exec for pipeline
+function lib.execp (t, ...)
+    local pid, err = unistd.fork()
+    local status, code, _
+    if pid == nil or pid == -1 then
+        return nil, err
+    elseif pid == 0 then
+        if type(t) == "table" then
+            unistd.exec(table.unpack(t))
+            local _, no = errno.errno()
+            unistd._exit(no)
         else
-            table.insert(list, pos, value)
-        end
-    end
-end
-
---- Return the second argument if the first argument is not nil or not false.
--- For value functions there should be no evaluation in the arguments.
--- @param bool value to evaluate
--- @param value value to return if first argument does not evaluate to nil or false
--- @return value if first argument does not evaluate to nil or false
-local return_if = function (bool, value)
-    if bool then
-        return (value)
-    end
-end
-
---- Return the second argument if the first argument is nil or false.
--- @param bool value to evaluate
--- @param value value to return if first argument evaluates to nil or false
--- @return value if first argument evaluates to nil or false
-local return_if_not = function (bool, value)
-    if bool == false or bool == nil then
-        return value
-    end
-end
-
---- Set up a table so that missing keys are created automatically as autotables.
--- From Luapower/glue
--- @return a new table with automatic keys
-local autotable
-local auto_meta = {
-    __index = function(t, k)
-        t[k] = autotable()
-        return t[k]
-    end
-}
-autotable = function(t)
-    t = t or {}
-    local meta = getmetatable(t)
-    if meta then
-        assert(not meta.__index or meta.__index == auto_meta.__index,
-            '__index already set')
-        meta.__index = auto_meta.__index
-    else
-        setmetatable(t, auto_meta)
-    end
-    return t
-end
-
---- Count the number of keys in table.
--- From Luapower/glue.<br/>
--- @tparam table t table to count keys from
--- @tparam number maxn only count up to this number of keys
-local count_keys = function(t, maxn)
-    local n = 0
-    if maxn then
-        for _ in pairs(t) do
-            n = n + 1
-            if n >= maxn then break end
+            unistd._exit(t(...) or 0)
         end
     else
-        for _ in pairs(t) do
-            n = n + 1
+        _, status, code = lib.wait(pid)
+    end
+    return code, status
+end
+
+-- Derived from luaposix/posix.lua pipeline()
+local pipeline
+pipeline = function (t, pipe_fn)
+    local list = {
+        sub = function (l, from, to)
+            local r = {}
+            local len = #l
+            from = from or 1
+            to = to or len
+            if from < 0 then
+                from = from + len + 1
+            end
+            if to < 0 then
+                to = to + len + 1
+            end
+            for i = from, to do
+                table.insert (r, l[i])
+            end
+            return r
+        end
+    }
+
+    pipe_fn = pipe_fn or unistd.pipe
+    local pid, read_fd, write_fd, save_stdout
+    if #t > 1 then
+        read_fd, write_fd = pipe_fn()
+        if not read_fd then
+            lc.errorf("error opening pipe")
+        end
+        pid = unistd.fork()
+        if pid == nil then
+            lc.errorf("error forking")
+        elseif pid == 0 then
+            if not lib.dup2(read_fd, unistd.STDIN_FILENO) then
+                lc.errorf("error dup2-ing")
+            end
+            unistd.close(read_fd)
+            unistd.close(write_fd)
+            unistd._exit(pipeline(list.sub(t, 2), pipe_fn))
+        else
+            save_stdout = unistd.dup(unistd.STDOUT_FILENO)
+            if not save_stdout then
+                lc.errorf("error dup-ing")
+            end
+            if not lib.dup2(write_fd, unistd.STDOUT_FILENO) then
+                lc.errorf("error dup2-ing")
+            end
+            unistd.close(read_fd)
+            unistd.close(write_fd)
         end
     end
-    return n
+
+    local code, status = lib.execp(t[1])
+    unistd.close(unistd.STDOUT_FILENO)
+
+    if #t > 1 then
+        unistd.close(write_fd)
+        lib.wait(pid)
+        if not lib.dup2 (save_stdout, unistd.STDOUT_FILENO) then
+            lc.errorf("error dup2-ing")
+        end
+        unistd.close(save_stdout)
+    end
+
+    if code == 0 then
+        return true, lc.exit_string("pipe", status, code)
+    else
+        return nil, lc.exit_string("pipe", status, code)
+    end
 end
 
---- Truncate a file
--- @tparam string file to truncate
-local truncate = function(file)
-    local o = io.output()
-    local fd = io.open(file, "w+")
-    io.output(fd)
-    io.write("")
-    io.close()
-    io.output(o)
+--- Checks the existence of a given path.
+-- @tparam string path the path to check for
+-- @treturn string the path if path exists.
+function lib.ret_path (path)
+    if stat.stat(path) then
+        return path
+    end
 end
 
---- Read a file in one shot
--- @tparam string file to read
--- @treturn string contents of file
-local read_all = function(file)
-    local o = io.input()
-    local fd = io.open(file)
-    io.input(fd)
-    local str = io.read("*a")
-    io.close()
-    io.input(o)
+--- Deduce the complete path name of an executable.
+--  Only checks standard locations.
+-- @tparam string bin executable name
+-- @treturn string full path name
+function lib.bin_path (bin)
+    -- If executable is not in any of these directories then it should be using the complete path.
+    local t = { "/usr/bin/", "/bin/", "/usr/sbin/", "/sbin/", "/usr/local/bin/", "/usr/local/sbin/" }
+    for _, p in ipairs(t) do
+        if stat.stat(p .. bin) then
+            return p .. bin
+        end
+    end
+end
+
+--[[
+    OVERRIDES for lib.exec and lib.qexec
+    _bin=path to binary
+    _env=environment
+    _cwd=current working directory
+    _stdin=standard input (STRING)
+    _stdout=standard output (FILE)
+    _stderr=standard error (FILE)
+    _return_code=return the exit code instead of boolean true
+    _ignore_error=always return boolean true
+]]
+
+local pexec = function (args)
+    if args._bin == nil then
+        return nil, "no executable passed"
+    end
+    local stdin, fd0    = unistd.pipe()
+    local fd1, stdout = unistd.pipe()
+    local fd2, stderr = unistd.pipe()
+    if not (fd0 and fd1 and fd2) then
+        return nil, "error opening pipe"
+    end
+    local _, res, no, pid, err = nil, nil, nil, unistd.fork()
+    if pid == nil or pid == -1 then
+        return nil, err
+    elseif pid == 0 then
+        unistd.close(fd0)
+        unistd.close(fd1)
+        unistd.close(fd2)
+        lib.dup2(stdin, unistd.STDIN_FILENO)
+        lib.dup2(stdout, unistd.STDOUT_FILENO)
+        lib.dup2(stderr, unistd.STDERR_FILENO)
+        unistd.close(stdin)
+        unistd.close(stdout)
+        unistd.close(stderr)
+        if args._cwd then
+            res, err = lib.chdir(args._cwd)
+            if not res then
+                return nil, err
+            end
+        end
+        lib.closefrom()
+        lib.execve(args._bin, args, args._env)
+        _, no = errno.errno()
+        unistd._exit(no)
+    end
+    unistd.close(stdin)
+    unistd.close(stdout)
+    unistd.close(stderr)
+    return pid, err, fd0, fd1, fd2
+end
+
+--- Execute a file.
+-- The sequence part of args are the arguments passed to the executable <br/>
+-- The dictionary part of args has options and override. See the following.<br/>
+-- @tparam table args
+-- @param args._bin override path to binary
+-- @param args._env environment variables
+-- @param args._cwd current working directory
+-- @param args._stdin string as standard input
+-- @param args._stdout path to file as standard output
+-- @param args._stderr path to file as standard error
+-- @param args._return_code return the exit code instead of boolean true
+-- @param args._ignore_error always return boolean true
+-- @treturn bool true if no errors, nil otherwise
+-- @treturn table result
+-- @return result.stdout (table) sequence of stdout lines
+-- @return result.stderr (table) sequence of stderr lines
+-- @return result.pid (int) pid of terminated executable, if successful; nil otherwise
+-- @return result.status (string) status: "exited", "killed" or "stopped"; otherwise, an error message
+-- @return result.code (int) exit status, or signal number responsible for "killed" or "stopped"; otherwise, an errnum
+-- @return result.bin (string) executable path
+function lib.exec (args)
+    local result = { stdout = {}, stderr = {} }
+    local sz = 4096
+    local pid, err, fd0, fd1, fd2 = pexec(args)
+    if not pid then
+        return nil, err
+    end
+    local fdcopy = function (fileno, std, output)
+        local buf, str = nil, {}
+        local fd, res, msg
+        if output then
+            fd, msg = lib.open(output, (fcntl.O_CREAT | fcntl.F_WRLCK | fcntl.O_WRONLY))
+            if not fd then return nil, msg end
+        end
+        while true do
+            buf = unistd.read(fileno, sz)
+            if buf == nil or string.len(buf) == 0 then
+                if output then
+                    unistd.close(fd)
+                end
+                break
+            elseif output then
+                res, msg = lib.write(fd, buf)
+                if not res then
+                    return nil, msg
+                end
+            else
+                str[#str + 1] = buf
+            end
+        end
+        if next(str) and not output then
+            str = table.concat(str) -- table to string
+            for ln in string.gmatch(str, "([^\n]*)\n") do
+                if ln ~= "" then result[std][#result[std] + 1] = ln end
+            end
+            if #result[std] == 0 then
+                result[std][1] = str
+            end
+        end
+        return true
+    end
+    if args._stdin then
+        local res, msg = lib.write(fd0, args._stdin)
+        if not res then
+            return nil, msg
+        end
+    end
+    unistd.close(fd0)
+    fdcopy(fd1, "stdout", args._stdout)
+    unistd.close(fd1)
+    fdcopy(fd2, "stderr", args._stderr)
+    unistd.close(fd2)
+    result.pid, result.status, result.code = lib.wait(pid)
+    result.bin = args._bin
+    if args._return_code then
+        return result.code, result
+    elseif args._ignore_error or result.code == 0 then
+        return true, result
+    else
+        return nil, result
+    end
+end
+
+--- Execute a file.
+--  Use if caller does not care for STDIN, STDOUT or STDERR. <br/>
+-- The sequence part of args are the arguments passed to the executable <br/>
+-- The dictionary part of args has options and override. See the following.<br/>
+-- @tparam table args
+-- @param args._bin override path to binary
+-- @param args._env environment variables
+-- @param args._cwd current working directory
+-- @param args._stdin string as standard input
+-- @param args._stdout path to file as standard output
+-- @param args._stderr path to file as standard error
+-- @param args._return_code return the exit code instead of boolean true
+-- @param args._ignore_error always return boolean true
+-- @treturn bool true if no errors, nil otherwise
+-- @treturn table result
+-- @return result.stdout (table) sequence of stdout lines
+-- @return result.stderr (table) sequence of stderr lines
+-- @return result.pid (int) pid of terminated executable, if successful; nil otherwise
+-- @return result.status (string) status: "exited", "killed" or "stopped"; otherwise, an error message
+-- @return result.code (int) exit status, or signal number responsible for "killed" or "stopped"; otherwise, an errnum
+-- @return result.bin (string) executable path
+function lib.qexec (args)
+    local pid, err = unistd.fork()
+    local result = {}
+    if pid == nil or pid == -1 then
+        return nil, err
+    elseif pid == 0 then
+        if args._cwd then
+            local res, err = lib.chdir(args._cwd)
+            if not res then
+                return nil, err
+            end
+        end
+        lib.closefrom()
+        lib.execve(args._bin, args, args._env)
+        local _, no = errno.errno()
+        unistd._exit(no)
+    else
+        result.pid, result.status, result.code = lib.wait(pid)
+        result.bin = args._bin
+    end
+    -- return values depending on flags
+    if args._return_code then
+        return result.code, result
+    elseif args._ignore_error or result.code == 0 then
+        return true, result
+    else
+        return nil, result
+    end
+end
+
+--- Read string from a polled STDIN.
+-- @tparam int sz bytes to read
+-- @treturn string string read
+function lib.readin (sz)
+    local fd = unistd.STDIN_FILENO
+    local str = ""
+    sz = sz or 1024
+    local fds = { [fd] = { events = { IN = true } } }
+    while fds ~= nil do
+        poll.poll(fds, -1)
+        if fds[fd].revents.IN then
+            local buf = unistd.read(fd, sz)
+            if buf == "" then fds = nil else str = string.format("%s%s", str, buf) end
+        end
+    end
     return str
 end
 
---- @export
-return {
-    pcall_f = pcall_f,
-    try_f = try_f,
-    require = xrequire,
-    printf = printf,
-    fprintf = fprintf,
-    errorf = errorf,
-    assertf = assertf,
-    warn = warn,
-    append = append,
-    time_hm = time_hm,
-    date_ymd = date_ymd,
-    timestamp = timestamp,
-    find_string = find_string,
-    string_find = find_string,
-    seq_to_dict = seq_to_dict,
-    arr_to_rec = seq_to_dict,
-    ln_to_tbl = ln_to_tbl,
-    word_to_tbl = word_to_tbl,
-    str_to_tbl = str_to_tbl,
-    escape_pattern = escape_pattern,
-    filter_tbl_value = filter_tbl_value,
-    file_to_tbl = file_to_tbl,
-    find_in_tbl = find_in_tbl,
-    shallow_cp = shallow_cp,
-    clone = clone,
-    split_path = split_path,
-    test_open = test_open,
-    fopen = fopen,
-    match_from_file = match_from_file,
-    fwrite = fwrite,
-    get_ln = get_ln,
-    sub = sub,
-    exit_string = exit_string,
-    truthy = truthy,
-    falsy = falsy,
-    popen = popen,
-    pwrite = pwrite,
-    system = system,
-    execute = execute,
-    pipeline = pipeline,
-    time = time,
-    escape_quotes = escape_quotes,
-    flog = flog,
-    insert_if = insert_if,
-    return_if = return_if,
-    return_if_not = return_if_not,
-    autotable = autotable,
-    count_keys = count_keys,
-    truncate = truncate,
-    read_all = read_all,
-}
+--- Write to given path name.
+--  Wraps lib.write().
+-- @tparam string path name
+-- @tparam string str string to write
+-- @treturn bool true if successfully written; otherwise it returns nil
+function lib.fdwrite (path, str)
+    local fd = lib.open(path, (fcntl.O_RDWR))
+    if not fd then
+        return nil
+    end
+    return lib.write(fd, str)
+end
+
+--- Write to give path name atomically.
+-- Wraps lib.write().
+-- @tparam string path name
+-- @tparam string str string to write
+-- @tparam number mode octal mode when opening file
+-- @treturn bool true when successfully writing; otherwise, return nil
+-- @treturn string successful message string; otherwise, return a string describing the error
+function lib.awrite (path, str, mode)
+    mode = mode or 384
+    local ok, err
+    -- O_WRONLY and F_WRLCK for an advisory lock on the given path
+    local fd = lib.open(path, (fcntl.O_CREAT | fcntl.O_WRONLY | fcntl.O_TRUNC), mode)
+    local lock = {
+        l_type = fcntl.F_WRLCK,
+        l_whence = unistd.SEEK_SET,
+        l_start = 0,
+        l_len = 0
+    }
+    ok = pcall(lib.fcntl, fd, fcntl.F_SETLK, lock)
+    if not ok then
+        return nil, "lib.awrite: fcntl(2) error."
+    end
+    local dirname = libgen.dirname(path)
+    local tmp, temp = stdlib.mkstemp(dirname .. "/._configiXXXXXX")
+    lib.write(tmp, str)
+    lib.fsync(tmp)
+    ok, err = os.rename(temp, path)
+    if not ok then
+        return nil, err
+    end
+    unistd.close(tmp)
+    lock.l_type = fcntl.F_UNLCK
+    lib.fcntl(fd, fcntl.F_SETLK, lock)
+    lib.fsync(fd)
+    unistd.close(fd)
+    return true, string.format("Successfully wrote %s", path)
+end
+
+--- Check if a given path name is a directory.
+-- @tparam string path name
+-- @treturn bool true if a directory; otherwise, return nil
+function lib.is_dir (path)
+    local path_stat = stat.stat(path)
+    if path_stat then
+        if stat.S_ISDIR(path_stat.st_mode) ~= 0 then
+            return true
+        end
+    end
+end
+
+--- Check if a given path name is a file.
+-- @tparam string path name
+-- @treturn bool true if a file; otherwise, return nil
+function lib.is_file (path)
+    local path_stat = stat.stat(path)
+    if path_stat then
+        if stat.S_ISREG(path_stat.st_mode) ~= 0 then
+            return true
+        end
+    end
+end
+
+--- Check if a given path name is a symbolic link.
+-- @tparam string path name
+-- @treturn bool true if a symbolic link; otherwise, return nil
+function lib.is_link (path)
+    local stat = stat.stat(path)
+    if stat then
+        if stat.S_ISLNK(stat.st_mode) ~= 0 then
+            return true
+        end
+    end
+end
+
+--- Write to the syslog and a file if given.
+-- @tparam string file path name to log to.
+-- @tparam string ident arbitrary identification string
+-- @tparam string msg message body
+-- @tparam int option see luaposix syslog constants
+-- @tparam int facility see luaposix syslog constants
+-- @tparam int level see luaposix syslog constants
+function lib.log (file, ident, msg, option, facility, level)
+    local flog = lc.flog
+    level = level or syslog.LOG_DEBUG
+    option = option or syslog.LOG_NDELAY
+    facility = facility or syslog.LOG_USER
+    if file then
+        flog(file, ident, msg)
+    end
+    syslog.openlog(ident, option, facility)
+    syslog.syslog(level, msg)
+    syslog.closelog()
+end
+
+--- Calculate difference in time.
+-- From luaposix.
+-- @tparam int finish end time
+-- @tparam int start start time
+-- @treturn {sec, usec} a table of results
+function lib.diff_time (finish, start)
+    local sec, usec = 0, 0
+    if finish.tv_sec then sec = finish.tv_sec end
+    if start.tv_sec then sec = sec - start.tv_sec end
+    if finish.tv_usec then usec = finish.tv_usec end
+    if start.tv_usec then usec = usec - start.tv_usec end
+    if usec < 0 then
+        sec = sec - 1
+        usec = usec + 1000000
+    end
+    return { sec = sec, usec = usec }
+end
+
+--- Get effective username.
+-- @treturn string username
+function lib.effective_username ()
+    return pwd.getpwuid(unistd.geteuid()).pw_name
+end
+
+--- Get real username.
+-- @treturn string username
+function lib.real_username ()
+    return pwd.getpwuid(unistd.getuid()).pw_name
+end
+
+lib.pipeline = pipeline
+
+--- Execute command or executable as the key for this function-table.
+-- @function cmd
+-- Wraps lib.exec and lib.qexec so you can execute a given executable as the index to `cmd`.
+-- See lib.exec() and lib.qexec() for the possible options and results.<br/><br/>
+-- The invocation `cmd.ls` should also work since lib.bin_path() is called on the command.
+-- Prepend '-' to the command to ignore the output ala lib.qexec(). <br/>
+-- @usage cmd["/bin/ls"]{ "/tmp" }
+-- @usage cmd.ls{"/tmp"}
+-- @usage cmd["-/bin/ls"]{ "/tmp" }
+lib.cmd = setmetatable({}, { __index =
+    function (_, key)
+        local exec, bin
+        -- silent execution (lib.qexec) when prepended with "-".
+        if string.sub(key, 1, 1) == "-" then
+            exec = lib.qexec
+            bin = string.sub(key, 2)
+        else
+            exec = lib.exec
+            bin = key
+        end
+        -- Search common executable directories if not a full path.
+        if string.len(lc.split_path(bin)) == 0 then
+            bin = lib.bin_path(bin)
+        end
+        return function (args)
+            args._bin = bin
+            return exec(args)
+        end
+    end
+})
+
+--- File part of a path.
+-- @function basename
+-- Same as posix.libgen.basename. Copied here for convenience.
+-- @tparam string file to act on
+-- @treturn string filename part of path
+lib.basename = libgen.basename
+
+--- Directory name of path.
+-- @function dirname
+-- Same as posix.libgen.dirname. Copied here for convenience.
+-- @tparam string file to act on
+-- @treturn string directory parth of path
+lib.dirname = libgen.dirname
+
+--- Split a file name.
+-- @tparam string str path name
+-- @treturn string path Directory component
+-- @treturn string base Basename minus the extension
+-- @treturn string ext The extension
+function lib.decomp_path(str)
+    local path = libgen.dirname(str)
+    local basename = libgen.basename(str)
+    local base, ext = string.match(basename, "([%g%s]*)%.([%g]+)$")
+    return path, base, ext
+end
+
+--- Retry factory.
+-- @tparam function on_fail function to run in case of failure. Takes in the second return value from the retried function as an argument.
+-- @tparam number delay seconds to sleep after a failure. Default is 30 seconds.
+-- @tparam number retries number of tries. Default is to retry indefinitely.
+-- @treturn function a function that runs ...
+-- @usage run = retry_f(function() end, 3, 1)
+--run(string.match, "match", "match")
+function lib.retry_f(on_fail, delay, retries)
+    return function(fn, ...)
+        fn = lc.pcall_f(fn)
+        delay = delay or 30
+        retries = retries or 0
+        local i = 0
+        repeat
+            local ok, err = fn(...)
+            if not ok then
+                i = i + 1
+                on_fail(err)
+                if delay > 0 then
+                    unistd.sleep(delay)
+                end
+            end
+        until(ok or (i == retries))
+    end
+end
+
+return setmetatable({}, { __index = function(_, func)
+    return lib[func] or lc[func]
+end})
