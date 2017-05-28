@@ -213,9 +213,9 @@ Funame(lua_State *L)
 	lua_pushstring(L, buf);
 	lua_setfield(L, -2, "machine");
 #ifdef _GNU_SOURCE
-	strnmove(dbuf, uts.domainname, _UTSNAME_DOMAIN_LENGTH);
+	auxL_strnmove(dbuf, uts.domainname, _UTSNAME_DOMAIN_LENGTH);
 #else
-	strnmove(dbuf, uts.__domainname, _UTSNAME_DOMAIN_LENGTH);
+	auxL_strnmove(dbuf, uts.__domainname, _UTSNAME_DOMAIN_LENGTH);
 #endif
 	lua_pushstring(L, dbuf);
 	lua_setfield(L, -2, "domainname");
