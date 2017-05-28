@@ -200,16 +200,16 @@ Funame(lua_State *L)
 	auxL_strnmove(buf, uts.sysname, _UTSNAME_LENGTH);
 	lua_pushstring(L, buf);
 	lua_setfield(L, -2, "sysname");
-	strnmove(buf, uts.nodename, _UTSNAME_LENGTH);
+	auxL_strnmove(buf, uts.nodename, _UTSNAME_LENGTH);
 	lua_pushstring(L, buf);
 	lua_setfield(L, -2, "nodename");
-	strnmove(buf, uts.release, _UTSNAME_LENGTH);
+	auxL_strnmove(buf, uts.release, _UTSNAME_LENGTH);
 	lua_pushstring(L, buf);
 	lua_setfield(L, -2, "release");
-	strnmove(buf, uts.version, _UTSNAME_LENGTH);
+	auxL_strnmove(buf, uts.version, _UTSNAME_LENGTH);
 	lua_pushstring(L, buf);
 	lua_setfield(L, -2, "version");
-	strnmove(buf, uts.machine, _UTSNAME_LENGTH);
+	auxL_strnmove(buf, uts.machine, _UTSNAME_LENGTH);
 	lua_pushstring(L, buf);
 	lua_setfield(L, -2, "machine");
 #ifdef _GNU_SOURCE
