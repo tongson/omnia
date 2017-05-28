@@ -118,7 +118,7 @@ ifeq ($(or $(MAKECMDGOALS),$(.DEFAULT_GOAL)), development)
 	CFLAGS+= -fsanitize=undefined
   endif
   TARGET_CCOPT:= $(NULSTRING)
-  FOUND_LSAN:= $(shell $(CONFIGURE_P)/test-liblsan.sh $(TARGET_STCC))
+  FOUND_LSAN:= $(shell $(CONFIGURE_P)/test-lsan.sh $(TARGET_STCC))
   ifeq ($(FOUND_LSAN), 0)
 	CFLAGS+= -fsanitize=leak
   endif
