@@ -1,8 +1,8 @@
 --- Additional functions. Can also be called from the `lib` module.
 -- @module lib
 local io, string, os, table = io, string, os, table
-local type, pcall, load, setmetatable, ipairs, next, pairs, error, require, getmetatable =
-      type, pcall, load, setmetatable, ipairs, next, pairs, error, require, getmetatable
+local rawget, type, pcall, load, setmetatable, ipairs, next, pairs, error, require, getmetatable =
+      rawget, type, pcall, load, setmetatable, ipairs, next, pairs, error, require, getmetatable
 local ENV = {}
 _ENV = ENV
 
@@ -41,7 +41,7 @@ local try_f = function(finalizer)
    end
 end
 
---- ADA-style case insensitive calls to modules with lower case functions.
+--- Ada-style case insensitive calls to modules with lower case functions.
 -- @tparam string module name
 -- @treturn table module functions
 local xrequire = function(m)
@@ -123,6 +123,7 @@ local timestamp = function ()
 end
 
 --- Check if a table has an specified string.
+-- @Warning does not check if value is a string
 -- @tparam table tbl table to search
 -- @tparam string str plain string or pattern to look for in tbl
 -- @tparam bool plain if true, turns off pattern matching facilities
@@ -136,7 +137,7 @@ end
 
 --- Convert a sequence into a dictionary.
 -- Sequence values are converted into field names.
--- @warning Does not check if input table is a sequence.
+-- @Warning Does not check if input table is a sequence.
 -- @tparam table tbl the properly sequenced table to convert
 -- @param def default value for each field in the record. Should not be nil
 -- @treturn table the converted table
@@ -163,7 +164,7 @@ end
 
 --- Split alphanumeric matches of a string into table values.
 -- @tparam string str string to convert
--- @treturn table a new
+-- @treturn table a new table
 local word_to_tbl = function (str)
     local t = {}
     for s in string.gmatch(str, "%w+") do
@@ -229,7 +230,7 @@ end
 --- Convert file into a table.
 -- Each line is a table value
 -- @tparam string file file to convert
--- @treturn table a new table
+-- @treturn table a new table, nil otherwise
 local file_to_tbl = function (file)
     local _, fd = pcall(io.open, file, "re")
     if fd then
@@ -243,17 +244,16 @@ local file_to_tbl = function (file)
     end
 end
 
---- Find a string in a table value.
--- string is a plain string not a pattern
+--- Find table (sequence) index where a given string is the value.
 -- @tparam table tbl properly sequenced table to traverse
 -- @tparam string str string or pattern to look for
--- @tparam bool plain set to true if true, turns of pattern matching facilities
+-- @tparam bool plain set to true if true, turns off pattern matching facilities
 -- @treturn number the matching index if string is found, nil otherwise
-local find_in_tbl = function (tbl, str, plain)
+local find_in_seq = function (tbl, str, plain)
     plain = plain or nil
     local ok, found
     for n = 1, #tbl do
-        ok, found = pcall(Lua.find, tbl[n], str, 1, plain)
+        ok, found = pcall(string.find, tbl[n], str, 1, plain)
         if ok and found then
             return n
         end
@@ -276,11 +276,11 @@ local shallow_cp = function (tbl)
     return copy
 end
 
+local clone
 --- Clone a table.
 -- From <http://stackoverflow.com/questions/640642/how-do-you-copy-a-lua-table-by-value/16077650#16077650>
 -- @tparam table tbl table to be cloned
 -- @treturn table a new table
-local clone
 clone = function(tbl, seen)
     seen = seen or {}
     if tbl == nil then
@@ -320,7 +320,7 @@ local split_path = function (path)
 end
 
 
---- Check if a path is a file or not.
+--- Test if file can be opened.
 -- @tparam string file path to the file
 -- @return true if path is a file, nil otherwise
 local test_open = function (file)
@@ -336,7 +336,7 @@ end
 -- @treturn string the contents of the file, nil if the file cannot be read or opened
 local fopen = function (file)
     if not test_open(file) then
-        return nil, "File not found or no permissions to read file."
+        return nil, "io.open: File not found or no permissions to read file."
     end
     local str = ""
     for s in io.lines(file, 2^12) do
@@ -378,6 +378,7 @@ local fwrite = function (path, str, mode)
         end
         return true
     end
+    return nil, "io.open: Cannot open path."
 end
 
 --- Get line.
@@ -405,7 +406,7 @@ end
 -- @treturn string processed string
 local sub = function (str, tbl)
     local t, _ = {}, nil
-    _, str = pcall(string.gsub, str, "{{[%s]-([%g]+)[%s]-}}",
+    _, str = pcall(string.gsub, str, "%${[%s]-([%g]+)[%s]-}",
         function (s)
             t.type = type
             local code = [[
@@ -418,7 +419,7 @@ local sub = function (str, tbl)
             local chunk, err = load(lua, lua, "t", setmetatable(t, {__index=tbl}))
             if chunk then
                 chunk()
-                return t.V
+                return rawget(t, "V") or s
             else
                 return s
             end
@@ -444,12 +445,10 @@ end
 -- @tparam string s string to evaluate
 -- @treturn bool the boolean true if the string matches, nil otherwise
 local truthy = function (s)
-    if s == "yes" or
-         s == "YES" or
-         s == "true" or
-         s == "True" or
-         s == "TRUE" then
-         return true
+    local _
+    _, s = pcall(string.lower, s)
+    if s == "yes" or s == "true" or s == "on" then
+        return true
     end
 end
 
@@ -457,12 +456,10 @@ end
 -- @tparam string s string to evaluate
 -- @treturn bool the boolean true if the string matches, nil otherwise
 local falsy = function (s)
-    if s == "no" or
-         s == "NO" or
-         s == "false" or
-         s == "False" or
-         s == "FALSE" then
-         return true
+    local _
+    _, s = pcall(string.lower, s)
+    if s == "no" or s == "false" or s == "off" then
+        return true
     end
 end
 
@@ -473,7 +470,7 @@ end
 -- 3. STDIN is closed<br/>
 -- 4. Copy STDERR to STDOUT<br/>
 -- 5. Finally replace the shell with the command
--- @warning The command has a script preamble
+-- @Warning The command has a script preamble
 -- @tparam string str command to popen(3)
 -- @tparam string cwd current working directory
 -- @tparam bool _ignore_error boolean setting to ignore errors
@@ -678,7 +675,7 @@ end
 
 --- Return the second argument if the first argument is not nil or not false.
 -- For value functions there should be no evaluation in the arguments.
--- @param bool value to evaluate
+-- @tparam bool value to evaluate
 -- @param value value to return if first argument does not evaluate to nil or false
 -- @return value if first argument does not evaluate to nil or false
 local return_if = function (bool, value)
@@ -688,7 +685,7 @@ local return_if = function (bool, value)
 end
 
 --- Return the second argument if the first argument is nil or false.
--- @param bool value to evaluate
+-- @tparam bool value to evaluate
 -- @param value value to return if first argument evaluates to nil or false
 -- @return value if first argument evaluates to nil or false
 local return_if_not = function (bool, value)
@@ -697,9 +694,6 @@ local return_if_not = function (bool, value)
     end
 end
 
---- Set up a table so that missing keys are created automatically as autotables.
--- From Luapower/glue
--- @return a new table with automatic keys
 local autotable
 local auto_meta = {
     __index = function(t, k)
@@ -707,6 +701,10 @@ local auto_meta = {
         return t[k]
     end
 }
+--- Set up a table so that missing keys are created automatically as autotables.
+-- From Luapower/glue
+-- @tparam table t optional table to apply autotable mechanism on
+-- @return a new table with automatic keys
 autotable = function(t)
     t = t or {}
     local meta = getmetatable(t)
@@ -767,7 +765,7 @@ end
 return {
     pcall_f = pcall_f,
     try_f = try_f,
-    require = xrequire,
+    xrequire = xrequire,
     printf = printf,
     fprintf = fprintf,
     errorf = errorf,
@@ -787,7 +785,7 @@ return {
     escape_pattern = escape_pattern,
     filter_tbl_value = filter_tbl_value,
     file_to_tbl = file_to_tbl,
-    find_in_tbl = find_in_tbl,
+    find_in_seq = find_in_seq,
     shallow_cp = shallow_cp,
     clone = clone,
     split_path = split_path,

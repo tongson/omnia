@@ -389,10 +389,10 @@ end
 -- @tparam string path name
 -- @tparam string str string to write
 -- @treturn bool true if successfully written; otherwise it returns nil
-function lib.fdwrite (path, str)
-    local fd = lib.open(path, (fcntl.O_RDWR))
+function lib.write_path (path, str)
+    local fd, err = lib.open(path, (fcntl.O_WRONLY))
     if not fd then
-        return nil
+        return nil, err
     end
     return lib.write(fd, str)
 end
