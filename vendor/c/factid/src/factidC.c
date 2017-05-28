@@ -197,7 +197,7 @@ Funame(lua_State *L)
 		return luaX_pusherrno(L, "uname(2) error");
 	}
 	lua_createtable(L, 0, 6);
-	strnmove(buf, uts.sysname, _UTSNAME_LENGTH);
+	auxL_strnmove(buf, uts.sysname, _UTSNAME_LENGTH);
 	lua_pushstring(L, buf);
 	lua_setfield(L, -2, "sysname");
 	strnmove(buf, uts.nodename, _UTSNAME_LENGTH);
