@@ -189,7 +189,7 @@ Show uname information via uname(2)
 static int
 Funame(lua_State *L)
 {
-	struct utsname uts = {{0}};
+	struct utsname uts = {.nodename = {0}};
 	char buf[_UTSNAME_LENGTH] = {0};
 	char dbuf[_UTSNAME_DOMAIN_LENGTH] = {0};
 
@@ -296,7 +296,7 @@ Fmount(lua_State *L)
 		lua_setfield(L, -2, "freq");
 		lua_pushinteger(L, m->mnt_passno);
 		lua_setfield(L, -2, "passno");
-		lua_rawseti(L, -2, c);
+		lua_rawseti(L, -2, c+1);
 		c++;
 	}
 	endmntent(mtab);
