@@ -104,7 +104,6 @@ Module                                                                          
 [lsocket](http://tset.de/lsocket/)[2]                                           | 1.4             | MIT
 [luafilesystem](https://github.com/keplerproject/luafilesystem)                 | 1.6.3           | MIT
 [md5](http://www.rjek.com/luahash-0.00.tar.bz2)                                 | 0.00            | PD
-[cwtest](https://github.com/catwell/cwtest)                                     | b027449         | MIT
 [lua-linenoise](https://github.com/hoelzro/lua-linenoise)                       | f30fa48         | MIT
 [inspect.lua](https://github.com/kikito/inspect.lua)                            | 3.1.0           | MIT
 [cimicida](https://github.com/Configi/configi)                                  | HEAD            | MIT
