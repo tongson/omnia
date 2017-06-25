@@ -109,7 +109,7 @@ Module                                                                          
 [inspect.lua](https://github.com/kikito/inspect.lua)                            | 3.1.0           | MIT
 [cimicida](https://github.com/Configi/configi)                                  | HEAD            | MIT
 [lib](https://github.com/Configi/configi)                                       | HEAD            | MIT
-[tapered](https://bitbucket.org/telemachus/tapered)                             | 2.1.0           | BSD 3C
+[u-test](https://github.com/IUdalov/u-test/)                                    | 1.1.0           | MIT
 [px](https://github.com/Configi/configi)                                        | HEAD            | MIT
 [factid](https://github.com/Configi/configi)                                    | HEAD            | MIT
 [crc32lua](https://github.com/davidm/lua-digest-crc32lua)                       | 0.3.20111128-1  | MIT

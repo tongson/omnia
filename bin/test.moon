@@ -1,24 +1,29 @@
-T = require"tapered"
+T = require "u-test"
 
-with T
-   lfs = require"lfs"
-   M = "Function from a vendor/c module(lfs)"
-   .same type(lfs.rmdir), "function", M
-with T
-   libgen = require"posix.libgen"
-   M = "Function from vendor/posix module(luaposix)"
-   .same type(libgen.basename), "function", M
-with T
-   src = require"src"
-   M = "Function from a src/lua module(src)"
-   .same type(src.src), "function", M
-with T
-   moon_slash_src = require"moon.src"
-   M = "Function from a src/lua module directory (moonscript) (moon.src)"
-   .same type(moon_slash_src.moon_slash_src), "function", M
-with T
-   moon_src = require"moon_src"
-   M = "Function from a src/lua module (moonscript) (moon_src)"
-   .same type(moon_src.moon_src), "function", M
+T["Function from a vendor/c module(lfs)"] = ->
+   with T
+     lfs = require"lfs"
+     .equal type(lfs.rmdir), "function"
 
-T.done(5)
+T["Function from vendor/posix module(luaposix)"] = ->
+   with T
+     libgen = require"posix.libgen"
+     .equal type(libgen.basename), "function"
+
+T["Function from a src/lua module(src)"] = ->
+   with T
+     src = require"src"
+     .equal type(src.src), "function"
+
+T["Function from a src/lua module directory (moonscript) (moon.src)"] = ->
+   with T
+     moon_slash_src = require"moon.src"
+     .equal type(moon_slash_src.moon_slash_src), "function"
+
+T["Function from a src/lua module (moonscript) (moon_src)"] = ->
+   with T
+     moon_src = require"moon_src"
+     .equal type(moon_src.moon_src), "function"
+
+T.summary!
+
