@@ -120,7 +120,7 @@ Module                                                                          
 [lua-ConciseSerialization](https://github.com/fperrad/lua-ConciseSerialization) | 0.2.0           | MIT
 [luaproxy](https://github.com/arcapos/luaproxy)                                 | 6d7bb0c         | BSD 3C
 [luatweetnacl](https://github.com/philanc/luatweetnacl)                         | 0.3-2           | MIT
-
+[lua-array](https://github.com/cloudwu/lua-array)                               | 676ba83         | MIT
 
 [1] posix.deprecated and posix.compat removed<br/>
 [2] Does not include the async resolver<br/>
