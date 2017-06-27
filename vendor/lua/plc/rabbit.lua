@@ -1,31 +1,10 @@
---[[
-Copyright (c) 2015 Phil Leblanc
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without restriction,
-including without limitation the rights to use, copy, modify, merge,
-publish, distribute, sublicense, and/or sell copies of the Software,
-and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-]]
---[[
-
+-- Copyright (c) 2015  Phil Leblanc  -- see LICENSE file
+------------------------------------------------------------------------
+--[[ 	
+					
 Rabbit stream cipher
 
-Rabbit was one of the four eSTREAM finalists in 2008
+Rabbit was one of the four eSTREAM finalists in 2008 
 (for profile 1 -- sofware implementation)
 http://www.ecrypt.eu.org/stream/endofphase3.html
 
@@ -56,8 +35,29 @@ http://www.ecrypt.eu.org/ecrypt2/
 
 ]]
 
+------------------------------------------------------------------------
+-- debug functions (should be removed)
+
+local function pf(...) print(string.format(...)) end
+
+local function pst(st)
+	local x,c = st.x, st.c
+	-- same presentation as in RFC 4503 appendix B
+	pf('X0 %08X  %08X  %08X  %08X', x[1],x[2],x[3],x[4])
+	pf('X4 %08X  %08X  %08X  %08X', x[5],x[6],x[7],x[8])
+	pf('C0 %08X  %08X  %08X  %08X', c[1],c[2],c[3],c[4])
+	pf('C4 %08X  %08X  %08X  %08X', c[5],c[6],c[7],c[8])
+	print'--'
+end	
+------------------------------------------------------------------------
+
 local spack, sunpack = string.pack, string.unpack
 local app, concat = table.insert, table.concat
+
+local function rotr32(i, n)
+	-- rotate right on 32 bits
+	return ((i >> n) | (i << (32 - n))) & 0xffffffff
+end
 
 local function rotl32(i, n)
 	-- rotate left on 32 bits
@@ -67,9 +67,9 @@ end
 ------------------------------------------------------------------------
 
 local function gfunc(x)
-	-- square a 32-bit unsigned integer
+	-- square a 32-bit unsigned integer 
 	-- return the upper 32 bits xor the lower 32 bits of the result
-	local h = x * x
+	local h = x * x 
 	-- looks like the mult works for arbitrary uint32 x...
 	-- normal or happy impl detail?
 	local l = h & 0xffffffff
@@ -82,10 +82,10 @@ local function newstate()
 	return {
 		x = {0,0,0,0,0,0,0,0},  -- 8 * u32
 		c = {0,0,0,0,0,0,0,0},  -- 8 * u32
-		co = {0,0,0,0,0,0,0,0},  -- 8 * u32
-		g = {0,0,0,0,0,0,0,0},  -- 8 * u32
-		-- (co is "c_old" in reference impl.
-		--  co and g are kept in state to
+		co = {0,0,0,0,0,0,0,0},  -- 8 * u32 
+		g = {0,0,0,0,0,0,0,0},  -- 8 * u32 
+		-- (co is "c_old" in reference impl. 
+		--  co and g are kept in state to 
 		--  prevent reallocation at every invocation)
 		carry = 0  -- u32
 	}
@@ -96,7 +96,7 @@ local function clonestate(st)
 	-- (allows to keep a "master" state for a same key setup
 	--  and create "working" states for different IV)
 	local nst = newstate()
-	for i = 1, 8 do
+	for i = 1, 8 do 
 		nst.x[i] = st.x[i]
 		nst.c[i] = st.c[i]
 	end
@@ -142,7 +142,7 @@ local function keysetup(st, key)
 	x[3] = k2
 	x[5] = k3
 	x[7] = k4
-	x[2] = ((k4<<16) & 0xffffffff | (k3>>16))
+	x[2] = ((k4<<16) & 0xffffffff | (k3>>16)) 
 	x[4] = ((k1<<16) & 0xffffffff | (k4>>16))
 	x[6] = ((k2<<16) & 0xffffffff | (k1>>16))
 	x[8] = ((k3<<16) & 0xffffffff | (k2>>16))
@@ -158,8 +158,8 @@ local function keysetup(st, key)
 	--
 	st.carry = 0
 	-- iterate 4 times
-	for i = 1, 4 do
-		nextstate(st)
+	for i = 1, 4 do 
+		nextstate(st) 
 	end
 	-- modify the counters
 	for i = 1, 4 do c[i] = c[i] ~ x[i+4] end
@@ -176,13 +176,13 @@ local function ivsetup(st, iv)
 	i4 = (i3 << 16) & 0xffffffff | (i1 & 0x0000ffff)
 	-- modify counter values
 	local c = st.c
-	c[1] = c[1] ~ i1
-	c[2] = c[2] ~ i2
-	c[3] = c[3] ~ i3
-	c[4] = c[4] ~ i4
-	c[5] = c[5] ~ i1
-	c[6] = c[6] ~ i2
-	c[7] = c[7] ~ i3
+	c[1] = c[1] ~ i1 
+	c[2] = c[2] ~ i2 
+	c[3] = c[3] ~ i3 
+	c[4] = c[4] ~ i4 
+	c[5] = c[5] ~ i1 
+	c[6] = c[6] ~ i2 
+	c[7] = c[7] ~ i3 
 	c[8] = c[8] ~ i4
 	-- iterate 4 times
 	for i = 1, 4 do  nextstate(st)  end
@@ -198,7 +198,7 @@ local function processblock(st, itxt, idx)
 	local i1, i2, i3, i4 	-- input, as 4 uint32 words
 	local o1, o2, o3, o4	-- output, as 4 uint32 words
 	-- bn: byte number (used for a last, incomplete block)
-	local bn = #itxt - idx + 1
+	local bn = #itxt - idx + 1 
 	local last = bn <= 16	-- last block in itxt
 	local short = bn < 16   -- last block, shorter than 16 bytes
 	local fmt = "<I4I4I4I4" -- format to unpack 16 bytes as 4 uint32
@@ -215,7 +215,7 @@ local function processblock(st, itxt, idx)
 	o3 = i3 ~ x[5] ~ (x[2] >> 16) ~ ((x[8] << 16) & 0xffffffff)
 	o4 = i4 ~ x[7] ~ (x[4] >> 16) ~ ((x[2] << 16) & 0xffffffff)
 	local outstr = spack(fmt, o1, o2, o3, o4)
-	if short then
+	if short then 
 		outstr = string.sub(outstr, 1, bn)
 	end
 	return outstr, last
@@ -245,8 +245,8 @@ end --crypt
 
 ------------------------------------------------------------------------
 return { -- rabbit module
-	encrypt = crypt,
-	decrypt = crypt,
+	encrypt = crypt, 
+	decrypt = crypt, 
 	--
 	key_size = 16,
 	iv_size = 8,
@@ -258,4 +258,4 @@ return { -- rabbit module
 	ivsetup = ivsetup,
 	processblock = processblock,
 }
-
+	
