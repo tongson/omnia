@@ -11,7 +11,7 @@ $(qhttpA): $(qhttpOBJ)
 
 $(qhttpOBJ): $(qhttpSRC)
 	$(ECHOT) CC $@
-	$(TARGET_DYNCC) -o $@ -Ivendor/c/qhttp -Ivendor/c/auxlib $(TARGET_FLAGS) -c $<
+	$(TARGET_DYNCC) -std=c99 -o $@ -Ivendor/c/qhttp -Ivendor/c/auxlib $(TARGET_FLAGS) -c $<
 
 $(qhttpSO): $(qhttpOBJ) vendor/c/auxlib/auxlib.o
 	$(ECHOT) CC $@

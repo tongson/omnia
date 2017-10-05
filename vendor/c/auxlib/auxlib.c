@@ -28,7 +28,7 @@ auxL_bzero(void *ptr, size_t len)
 }
 
 int
-auxL_assert_bzero(unsigned char *buf, size_t len)
+auxL_assert_bzero(char *buf, size_t len)
 {
 	int z = 0;
 	size_t i;
@@ -70,20 +70,17 @@ char
 }
 
 int
-luaX_pusherror(lua_State *L, const char *error)
+luaX_pusherror(lua_State *L, char *error)
 {
-        lua_pushnil(L);
-        lua_pushstring(L, error);
-        return 2;
-}
-
-int
-luaX_pusherrno(lua_State *L, char *error)
-{
-        lua_pushnil(L);
-        lua_pushfstring(L, LUA_QS" : "LUA_QS, error, strerror(errno));
-        lua_pushinteger(L, errno);
-        return 3;
+	lua_pushnil(L);
+	if (errno) {
+		lua_pushfstring(L, LUA_QS" : "LUA_QS, error, strerror(errno));
+		lua_pushinteger(L, errno);
+		return 3;
+	} else {
+		lua_pushstring(L, error);
+		return 2;
+	}
 }
 
 static int

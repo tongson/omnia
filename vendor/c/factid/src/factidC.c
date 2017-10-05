@@ -39,10 +39,8 @@ static int
 Fuptime(lua_State *L)
 {
 	struct sysinfo info = {0};
-
-	if (sysinfo(&info) == -1) {
-		return luaX_pusherrno(L, "sysinfo(2) error");
-	}
+	errno = 0;
+	if (0 > sysinfo(&info)) return luaX_pusherror(L, "sysinfo(2) error");
 	lua_createtable(L, 0, 5);
 	lua_pushinteger(L, info.uptime);
 	lua_setfield(L, -2, "totalseconds");
@@ -69,10 +67,8 @@ Floads(lua_State *L)
 {
 	int l;
 	struct sysinfo info = {0};
-
-	if (sysinfo(&info) == -1) {
-		return luaX_pusherrno(L, "sysinfo(2) error");
-	}
+	errno = 0;
+	if (0 > sysinfo(&info)) return luaX_pusherror(L, "sysinfo(2) error");
 	lua_createtable(L, 3, 0);
 	for (l = 0; l < 3; l++) {
 		lua_pushnumber(L, info.loads[l]/65536.00);
@@ -90,10 +86,8 @@ static int
 Fmem(lua_State *L)
 {
 	struct sysinfo info = {0};
-
-	if (sysinfo(&info) == -1) {
-		return luaX_pusherrno(L, "sysinfo(2) error");
-	}
+	errno = 0;
+	if (0 > sysinfo(&info)) return luaX_pusherror(L, "sysinfo(2) error");
 	lua_createtable(L, 0, 9);
 	lua_pushinteger(L, info.mem_unit);
 	lua_setfield(L, -2, "mem_unit");
@@ -125,10 +119,8 @@ static int
 Fprocs(lua_State *L)
 {
 	struct sysinfo info = {0};
-
-	if (sysinfo(&info) == -1) {
-		return luaX_pusherrno(L, "sysinfo(2) error");
-	}
+	errno = 0;
+	if (0 > sysinfo(&info)) return luaX_pusherror(L, "sysinfo(2) error");
 	lua_pushinteger(L, info.procs);
 	return 1;
 }
@@ -152,10 +144,9 @@ Fsysconf(lua_State *L)
 		{"physpages", sysconf(_SC_PHYS_PAGES)},
 		{"avphyspages", sysconf(_SC_AVPHYS_PAGES)}
 	};
-
 	size_t c;
 	lua_createtable(L, 0, 6);
-	for (c = 0; c < sizeof m/sizeof *m; c++) {
+	for (c = 0; c < sizeof(m)/sizeof(*m); c++) {
 		lua_pushinteger(L, m[c].sc);
 		lua_setfield(L, -2, m[c].name);
 	}
@@ -172,11 +163,12 @@ static int
 Fhostname(lua_State *L)
 {
 	char hostname[1026]; // NI_MAXHOST + 1
-	if (!gethostname(hostname, (sizeof hostname)-1)) {
-		hostname[(sizeof hostname)-1] = '\0';
+	size_t len = 1025;
+	if (!gethostname(hostname, len)) {
+		hostname[1025] = '\0';
 		lua_pushstring(L, hostname);
 	} else {
-		return luaX_pusherrno(L, "gethostname(2) error");
+		return luaX_pusherror(L, "gethostname(2) error");
 	}
 	return 1;
 }
@@ -192,10 +184,8 @@ Funame(lua_State *L)
 	struct utsname uts = {.nodename = {0}};
 	char buf[_UTSNAME_LENGTH] = {0};
 	char dbuf[_UTSNAME_DOMAIN_LENGTH] = {0};
-
-	if (uname(&uts) == -1) {
-		return luaX_pusherrno(L, "uname(2) error");
-	}
+	errno = 0;
+	if (0 > uname(&uts)) return luaX_pusherror(L, "uname(2) error");
 	lua_createtable(L, 0, 6);
 	auxL_strnmove(buf, uts.sysname, _UTSNAME_LENGTH);
 	lua_pushstring(L, buf);
@@ -231,8 +221,8 @@ static int
 Fhostid(lua_State *L)
 {
 	char hostid[9] = {0};
-
-	snprintf(hostid, sizeof hostid, "%08lx", gethostid());
+	errno = 0;
+	if (0 > snprintf(hostid, sizeof(hostid), "%08lx", gethostid())) return luaX_pusherror(L, "snprintf(3) error.");
 	lua_pushstring(L, hostid);
 	return 1;
 }
@@ -246,15 +236,12 @@ static int
 Ftimezone(lua_State *L)
 {
 	char tzbuf[4];
-        struct tm *te = {0};
-        time_t t;
-        t = time(NULL);
-        te = localtime(&t);
-
-        setlocale(LC_TIME, "C");
-	if (!strftime(tzbuf, sizeof tzbuf, "%Z", te)) {
-		return luaX_pusherror(L, "strftime(3) error");
-	}
+	struct tm *te = {0};
+	time_t t;
+	t = time(NULL);
+	te = localtime(&t);
+	setlocale(LC_TIME, "C");
+	if (!strftime(tzbuf, sizeof tzbuf, "%Z", te)) return luaX_pusherror(L, "strftime(3) error");
 	assert(tzbuf[3] == '\0');
 	lua_pushstring(L, tzbuf);
 	return 1;
@@ -271,16 +258,11 @@ Fmount(lua_State *L)
 	int c = 0;
 	struct mntent *m = {0};
 	FILE *mtab = setmntent("/etc/mtab", "r");
-
 	if (!mtab) {
 		mtab = setmntent("/proc/self/mounts", "r");
 	}
-	if (!mtab) {
-		return luaX_pusherrno(L, "setmntent(3) error");
-	}
-	if (setvbuf(mtab, (void *)0, _IONBF, 0)) {
-		return luaX_pusherrno(L, "setvbuf(3) error");
-	}
+	if (!mtab) return luaX_pusherror(L, "setmntent(3) error");
+	if (setvbuf(mtab, (void *)0, _IONBF, 0)) return luaX_pusherror(L, "setvbuf(3) error");
 	lua_newtable(L);
 	while ((m = getmntent(mtab))) {
 		lua_createtable(L, 0, 6);
@@ -316,8 +298,8 @@ Fipaddress(lua_State *L)
 	char ipv4[INET_ADDRSTRLEN];
 	struct sockaddr_in r4 = {0}, ip4 = {0};
 	struct sockaddr_in6 r6 = {0}, ip6 = {0};
-	socklen_t ip4len = sizeof ip4;
-	socklen_t ip6len = sizeof ip6;
+	socklen_t ip4len = sizeof(ip4);
+	socklen_t ip6len = sizeof(ip6);
 
 	r4.sin_family = AF_INET;
 	r4.sin_port = htons(40444);
@@ -328,49 +310,42 @@ Fipaddress(lua_State *L)
 	inet_pton(AF_INET6, "2001:4860:4860::8888", &r6.sin6_addr);
 
 	lua_createtable(L, 0, 2);
-	if ((fd4 = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
-		return luaX_pusherrno(L, "socket(2) error");
-	}
+	errno = 0;
+	fd4 = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (0 > fd4) return luaX_pusherror(L, "socket(2) error");
 	for (c = 0; c <= 3; c++) {
-		if (!connect(fd4, (struct sockaddr *)&r4, sizeof r4)) {
-			break;
-		}
+		if (!connect(fd4, (struct sockaddr *)&r4, sizeof r4)) break;
 		if (c == 3) {
 			inet_pton(AF_INET, "127.0.0.1", &r4.sin_addr.s_addr);
-			if (connect(fd4, (struct sockaddr *)&r4, sizeof r4) == -1) {
-				return luaX_pusherrno(L, "connect(2) error");
-			}
+			if (0 > connect(fd4, (struct sockaddr *)&r4, sizeof r4)) return luaX_pusherror(L, "connect(2) error");
 		}
 	}
-	if (getsockname(fd4, (struct sockaddr *)&ip4, &ip4len) == -1) {
-		return luaX_pusherrno(L, "getsockname(2) error");
-	}
+	errno = 0;
+	if (0 > getsockname(fd4, (struct sockaddr *)&ip4, &ip4len)) return luaX_pusherror(L, "getsockname(2) error");
 	shutdown(fd4, 2);
+	close(fd4);
 	inet_ntop(AF_INET, &ip4.sin_addr, ipv4, INET_ADDRSTRLEN);
 	lua_pushstring(L, ipv4);
 	lua_setfield(L, -2, "ipv4");
-
-	if ((fd6 = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
-		return luaX_pusherrno(L, "socket(2) error");
-	}
+	errno = 0;
+	if (0 > (fd6 = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP))) return luaX_pusherror(L, "socket(2) error");
 	for (c = 0; c <= 3; c++) {
-		if (!connect(fd6, (struct sockaddr *)&r6, sizeof r6)) {
-			break;
-		}
+		if (!connect(fd6, (struct sockaddr *)&r6, sizeof r6)) break;
 		if (c == 3) {
 			inet_pton(AF_INET6, "::1", &r6.sin6_addr);
 			if (connect(fd6, (struct sockaddr *)&r6, sizeof r6) == -1) {
 				shutdown(fd6, 2);
+				close(fd6);
 				lua_pushstring(L, "disabled");
 				lua_setfield(L, -2, "ipv6");
 				return 1;
 			}
 		}
 	}
-	if (getsockname(fd6, (struct sockaddr *)&ip6, &ip6len) == -1) {
-		return luaX_pusherrno(L, "getsockname(2) error");
-	}
+	errno = 0;
+	if (0 > getsockname(fd6, (struct sockaddr *)&ip6, &ip6len)) return luaX_pusherror(L, "getsockname(2) error");
 	shutdown(fd6, 2);
+	close(fd6);
 	inet_ntop(AF_INET6, &ip6.sin6_addr, ipv6, INET6_ADDRSTRLEN);
 	lua_pushstring(L, ipv6);
 	lua_setfield(L, -2, "ipv6");
@@ -417,7 +392,6 @@ ipaddr(lua_State *L, struct ifaddrs *i)
 	char ipv4[INET_ADDRSTRLEN];
 	char ipv6[INET6_ADDRSTRLEN];
 	void *ip = 0;
-
 	if (i->ifa_addr->sa_family == AF_INET) {
 		ip = &((struct sockaddr_in *)i->ifa_addr)->sin_addr;
 		inet_ntop(AF_INET, ip, ipv4, INET_ADDRSTRLEN);
@@ -445,9 +419,8 @@ Fifaddrs(lua_State *L)
 	struct ifaddrs *i = {0};
 	int c = 1;
 
-	if (getifaddrs(&ifaddr) == -1) {
-		return luaX_pusherrno(L, "getifaddrs(3) error");
-	}
+	errno = 0;
+	if (0 > getifaddrs(&ifaddr)) return luaX_pusherror(L, "getifaddrs(3) error");
 	lua_newtable(L);
 	for (i = ifaddr; i != 0 ; i = i->ifa_next) {
 		if (i->ifa_addr == 0) {
@@ -482,21 +455,18 @@ Fmacaddrs(lua_State *L)
 	size_t c = 0;
  	struct ifconf ifc = {0};
 	struct ifreq *cifr = {0};
-
-	if ((fd = socket(PF_INET, SOCK_DGRAM, 0)) == -1) {
-		return luaX_pusherrno(L, "socket(2) error");
-	}
+	errno = 0;
+	fd = socket(PF_INET, SOCK_DGRAM, 0);
+	if (0 > fd) return luaX_pusherror(L, "socket(2) error");
 	ifc.ifc_len = sizeof buf;
 	ifc.ifc_buf = buf;
-	if (ioctl(fd, SIOCGIFCONF, &ifc) == -1) {
-		return luaX_pusherrno(L, "ioctl(2) error");
-	}
+	errno = 0;
+	if (0 > ioctl(fd, SIOCGIFCONF, &ifc)) return luaX_pusherror(L, "ioctl(2) error");
 	lua_newtable(L);
-	for (c = 0; c < (ifc.ifc_len/sizeof (struct ifreq)); c++) {
+	for (c = 0; c < (ifc.ifc_len/sizeof(struct ifreq)); c++) {
 		cifr = &ifc.ifc_req[c];
-		if (ioctl(fd, SIOCGIFHWADDR, cifr) == -1) {
-			return luaX_pusherrno(L, "ioctl(2) error");
-		}
+		errno = 0;
+		if (0 > ioctl(fd, SIOCGIFHWADDR, cifr)) return luaX_pusherror(L, "ioctl(2) error");
 		snprintf(mac, sizeof mac, "%02x:%02x:%02x:%02x:%02x:%02x",
 			(unsigned char)cifr->ifr_hwaddr.sa_data[0],
 			(unsigned char)cifr->ifr_hwaddr.sa_data[1],

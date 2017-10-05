@@ -1,5 +1,5 @@
-local rawget, type, pcall, load, setmetatable, ipairs, next, pairs, error, getmetatable =
-      rawget, type, pcall, load, setmetatable, ipairs, next, pairs, error, getmetatable
+local tonumber, rawget, type, pcall, load, setmetatable, ipairs, next, pairs, error, getmetatable =
+      tonumber, rawget, type, pcall, load, setmetatable, ipairs, next, pairs, error, getmetatable
 
 local fix_return_values = function(ok, ...)
   if ok then
@@ -20,7 +20,7 @@ local try_f = function(fn)
     if ok then
       return ok, ...
     else
-      if fn then fn() end
+      if fn then fn(...) end
       error((...), 0)
     end
   end
@@ -183,19 +183,6 @@ local f_to_seq = function(file, fmt)
   end
 end
 
-local copy = function(tbl)
-  local copy = {}
-  local iter = tbl[1] and ipairs or pairs
-  for f, v in iter(tbl) do
-    if type(v) == "table" then
-      copy[f] = {}
-    else
-      copy[f] = v
-    end
-  end
-  return copy
-end
-
 local clone
 clone = function(tbl, seen)
   seen = seen or {}
@@ -341,11 +328,11 @@ local popen = function(str, cwd, ignore)
   for ln in pipe:lines() do
     R.output[#R.output + 1] = ln
   end
-  local _
-  _, R.status, R.code = io.close(pipe)
-  R.bin = "io.popen"
-  if R.code == 0 or ignore then
-    return R.code, R
+  local _, code
+  _, R.status, code = io.close(pipe)
+  R.exe = "io.popen"
+  if code == 0 or ignore then
+    return code, R
   else
     return nil, R
   end
@@ -364,12 +351,12 @@ local pwrite = function(str, data, cwd, ignore)
   local pipe = io.popen(str, "w")
   io.flush(pipe)
   pipe:write(data)
-  local _
+  local _, code
   local R = {}
-  _, R.status, R.code = io.close(pipe)
-  R.bin = "io.popen"
-  if R.code == 0 or ignore then
-    return R.code, R
+  _, R.status, code = io.close(pipe)
+  R.exe = "io.popen"
+  if code == 0 or ignore then
+    return code, R
   else
     return nil, R
   end
@@ -388,12 +375,12 @@ local system = function(str, cwd, ignore)
   else
     str = string.format("%sexec %s %s", set, str, redir)
   end
-  local _
+  local _, code
   local R = {}
-  _, R.status, R.code = os.execute(str)
-  R.bin = "os.execute"
-  if R.code == 0 or ignore then
-    return R.code, R
+  _, R.status, code = os.execute(str)
+  R.exe = "os.execute"
+  if code == 0 or ignore then
+    return code, R
   else
     return nil, R
   end
@@ -404,12 +391,12 @@ local script = function(str, ignore)
   export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin
   exec 0>&- 2>&- 1>/dev/null
   ]]
-  local _
+  local _, code
   local R = {}
-  _, R.status, R.code = os.execute(set..str)
-  R.bin = "os.execute"
-  if R.code == 0 or ignore then
-    return R.code, R
+  _, R.status, code = os.execute(set..str)
+  R.exe = "os.execute"
+  if code == 0 or ignore then
+    return code, R
   else
     return nil, R
   end
@@ -545,11 +532,16 @@ local read_all = function(file)
   return str
 end
 
+local octal = function(num)
+  local s = string.format("%o", num)
+  local n = tonumber(s)
+  return n, s
+end
+
 table.find = t_find
 table.to_dict = t_to_dict
 table.to_hash = t_to_dict
 table.filter = t_filter
-table.copy = copy
 table.clone = clone
 table.insert_if = insert_if
 table.auto = autotable
@@ -599,7 +591,9 @@ return {
     to_array = f_to_seq,
     test = test,
     read_to_string = f_read,
+    read = f_read,
     write_all = f_write,
+    write = f_write,
     line = line,
     truncate = truncate,
     read_all = read_all
@@ -622,7 +616,7 @@ return {
     truthy = truthy,
     falsy = falsy,
     return_if = return_if,
-    return_if_not = return_if_not
-
+    return_if_not = return_if_not,
+    octal = octal,
   }
 }

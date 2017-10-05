@@ -8,9 +8,8 @@
  */
 
 void auxL_bzero(void *, size_t);
-int auxL_assert_bzero(unsigned char *, size_t);
-int luaX_pusherror(lua_State *, const char *);
-int luaX_pusherrno(lua_State *, char *);
+int auxL_assert_bzero(char *, size_t);
+int luaX_pusherror(lua_State *, char *);
 char *auxL_strncpy(char *, const char *, size_t);
 char *auxL_strnmove(char *, const char *, size_t);
 void auxI_assertion_failed(const char *, int, const char *, const char *) __attribute((noreturn));
