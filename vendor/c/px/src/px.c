@@ -39,7 +39,7 @@ static const Node dummynode_ = {
 #include "flopen.h"
 #include "closefrom.h"
 
-static void
+static int
 lcleartable(lua_State *L) {
 	luaL_checktype(L, 1, LUA_TTABLE);
 	Table *h = (Table *)lua_topointer(L, 1);
@@ -51,6 +51,7 @@ lcleartable(lua_State *L) {
 		for (n = gnode(h, 0); n < limit; n++)   //traverse hash part
 			setnilvalue(gval(n));
 	}
+	return 0;
 }
 
 /*
@@ -271,7 +272,7 @@ Cexecve(lua_State *L)
 	int exec_r;
 	if (LUA_TTABLE != lua_type(L, 3)) {
 		errno = 0;
-		if (0 > execv(path, argv)) return luaX_pusherror(L, path);
+		if (0 > execv(path, argv)) return luaX_pusherror(L, "execv(3) error");
 	} else if (LUA_TTABLE == lua_type(L, 3)) {
 		int e = lua_rawlen(L, 3);
 		env = lua_newuserdata(L, (e+2)*sizeof(char*));
@@ -282,7 +283,7 @@ Cexecve(lua_State *L)
 		}
 		env[e+1] = 0;
 		errno = 0;
-		if (0 > execve(path, argv, env)) return luaX_pusherror(L, path);
+		if (0 > execve(path, argv, env)) return luaX_pusherror(L, "execve(2) error");
 	}	else {
 		errno = 0;
 		return luaX_pusherror(L, "bad argument #3 to 'execve' (none or table expected)");
