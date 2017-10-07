@@ -1,12 +1,12 @@
-.DEFAULT_GOAL= development
-EXE:= test
+.DEFAULT_GOAL= release
+EXE:= lib
 SRC:= src moon_src
 SRC_DIR:= moon
 SRC_C:=
-VENDOR:= tapered
+VENDOR:= u-test cimicida lib inspect
 VENDOR_DIR:=
-VENDOR_C:= lfs posix
-MAKEFLAGS=
+VENDOR_C:= lfs posix px auxlib array qhttp
+MAKEFLAGS= --silent
 HOST_CC= cc
 CROSS=
 CROSS_CC=
