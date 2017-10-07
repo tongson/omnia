@@ -275,11 +275,12 @@ Cexecve(lua_State *L)
 		if (0 > execv(path, argv)) return luaX_pusherror(L, "execv(3) error");
 	} else if (LUA_TTABLE == lua_type(L, 3)) {
 		int e = lua_rawlen(L, 3);
+		int ei;
 		env = lua_newuserdata(L, (e+2)*sizeof(char*));
-		for (i=1; i<=e; i++) {
-			lua_pushinteger(L, i);
+		for (ei=0; ei<=e; ei++) {
+			lua_pushinteger(L, ei+1);
 			lua_gettable(L, 3);
-			env[i] = (char*)lua_tostring(L, -1);
+			env[ei] = (char*)lua_tostring(L, -1);
 		}
 		env[e+1] = 0;
 		errno = 0;
