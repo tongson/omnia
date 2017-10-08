@@ -99,7 +99,7 @@ Project                                                     | Version         | 
 Module                                                                          | Version         | License
 --------------------------------------------------------------------------------|-----------------|---------
 [Luaposix](https://github.com/luaposix/luaposix)[1]                             | 34.0            | MIT
-[Linotify](https://github.com/hoelzro/linotify)                                 | 0.4             | MIT
+[Linotify](https://github.com/hoelzro/linotify)                                 | 0.5             | MIT
 [LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)                                | 1.0.1           | MIT
 [lsocket](http://tset.de/lsocket/)[2]                                           | 1.4             | MIT
 [luafilesystem](https://github.com/keplerproject/luafilesystem)                 | 1.6.3           | MIT
