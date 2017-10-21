@@ -88,9 +88,9 @@ Project                                                     | Version         | 
 [Lua](http://www.lua.org)                                   | 5.3.4           | MIT
 [luastatic](https://github.com/ers35/luastatic)             | 0.0.9-dev       | CC0
 [MoonScript](http://moonscript.org)                         | 0.5.0           | MIT
-[moor](https://github.com/Nymphium/moor)                    | 9329bd4         | MIT
+[moor](https://github.com/Nymphium/moor)                    | HEAD            | MIT
 [linenoise](http://github.com/antirez/linenoise)            | c894b9e         | BSD 2C
-[moonpick](https://github.com/nilnor/moonpick)              | 2e390b3         | MIT
+[moonpick](https://github.com/nilnor/moonpick)              | HEAD            | MIT
 [luacheck](https://github.com/mpeterv/luacheck)             | 0.19.0          | MIT
 [luacov](https://github.com/keplerproject/luacov)           | 0.12.0          | MIT
 
