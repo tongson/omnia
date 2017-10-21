@@ -105,9 +105,9 @@ replgen = (get_line) -> (env = {}, _ENV = _ENV, ignorename) ->
 			-- continue
 
 		is_fncls, lua_code, err =  if line\match_if_fncls!
-				true
+			true
 		else
-				false, to_lua line
+			false, to_lua line
 
 		ok = lua_code != nil
 
