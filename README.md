@@ -116,7 +116,7 @@ Module                                                                          
 [dkjson](http://dkolf.de/src/dkjson-lua.fsl/home)                               | c23a579         | MIT
 [lua-ConciseSerialization](https://github.com/fperrad/lua-ConciseSerialization) | 0.2.0           | MIT
 [luaproxy](https://github.com/arcapos/luaproxy)                                 | 6d7bb0c         | BSD 3C
-[luatweetnacl](https://github.com/philanc/luatweetnacl)                         | 0.3-2           | MIT
+[luatweetnacl](https://github.com/philanc/luatweetnacl)                         | 0.5-1           | MIT
 [lua-array](https://github.com/cloudwu/lua-array)                               | 676ba83         | MIT
 
 [1] posix.deprecated and posix.compat removed<br/>
