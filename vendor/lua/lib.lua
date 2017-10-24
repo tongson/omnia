@@ -15,6 +15,7 @@ local errno = require"posix.errno"
 local fcntl = require"posix.fcntl"
 local wait = require"posix.sys.wait"
 local stat = require"posix.sys.stat"
+local ptime = require"posix.time"
 local A = require"array"
 local P = require"px"
 local I = require"inspect"
@@ -545,6 +546,12 @@ function func.retry_f(on_fail, delay, retries)
       end
     until(ok or (i == retries))
   end
+end
+
+function time.unix(t, f)
+  if not t then return nil, "Missing timestamp to convert." end
+  f = f or "%Y-%m-%d %H:%M:%S"
+  return ptime.strftime(f, ptime.gmtime(t))
 end
 
 return _ENV
