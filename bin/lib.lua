@@ -170,6 +170,11 @@ T["All tests"] = function()
     T.time.stamp = function()
       T.is_string(time.stamp())
     end
+    T.time.unix = function()
+      local s = time.unix(1508766437923)
+      T.is_string(s)
+      T.equal("2009-01-25 20:57:07", s)
+    end
   end
   do
     local table = C.table
@@ -689,6 +694,10 @@ T["All tests"] = function()
     T["Function from a src/lua module (moonscript) (moon_src)"] = function()
       local moon_src = require"moon_src"
       T.equal(type(moon_src.moon_src), "function")
+    end
+    T["No _ENV leak"] = function()
+      T.is_nil(C.wait)
+      T.is_table(C.time)
     end
   end
 end
