@@ -389,13 +389,9 @@ local system = function(str, cwd, ignore)
 end
 
 local script = function(str, ignore)
-  local set = [[  set -ef
-  export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin
-  exec 0>&- 2>&- 1>/dev/null
-  ]]
   local _, code
   local R = {}
-  _, R.status, code = os.execute(set..str)
+  _, R.status, code = os.execute(str)
   R.exe = "os.execute"
   if code == 0 or ignore then
     return code, R
