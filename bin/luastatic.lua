@@ -157,7 +157,7 @@ for _, name in ipairs(arg) do
 end
 
 if #lua_source_files == 0 then
-  local version = "0.0.9-dev"
+  local version = "0.0.9"
   print("luastatic " .. version)
   print([[
 usage: luastatic main.lua[1] require.lua[2] liblua.a[3] library.a[4] -I/include/lua[5] [6]
@@ -337,13 +337,16 @@ local function lua_loader(name)
   end
 end
 table.insert(package.loaders or package.searchers, 2, lua_loader)
+
+-- Lua 5.1 has unpack(). Lua 5.2+ has table.unpack().
+local unpack = unpack or table.unpack
 ]])
 
 outhex(([[
 local func = lua_loader("%s")
 if type(func) == "function" then
   -- Run the main Lua program.
-  func()
+  func(unpack(arg))
 else
   error(func, 0)
 end
