@@ -582,21 +582,27 @@ T["All tests"] = function()
       T.equal(t, 1)
     end
     T.exec.script = function()
-      local t, r = exec.script[[
-        touch tmp/three
-        touch tmp/four
+      os.execute[[
+        echo "touch tmp/three" > tmp/exec_script
+        echo "touch tmp/four" >> tmp/exec_script
       ]]
+      local t, r = exec.script("tmp/exec_script")
       T.equal(t, 0)
-      T.equal(r.exe, "os.execute")
+      T.equal(r.exe, "io.popen")
       T.equal(r.status, "exit")
       local script = [[
         touch xxx/three
       ]]
-      t, r = exec.script(script, true)
+      os.execute[[
+        echo "touch xxx/three" > tmp/exec_script2
+      ]]
+      t, r = exec.script("tmp/exec_script2", true)
       T.equal(t, 1)
       os.execute[[
         rm tmp/three
         rm tmp/four
+        rm tmp/exec_script
+        rm tmp/exec_script2
       ]]
     end
     T.exec.pipe_args = function()
