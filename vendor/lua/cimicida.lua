@@ -537,6 +537,16 @@ local read_all = function(file)
   return str
 end
 
+local read_line = function(file)
+  local o = io.input()
+  local fd = io.open(file)
+  io.input(fd)
+  local str = io.read("*l")
+  io.close()
+  io.input(o)
+  return str
+end
+
 local octal = function(num)
   local s = string.format("%o", num)
   local n = tonumber(s)
@@ -601,7 +611,8 @@ return {
     write = f_write,
     line = line,
     truncate = truncate,
-    read_all = read_all
+    read_all = read_all,
+    read_line = read_line
   },
   path = {
     split = split
