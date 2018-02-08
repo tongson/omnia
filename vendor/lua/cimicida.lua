@@ -389,10 +389,17 @@ local system = function(str, cwd, ignore)
 end
 
 local script = function(str, ignore)
-  local _, code
   local R = {}
-  _, R.status, code = os.execute(str)
-  R.exe = "os.execute"
+  local pipe = io.popen(f_read(str), "r")
+  io.flush(pipe)
+  R.output = {}
+  for ln in pipe:lines() do
+    R.output[#R.output + 1] = ln
+  end
+  local _, code
+  _, R.status, code = io.close(pipe)
+  R.exe = "io.popen"
+  R.code = code
   if code == 0 or ignore then
     return code, R
   else
