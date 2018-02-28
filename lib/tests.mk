@@ -23,8 +23,8 @@ TARGET_AR= $(CROSS)$(AR)
 TARGET_NM= $(CROSS)$(NM)
 TARGET_STRIP= $(CROSS)$(STRIP)
 
-# FLAGS when compiling for an OpenWRT target.
-ifneq (,$(findstring openwrt,$(TARGET_STCC)))
+# FLAGS when cross compiling
+ifneq (,$(CROSS))
   TARGET_CCOPT:= -Os -fomit-frame-pointer -pipe
   TARGET_LDFLAGS= -Wl,--gc-sections -Wl,--strip-all
 endif
@@ -53,13 +53,15 @@ ifeq ($(FOUND_RT), 0)
 endif
 
 # Test for GCC LTO capability.
-ifeq ($(shell $(CONFIGURE_P)/test-gcc47.sh $(TARGET_STCC)), true)
-  ifeq ($(shell $(CONFIGURE_P)/test-binutils-plugins.sh $(CROSS)gcc-ar), true)
-    TARGET_CFLAGS+= -fwhole-program -flto -fuse-linker-plugin
-    TARGET_LDFLAGS+= -fwhole-program -flto
-    TARGET_RANLIB:= $(CROSS)gcc-ranlib
-    TARGET_AR:= $(CROSS)gcc-ar
-    TARGET_NM:= $(CROSS)gcc-nm
+ifneq (,$(findstring enable-lto,$(shell $(TARGET_STCC) -v 2>&1)))
+  ifeq ($(shell $(CONFIGURE_P)/test-gcc47.sh $(TARGET_STCC)), true)
+    ifeq ($(shell $(CONFIGURE_P)/test-binutils-plugins.sh $(CROSS)$(AR)), true)
+      TARGET_CFLAGS+= -fwhole-program -flto -fuse-linker-plugin
+      TARGET_LDFLAGS+= -fwhole-program -flto
+      TARGET_RANLIB:= $(CROSS)$(RANLIB)
+      TARGET_AR:= $(CROSS)$(AR)
+      TARGET_NM:= $(CROSS)$(NM)
+    endif
   endif
 endif
 
