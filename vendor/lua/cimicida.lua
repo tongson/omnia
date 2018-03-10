@@ -577,7 +577,9 @@ return {
   string = string,
   func = {
     pcall_f = pcall_f,
+    pcall = pcall_f,
     try_f = try_f,
+    try = try_f,
     time = time
   },
   fmt = {
