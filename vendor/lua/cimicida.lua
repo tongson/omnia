@@ -524,6 +524,16 @@ local t_count = function(t, i)
   return n
 end
 
+local t_unique = function(t)
+  local nt = {}
+  for _, v in pairs(t) do
+    if t_count(nt, v) == 0 then
+      nt[#nt+1] = v
+    end
+  end
+  return nt
+end
+
 local truncate = function(file)
   local o = io.output()
   local fd = io.open(file, "w+")
