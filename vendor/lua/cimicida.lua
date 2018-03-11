@@ -499,7 +499,7 @@ autotable = function(t)
   return t
 end
 
-local count = function(t, maxn)
+local t_len = function(t, maxn)
   local n = 0
   if maxn then
     for _ in pairs(t) do
@@ -508,6 +508,16 @@ local count = function(t, maxn)
     end
   else
     for _ in pairs(t) do
+      n = n + 1
+    end
+  end
+  return n
+end
+
+local t_count = function(t, i)
+  local n = 0
+  for _, v in pairs(t) do
+    if i == v then
       n = n + 1
     end
   end
@@ -560,7 +570,8 @@ table.filter = t_filter
 table.clone = clone
 table.insert_if = insert_if
 table.auto = autotable
-table.count = count
+table.len = t_len
+table.count = t_count
 string.append = append
 string.line_to_table = line_to_seq
 string.line_to_array = line_to_seq
