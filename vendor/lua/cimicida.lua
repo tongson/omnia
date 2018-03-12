@@ -111,6 +111,14 @@ local t_to_dict = function(tbl, def)
   return t
 end
 
+local t_to_seq = function(tbl)
+  local t = {}
+  for k, _ in pairs(tbl) do
+    t[#t+1] = k
+  end
+  return t
+end
+
 local line_to_seq = function(str)
   local tbl = {}
   if not str then
@@ -576,6 +584,8 @@ end
 table.find = t_find
 table.to_dict = t_to_dict
 table.to_hash = t_to_dict
+table.to_seq = t_to_seq
+table.to_array = t_to_seq
 table.filter = t_filter
 table.clone = clone
 table.insert_if = insert_if
