@@ -1,7 +1,7 @@
 .DEFAULT_GOAL= release
 EXE:= lib
-SRC:= src moon_src
-SRC_DIR:= moon
+SRC:= src moon_src fnl_src
+SRC_DIR:= moon fnl
 SRC_C:=
 VENDOR:= u-test cimicida lib inspect
 VENDOR_DIR:=

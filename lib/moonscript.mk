@@ -47,5 +47,5 @@ $(MOONPICK_T): $(HOST_LUA_A) $(LUA_T) $(host_lpegA)
 	$(MOONC_T) $*.moon $@
 
 clean_moonscript:
-	$(RM) $(RMFLAGS) $(COMPILED) $(MOONC_T) $(MOONI_T) $(MOONPICK_T) $(host_lpegA) cimicida.lua \
+	$(RM) $(RMFLAGS) $(COMPILED_MOON) $(MOONC_T) $(MOONI_T) $(MOONPICK_T) $(host_lpegA) cimicida.lua \
 	  vendor/c/linenoise/*.o vendor/lua/moor/*.lua vendor/lua/moor.lua bin/moor

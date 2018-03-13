@@ -48,7 +48,7 @@ luacov:
 	$(ECHOT) CP luacov
 	$(CPR) lib/luacov .
 
-$(EXE_T): $(BUILD_DEPS) $(LIBLUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(VENDOR_TOP) $(SRC_TOP) $(SRC_LUA) $(VENDOR_LUA)
+$(EXE_T): $(BUILD_DEPS) $(LIBLUA_A) $(LUA_T) $(C_MODULES) $(COMPILED_MOON) $(COMPILED_FNL) $(VENDOR_TOP) $(SRC_TOP) $(SRC_LUA) $(VENDOR_LUA)
 	$(ECHOT) LN $(EXE_T)
 	CC=$(TARGET_STCC) NM=$(TARGET_NM) $(LUA_T) $(LUASTATIC) $(MAIN) \
 	   $(SRC_LUA) $(VENDOR_LUA) $(VENDOR_TOP) $(SRC_TOP) $(C_MODULES) $(LIBLUA_A) \
@@ -56,18 +56,18 @@ $(EXE_T): $(BUILD_DEPS) $(LIBLUA_A) $(LUA_T) $(C_MODULES) $(COMPILED) $(VENDOR_T
 	$(RM) $(RMFLAGS) $(MAIN).c $(VENDOR_TOP) $(SRC_TOP)
 	$(RMRF) $(VENDOR_DIRS) $(SRC_DIRS)
 
-development: $(LUA_T) $(C_SHARED) luacheck luacov $(COMPILED) $(VENDOR_LUA) $(VENDOR_TOP)
+development: $(LUA_T) $(C_SHARED) luacheck luacov $(COMPILED_MOON) $(COMPILED_FNL) $(VENDOR_LUA) $(VENDOR_TOP)
 	for f in $(SRC); do $(CP) $(SRC_P)/$$f.lua .; done
 	$(RMRF) $(SRC_DIRS)
 	for d in $(SRC_DIRS); do $(CPR) $(SRC_P)/$$d .; done
 	$(ECHOT) RUN luacheck
-	-bin/luacheck.lua src/lua/*.lua $(COMPILED) $(SRC_CHECK) --exclude-files 'vendor/lua/*'
+	-bin/luacheck.lua src/lua/*.lua $(COMPILED_MOON) $(COMPILED_FNL) $(SRC_CHECK) --exclude-files 'vendor/lua/*'
 	$(RM) $(RMFLAGS) luacov.stats.out
 
 clean: $(CLEAN)
 	$(ECHO) "Cleaning up..."
 	$(RM) $(RMFLAGS) $(MAIN).c $(LUA_O) $(LUA_T) $(LUAC_T) $(LUA_A) $(EXE_T) \
-	   $(HOST_LUA_A) $(HOST_LUA_O) $(COMPILED) $(VENDOR_TOP) $(SRC_TOP)
+	   $(HOST_LUA_A) $(HOST_LUA_O) $(COMPILED_MOON) $(COMPILED_FNL) $(VENDOR_TOP) $(SRC_TOP)
 	$(RMRF) $(SRC_DIRS) $(VENDOR_DIRS)
 	$(RMRF) *.a bin/*.dSYM luacheck luacov luacov.report.out luacov.stats.out
 	$(ECHO) "Done!"
