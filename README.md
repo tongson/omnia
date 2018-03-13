@@ -1,7 +1,7 @@
 Omnia -- Batteries included Lua
 =====
 
-Compile Lua, Fennel and MoonScript source code into standalone executables. This makes it easy to use Lua for general purpose scripting.
+Compile Lua, Fennel and MoonScript source code into standalone executables. This makes it easy to use Lua/Fennel/Moonscript for system programming and general purpose scripting.
 
 Another Lua 5.3 build system for standalone executables.
 
@@ -41,14 +41,14 @@ If you want to link statically run `make release STATIC=1`<br/>
 
 Adding plain modules is trivial. $(NAME) is the name of the module passed to `VENDOR`.
 
-1. Copy the module to `vendor/lua/$(NAME).{lua,moon}`<br/>
+1. Copy the module to `vendor/lua/$(NAME).{lua,fnl,moon}`<br/>
   example: `cp ~/Downloads/dkjson.lua vendor/lua`
 1. Add `$(NAME)` to `VENDOR`<br/>
   example: `VENDOR= re dkjson`
 
 For modules that are split into multile files, such as Penlight:
 
-1. Copy the directory of the Lua to `vendor/lua/$(NAME)`<br/>
+1. Copy the directory of the Lua module to `vendor/lua/$(NAME)`<br/>
   example: `cp -R ~/Download/Penlight-1.3.1/lua/pl vendor/lua`
 1. Add `$(NAME)` to `VENDOR_DIR`<br/>
   example: `VENDOR_DIR= pl`
