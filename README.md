@@ -1,7 +1,7 @@
 Omnia -- Batteries included Lua
 =====
 
-Compile Lua and MoonScript source code into standalone executables. This makes it easy to use Lua for general purpose scripting.
+Compile Lua, Fennel and MoonScript source code into standalone executables. This makes it easy to use Lua for general purpose scripting.
 
 Another Lua 5.3 build system for standalone executables.
 
@@ -37,7 +37,7 @@ Run `make` during development or `make release` for the final executable without
 If you want to link statically run `make release STATIC=1`<br/>
 
 
-#### Adding plain Lua and MoonScript modules. (NOTE: VENDOR and SRC are interchangeable.)
+#### Adding plain Lua, Fennel and MoonScript modules. (NOTE: VENDOR and SRC are interchangeable.)
 
 Adding plain modules is trivial. $(NAME) is the name of the module passed to `VENDOR`.
 
@@ -56,7 +56,7 @@ For modules that are split into multile files, such as Penlight:
 For modules with multiple levels of directories you will have to pass each directory. Example:<br/>
   `VENDOR_DIR= ldoc ldoc/builtin ldoc/html`
 
-Lua does not have facilities to traverse directories and I'd like to avoid shell out functions.
+Lua does not have the facilities to traverse directories and I'd like to avoid shell out functions.
 
 #### Adding C modules
 
@@ -73,13 +73,14 @@ Luacov is also integrated. Just run the your test code with Luacov loaded e.g. `
 
 The included Lua script might be too simplistic to demonstrate Omnia. For a more complicated application check my 'fork' of [LDoc](https://github.com/tongson/LDoc)
 
-#### MoonScript support
+#### Fennel and MoonScript support
 
-Just treat MoonScript source the same as Lua source. The Make routines will handle the compilation of MoonScript sources and link the appropriate compiled Lua source to the final executable.
+Just treat Fennel/MoonScript source the same as Lua source. The Make routines will handle the compilation of Fennel/MoonScript sources and link the appropriate compiled Lua source to the final executable.
 
 The MoonScript standard library is included but you have to add `moon` to the `VENDOR` line in the Makefile.
 
 A copy of the MoonScript REPL `moor` is also included. To compile, run `make bin/moor`.
+A copy of the upstream Fennel REPL and compiler is also included. To compile, run `make bin/fennel`.
 
 #### Included projects
 
@@ -87,6 +88,7 @@ Project                                                     | Version         | 
 ------------------------------------------------------------|-----------------|---------
 [Lua](http://www.lua.org)                                   | 5.3.4           | MIT
 [luastatic](https://github.com/ers35/luastatic)             | 0.0.9-dev       | CC0
+[Fennel](https://github.com/bakpakin/Fennel)                | HEAD            | MIT
 [MoonScript](http://moonscript.org)                         | 0.5.0           | MIT
 [moor](https://github.com/Nymphium/moor)                    | HEAD            | MIT
 [linenoise](http://github.com/antirez/linenoise)            | c894b9e         | BSD 2C
