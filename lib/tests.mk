@@ -58,9 +58,9 @@ ifneq (,$(findstring enable-lto,$(shell $(TARGET_STCC) -v 2>&1)))
     ifeq ($(shell $(CONFIGURE_P)/test-binutils-plugins.sh $(CROSS)$(AR)), true)
       TARGET_CFLAGS+= -fwhole-program -flto -fuse-linker-plugin
       TARGET_LDFLAGS+= -fwhole-program -flto
-      TARGET_RANLIB:= $(CROSS)-gcc-$(RANLIB)
-      TARGET_AR:= $(CROSS)-gcc-$(AR)
-      TARGET_NM:= $(CROSS)-gcc-$(NM)
+      TARGET_RANLIB:= $(CROSS)gcc-$(RANLIB)
+      TARGET_AR:= $(CROSS)gcc-$(AR)
+      TARGET_NM:= $(CROSS)gcc-$(NM)
     endif
   endif
 endif
