@@ -1,3 +1,5 @@
+#!bin/lua
+package.path = "vendor/lua/?.lua;vendor/lua/?/init.lua"
 local script = arg[1]
 local lua_script = arg[2]
 local lib = require "cimicida"

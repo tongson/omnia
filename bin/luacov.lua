@@ -1,4 +1,5 @@
 #!bin/lua
+package.path = "lib/?.lua;lib/?/init.lua"
 local runner = require("luacov.runner")
 
 local patterns = {}
