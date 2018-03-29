@@ -276,7 +276,7 @@ const char *match (lua_State *L, const char *o, const char *s, const char *e,
       case IFailTwice:
         assert(stack > getstackbase(L, ptop));
         stack--;
-        /* go through */
+	  /* FALLTHROUGH */
       case IFail:
       fail: { /* pattern failed: try to backtrack */
         do {  /* remove pending calls */
@@ -315,7 +315,7 @@ const char *match (lua_State *L, const char *o, const char *s, const char *e,
             capsize = 2 * captop;
           }
           /* add new captures to 'capture' list */
-          adddyncaptures(s, capture + captop - n - 2, n, fr); 
+          adddyncaptures(s, capture + captop - n - 2, n, fr);
         }
         p++;
         continue;
