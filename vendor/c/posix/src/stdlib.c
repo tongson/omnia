@@ -50,7 +50,9 @@ Pgetenv(lua_State *L)
 	checknargs(L, 1);
 	if (lua_isnoneornil(L, 1))
 	{
+#ifndef HAVE_EXTERN_ENVIRON_DECLARED
 		extern char **environ;
+#endif
 		char **e;
 		lua_newtable(L);
 		for (e=environ; *e!=NULL; e++)

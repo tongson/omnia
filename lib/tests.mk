@@ -35,6 +35,11 @@ ifeq ($(IS_CC), GCC)
   TARGET_CFLAGS+= -static-libgcc
 endif
 
+ENVIRON_DECLARED:= $(shell $(CONFIGURE_P)/test-environ.sh $(TARGET_STCC))
+ifeq ($(ENVIRON_DECLARED), 1)
+  luaposixDEFINES+= -DHAVE_EXTERN_ENVIRON_DECLARED
+endif
+
 # Replace --gc-sections with -dead-strip on Mac
 IS_APPLE:= $(shell $(CONFIGURE_P)/test-mac.sh $(TARGET_STCC))
 ifeq ($(IS_APPLE), APPLE)
