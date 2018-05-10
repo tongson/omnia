@@ -113,7 +113,7 @@ ifeq ($(HAVE_FCNTL_CLOSEM), true)
 endif
 
 ifeq ($(or $(MAKECMDGOALS),$(.DEFAULT_GOAL)), development)
-  CCWARN:= -Wall -Wextra -Wredundant-decls -Wshadow -Wpointer-arith -Werror -Wfatal-errors
+  CCWARN:= -Wall -Wextra -Wredundant-decls -Wshadow -Wpointer-arith
   TARGET_CFLAGS:= -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -O1 -fno-omit-frame-pointer -ggdb
   CFLAGS:= -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -O1 -fno-omit-frame-pointer -ggdb
   FOUND_ASAN:= $(shell $(CONFIGURE_P)/test-lasan.sh $(TARGET_STCC))
