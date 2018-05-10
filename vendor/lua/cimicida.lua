@@ -269,27 +269,8 @@ local line = function(file, ln)
   end
 end
 
-local template = function(str, tbl)
-  local t, _ = {}, nil
-  _, str = pcall(string.gsub, str, "%${[%s]-([^}%G]+)[%s]-}",
-    function (s)
-      t.type = type
-      local code = [[
-        V=%s
-        if type(V) == "function" then
-          V=V()
-        end
-      ]]
-      local lua = string.format(code, s)
-      local chunk = load(lua, lua, "t", setmetatable(t, {__index=tbl}))
-      if chunk then
-        chunk()
-        return rawget(t, "V") or s
-      else
-        return s
-      end
-    end)
-  return str
+local template = function(s, v)
+  return string.gsub(s, "%${[%s]-([^}%G]+)[%s]-}", v)
 end
 
 local exit_string = function(proc, status, code)
