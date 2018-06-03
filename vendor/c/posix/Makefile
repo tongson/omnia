@@ -19,11 +19,11 @@ luaposixDEFINES+= -D_POSIX_C_SOURCE=200809L -D_BSD_SOURCE -D_GNU_SOURCE -D_XOPEN
 
 $(posix_P)/sys/socket.o:  $(posix_P)/sys/socket.c
 	$(ECHOT) CC $@
-	$(TARGET_DYNCC) -Wno-error=address -Wno-error=unused-function -Wno-error=unused-variable -o $@ $(luaposixDEFINES) -I$(posix_P) $(TARGET_FLAGS) -c $<
+	$(TARGET_DYNCC) -w -o $@ $(luaposixDEFINES) -I$(posix_P) $(TARGET_FLAGS) -c $<
 
 $(posix_P)/sys/%.o:  $(posix_P)/sys/%.c
 	$(ECHOT) CC $@
-	$(TARGET_DYNCC) -Wno-error=unused-function -Wno-error=unused-variable -o $@ $(luaposixDEFINES) -I$(posix_P) $(TARGET_FLAGS) -c $<
+	$(TARGET_DYNCC) -w -o $@ $(luaposixDEFINES) -I$(posix_P) $(TARGET_FLAGS) -c $<
 
 posix.sys.%.a: $(posix_P)/sys/%.o
 	$(ECHOT) AR $@
@@ -32,11 +32,11 @@ posix.sys.%.a: $(posix_P)/sys/%.o
 
 $(posix_P)/unistd.o:  $(posix_P)/unistd.c
 	$(ECHOT) CC $@
-	$(TARGET_DYNCC) -Wno-error=redundant-decls -Wno-error=unused-function -Wno-error=unused-variable -o $@ $(luaposixDEFINES) -I$(posix_P) $(TARGET_FLAGS) -c $<
+	$(TARGET_DYNCC) -w -o $@ $(luaposixDEFINES) -I$(posix_P) $(TARGET_FLAGS) -c $<
 
 $(posix_P)/%.o:  $(posix_P)/%.c
 	$(ECHOT) CC $@
-	$(TARGET_DYNCC) -w -Wno-error=missing-prototypes -Wno-error=unused-function -Wno-error=unused-variable -o $@ $(luaposixDEFINES) -I$(posix_P) $(TARGET_FLAGS) -c $<
+	$(TARGET_DYNCC) -w -o $@ $(luaposixDEFINES) -I$(posix_P) $(TARGET_FLAGS) -c $<
 
 
 posix.%.a: $(posix_P)/%.o
