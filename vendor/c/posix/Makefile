@@ -36,7 +36,7 @@ $(posix_P)/unistd.o:  $(posix_P)/unistd.c
 
 $(posix_P)/%.o:  $(posix_P)/%.c
 	$(ECHOT) CC $@
-	$(TARGET_DYNCC) -Wno-error=unused-function -Wno-error=unused-variable -o $@ $(luaposixDEFINES) -I$(posix_P) $(TARGET_FLAGS) -c $<
+	$(TARGET_DYNCC) -w -Wno-error=missing-prototypes -Wno-error=unused-function -Wno-error=unused-variable -o $@ $(luaposixDEFINES) -I$(posix_P) $(TARGET_FLAGS) -c $<
 
 
 posix.%.a: $(posix_P)/%.o
