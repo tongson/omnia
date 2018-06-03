@@ -11,7 +11,7 @@ $(arrayA): $(arrayOBJ)
 
 $(arrayOBJ): $(arraySRC)
 	$(ECHOT) CC $@
-	$(TARGET_DYNCC) -o $@ $(TARGET_FLAGS) -Wno-error=sign-compare -c $<
+	$(TARGET_DYNCC) -Wno-sign-compare -o $@ $(TARGET_FLAGS) -c $<
 
 $(arraySO): $(arrayOBJ)
 	$(ECHOT) CC $@
