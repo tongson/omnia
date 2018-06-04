@@ -12,6 +12,7 @@
 #include <string.h>
 #include <spawn.h>
 #include <sys/poll.h>
+#include <sys/wait.h>
 
 /*
  * lclonetable
@@ -352,6 +353,8 @@ Cposix_spawn(lua_State *L)
 	int stderr[2];
 	posix_spawn_file_actions_t action = {0};
 	pid_t pid;
+	int status;
+	int w;
 
 	errno = 0;
 	if (pipe(stdin) || pipe(stdout) || pipe(stderr)) return luaX_pusherror(L, "pipe(2) error");
@@ -374,7 +377,12 @@ Cposix_spawn(lua_State *L)
 		errno = 0;
 		int r = posix_spawn(&pid, argv[0], &action, NULL, argv, env);
 		if ((0 > r) && (EINTR == errno)) continue;
-		if (0 == r) break;
+		if (0 == r) {
+			errno = 0;
+			w = waitpid(pid, &status, 0);
+			if (0 > w) goto error;
+			break;
+		}
 		if (0 > r) {
 			posix_spawn_file_actions_destroy(&action);
 			goto error;
@@ -523,6 +531,8 @@ Cposix_spawn(lua_State *L)
 			}
 		}
 	}
+	lua_pushinteger(L, (lua_Integer)status);
+	lua_setfield(L, -2, "status");
 	lua_pushinteger(L, (lua_Integer)pid);
 	lua_setfield(L, -2, "pid");
 	lua_settop(L, -1);
