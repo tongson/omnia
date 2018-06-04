@@ -108,14 +108,9 @@ int
 luaX_pusherror(lua_State *L, char *error)
 {
 	lua_pushnil(L);
-	if (errno) {
-		lua_pushfstring(L, LUA_QS" : "LUA_QS, error, strerror(errno));
-		lua_pushinteger(L, errno);
-		return 3;
-	} else {
-		lua_pushstring(L, error);
-		return 2;
-	}
+	lua_pushfstring(L, LUA_QS" ("LUA_QS")", error, strerror(errno));
+	lua_pushinteger(L, errno);
+	return 3;
 }
 
 static int
