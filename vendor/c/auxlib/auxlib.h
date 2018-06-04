@@ -12,6 +12,7 @@ int auxL_assert_bzero(char *, size_t);
 int luaX_pusherror(lua_State *, char *);
 char *auxL_strncpy(char *, const char *, size_t);
 char *auxL_strnmove(char *, const char *, size_t);
+ssize_t auxL_getline(int, void *, size_t);
 void auxI_assertion_failed(const char *, int, const char *, const char *) __attribute((noreturn));
 #define LIKELY(x) __builtin_expect(!!(x), 1)
 #define REQUIRE(cond, diag) ((void) (LIKELY(cond) || ((auxI_assertion_failed)(__FILE__, __LINE__, #diag, #cond), 0)))
