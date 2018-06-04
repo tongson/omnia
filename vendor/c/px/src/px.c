@@ -531,8 +531,22 @@ Cposix_spawn(lua_State *L)
 			}
 		}
 	}
-	lua_pushinteger(L, (lua_Integer)status);
-	lua_setfield(L, -2, "status");
+	if (WIFEXITED(status)) {
+                lua_pushliteral(L,"exited");
+		lua_setfield(L, -2, "status");
+                lua_pushinteger(L, WEXITSTATUS(status));
+		lua_setfield(L, -2, "code");
+        } else if (WIFSIGNALED(status)) {
+                lua_pushliteral(L,"killed");
+		lua_setfield(L, -2, "status");
+                lua_pushinteger(L, WTERMSIG(status));
+		lua_setfield(L, -2, "code");
+        } else if (WIFSTOPPED(status)) {
+                lua_pushliteral(L,"stopped");
+		lua_setfield(L, -2, "status");
+                lua_pushinteger(L, WSTOPSIG(status));
+		lua_setfield(L, -2, "code");
+        }
 	lua_pushinteger(L, (lua_Integer)pid);
 	lua_setfield(L, -2, "pid");
 	lua_settop(L, -1);
