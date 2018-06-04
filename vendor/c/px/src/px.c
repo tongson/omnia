@@ -388,6 +388,8 @@ Cposix_spawn(lua_State *L)
 			if (0 != posix_spawn_file_actions_addclose(&action, stdout[1])) goto error;
 			lua_pop(L, 1);
 			poll_stdout = 1;
+		} else {
+			if (0 != posix_spawn_file_actions_addopen(&action, 1, "/dev/null", O_WRONLY, 0600)) goto error;
 		}
 		lua_pushliteral(L, "stderr");
 		lua_gettable(L, 4);
@@ -400,7 +402,12 @@ Cposix_spawn(lua_State *L)
 			if (0 != posix_spawn_file_actions_addclose(&action, stderr[1])) goto error;
 			lua_pop(L, 1);
 			poll_stderr = 1;
+		} else {
+			if (0 != posix_spawn_file_actions_addopen(&action, 2, "/dev/null", O_WRONLY, 0600)) goto error;
 		}
+	} else {
+		if (0 != posix_spawn_file_actions_addopen(&action, 1, "/dev/null", O_WRONLY, 0600)) goto error;
+		if (0 != posix_spawn_file_actions_addopen(&action, 2, "/dev/null", O_WRONLY, 0600)) goto error;
 	}
 
 	while (1) {
@@ -408,6 +415,130 @@ Cposix_spawn(lua_State *L)
 		int r = posix_spawn(&pid, argv[0], &action, NULL, argv, env);
 		if ((0 > r) && (EINTR == errno)) continue;
 		if (0 == r) {
+
+			int timeout = -1;
+			if (3 < nargs) {
+				lua_pushstring(L, "timeout");
+				lua_gettable(L, 4);
+				if (LUA_TNUMBER == lua_type(L, -1)) {
+					timeout = (int)lua_tointeger(L, -1);
+				}
+				lua_pop(L, 1);
+			}
+			struct pollfd fds[3];
+			fds[0].fd = stdin[1];
+			fds[0].events = POLLOUT;
+			fds[1].fd = stdout[0];
+			fds[1].events = POLLIN;
+			fds[2].fd = stderr[0];
+			fds[2].events = POLLIN;
+			int stdin_done = 0;
+			int stdout_done = 0;
+			int stderr_done = 0;
+
+			lua_createtable(L, 0, 5);
+			int pr;
+			for (errno = 0; ((poll_stdin || poll_stdout || poll_stderr) && (pr = poll(fds, 3, timeout))); errno = 0) {
+				if (0 < pr) {
+					if (!poll_stdin || stdin_done) {
+						stdin_done = 1;
+					} else {
+						if (fds[0].revents & POLLOUT) {
+							lua_pushliteral(L, "stdin");
+							lua_gettable(L, 4);
+							int sz = lua_rawlen(L, -1);
+							ssize_t wr;
+							while (1) {
+								wr = write(stdin[1], lua_tostring(L, -1), sz);
+								if (0 < wr) break;
+								if (0 > wr && (EAGAIN == errno)) {
+									errno = 0;
+									continue;
+								}
+								if (0 > wr) goto error;
+								if (0 == wr) {
+									errno = 0;
+									return luaX_pusherror(L, "0 bytes written to stdin.");
+								}
+							}
+							stdin_done = 1;
+							lua_pop(L, 1);
+						}
+					}
+					if (!poll_stdout || stdout_done) {
+						stdout_done = 1;
+					} else {
+						if (fds[1].revents & POLLIN) {
+							size_t sz = 1024;
+							char line[sz];
+							int n = 1;
+							lua_newtable(L);
+							int flags = fcntl(stdout[0], F_GETFL, 0);
+							fcntl(stdout[0], F_SETFL, flags | O_NONBLOCK);
+							while (1) {
+								auxL_bzero(line, sz);
+								errno = 0;
+								ssize_t ret = auxL_getline(stdout[0], line, sz);
+								if ((EAGAIN == errno) || 0 == ret) break;
+								if (-255 == ret) {
+									errno = 0;
+									return luaX_pusherror(L, "Read characters exceed buffer.");
+								}
+								if (0 > ret) {
+									return luaX_pusherror(L, "Errno set.");
+								}
+								if (0 < ret) {
+									lua_pushstring(L, line);
+									lua_rawseti(L, -2, n++);
+								}
+							}
+							lua_setfield(L, -2, "stdout");
+							stdout_done = 1;
+						}
+					}
+					if (!poll_stderr || stderr_done) {
+						stderr_done = 1;
+					} else {
+						if (fds[2].revents & POLLIN) {
+							size_t sz = 1024;
+							char line[sz];
+							int n = 1;
+							lua_newtable(L);
+							int flags = fcntl(stderr[0], F_GETFL, 0);
+							fcntl(stderr[0], F_SETFL, flags | O_NONBLOCK);
+							while (1) {
+								auxL_bzero(line, sz);
+								errno = 0;
+								ssize_t ret = auxL_getline(stderr[0], line, sz);
+								if ((EAGAIN == errno) || 0 == ret) break;
+								if (-255 == ret) {
+									errno = 0;
+									return luaX_pusherror(L, "Read characters exceed buffer.");
+								}
+								if (0 > ret) {
+									return luaX_pusherror(L, "Errno set.");
+								}
+								if (0 < ret) {
+									lua_pushstring(L, line);
+									lua_rawseti(L, -2, n++);
+								}
+							}
+							lua_setfield(L, -2, "stderr");
+							stderr_done = 1;
+						}
+					}
+				}
+				if (stdin_done && stdout_done && stderr_done) break;
+				if ((0 > pr) && (EINTR == errno)) continue;
+				if (0 > pr) goto error;
+				if (0 == pr) {
+					errno = 0;
+					return luaX_pusherror(L, "Execution timed out.");
+				}
+			}
+			close(stdin[1]);
+			close(stdout[0]);
+			close(stderr[0]);
 			errno = 0;
 			w = waitpid(pid, &status, 0);
 			if (0 > w) goto error;
@@ -423,124 +554,7 @@ Cposix_spawn(lua_State *L)
 	close(stdout[1]);
 	close(stderr[1]);
 
-	{
-		int timeout = -1;
-		if (3 < nargs) {
-			lua_pushstring(L, "timeout");
-			lua_gettable(L, 4);
-			if (LUA_TNUMBER == lua_type(L, -1)) {
-				timeout = (int)lua_tointeger(L, -1);
-			}
-			lua_pop(L, 1);
-		}
-		struct pollfd fds[3];
-		fds[0].fd = stdin[1];
-		fds[0].events = POLLOUT;
-		fds[1].fd = stdout[0];
-		fds[1].events = POLLIN;
-		fds[2].fd = stderr[0];
-		fds[2].events = POLLIN;
-		int fd0 = 0;
-		int fd1 = 0;
-		int fd2 = 0;
-
-		lua_createtable(L, 0, 2);
-		int r;
-	        for (errno = 0; ((poll_stdin || poll_stdout || poll_stderr) && (r = poll(fds, 3, timeout))); errno = 0) {
-			if (0 < r) {
-				if (!poll_stdin) {
-					fd0 = 1;
-					close(stdin[1]);
-				} else {
-					if (fds[0].revents & POLLOUT) {
-						int sz = lua_rawlen(L, -1);
-						ssize_t wr = write(stdin[1], lua_tostring(L, -1), sz);
-						while (1) {
-							if (0 < wr) break;
-							if (0 > wr && (EAGAIN == errno)) {
-								errno = 0;
-								continue;
-							}
-							if (0 > wr) goto error;
-							if (0 == wr) {
-								errno = 0;
-								return luaX_pusherror(L, "0 bytes written to stdin.");
-							}
-						}
-						fd0 = 1;
-					}
-				}
-				if (!poll_stdout) {
-					fd1 = 1;
-					close(stdout[0]);
-				} else {
-					if (fds[1].revents & POLLIN) {
-						size_t sz = 1024;
-						char line[sz];
-						int n = 1;
-						lua_newtable(L);
-						while (1) {
-							auxL_bzero(line, sz);
-							errno = 0;
-							ssize_t ret = auxL_getline(stdout[0], line, sz);
-							if (0 == ret) break;
-							if (-255 == ret) {
-								errno = 0;
-								return luaX_pusherror(L, "Read characters exceed buffer.");
-							}
-							if (0 > ret) {
-								return luaX_pusherror(L, "Errno set.");
-							}
-							if (0 < ret) {
-								lua_pushstring(L, line);
-								lua_rawseti(L, -2, n++);
-							}
-						}
-						lua_setfield(L, -2, "stdout");
-						fd1 = 1;
-					}
-				}
-				if (!poll_stderr) {
-					fd2 = 1;
-					close(stderr[0]);
-				} else {
-					if (fds[2].revents & POLLIN) {
-						size_t sz = 1024;
-						char line[sz];
-						int n = 1;
-						lua_newtable(L);
-						while (1) {
-							auxL_bzero(line, sz);
-							errno = 0;
-							ssize_t ret = auxL_getline(stderr[0], line, sz);
-							if (0 == ret) break;
-							if (-255 == ret) {
-								errno = 0;
-								return luaX_pusherror(L, "Read characters exceed buffer.");
-							}
-							if (0 > ret) {
-								return luaX_pusherror(L, "Errno set.");
-							}
-							if (0 < ret) {
-								lua_pushstring(L, line);
-								lua_rawseti(L, -2, n++);
-							}
-						}
-						lua_setfield(L, -2, "stderr");
-						fd2 = 1;
-					}
-				}
-			}
-			if (fd0 && fd1 && fd2) break;
-			if ((0 > r) && (EINTR == errno)) continue;
-			if (0 > r) goto error;
-			if (0 == r) {
-				errno = 0;
-				return luaX_pusherror(L, "Execution timed out.");
-			}
-		}
-	}
-	if (WIFEXITED(status)) {
+		if (WIFEXITED(status)) {
                 lua_pushliteral(L,"exited");
 		lua_setfield(L, -2, "status");
                 lua_pushinteger(L, WEXITSTATUS(status));
