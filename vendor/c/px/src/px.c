@@ -523,6 +523,8 @@ Cposix_spawn(lua_State *L)
 			}
 		}
 	}
+	lua_pushinteger(L, (lua_Integer)pid);
+	lua_setfield(L, -2, "pid");
 	lua_settop(L, -1);
 	return 1;
 error:
