@@ -271,6 +271,26 @@ local pexec = function(args)
 end
 
 function exec.exec(args)
+  local flags = {}
+  flags.stdin = args.stdin
+  flags.stdout = true
+  flags.stderr = args.stderr
+  flags.timeout = args.timeout
+  flags.cwd = args.cwd
+  local argv = {}
+  for _, v in ipairs(args) do
+    argv[#argv + 1] = v
+  end
+  local R = P.posix_spawn(args.exe, argv, args.env, flags);
+  R.exe = args.exe
+  if R.code == 0 or args.ignore then
+    return R.code, R
+  else
+    return nil, R
+  end
+end
+
+function exec._exec(args)
   local pid, err, fd0, fd1, fd2 = pexec(args)
   if not pid then return nil, err end
   local R = {stdout = {}, stderr = {}}
@@ -461,12 +481,12 @@ function os.real_name()
 end
 
 function exec.context(str)
-  local E, exe, args
+  local silent, exe, args
   if string.sub(str, 1, 1) == "-" then
-    E = exec.qexec
+    args.stdout = false
+    args.stderr = false
     exe = string.sub(str, 2)
   else
-    E = exec.exec
     exe = str
   end
   if strlen(path.split(exe)) == 0 then
@@ -494,13 +514,12 @@ end
 exec.ctx = exec.context
 exec.cmd = setmetatable({}, {__index =
   function (_, key)
-    local E, exe
+    local silent, exe
     -- silent execution (exec.qexec) when prepended with "-".
     if string.sub(key, 1, 1) == "-" then
-      E = exec.qexec
+      silent = true
       exe = string.sub(key, 2)
     else
-      E = exec.exec
       exe = key
     end
     -- Search common executable directories if not a full path.
@@ -517,7 +536,11 @@ exec.cmd = setmetatable({}, {__index =
         args = {...}
       end
       args.exe = exe
-      return E(args)
+      if silent then
+	args.stdout = false
+        args.stderr = false
+      end
+      return exec.exec(args)
     end
   end
 })
