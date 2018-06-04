@@ -351,6 +351,9 @@ Cposix_spawn(lua_State *L)
 	int stdin[2] ;
 	int stdout[2];
 	int stderr[2];
+	int poll_stdin = 0;
+	int poll_stdout = 0;
+	int poll_stderr = 0;
 	posix_spawn_file_actions_t action = {0};
 	pid_t pid;
 	int status;
@@ -360,18 +363,45 @@ Cposix_spawn(lua_State *L)
 	if (pipe(stdin) || pipe(stdout) || pipe(stderr)) return luaX_pusherror(L, "pipe(2) error");
 
 	if (0 != posix_spawn_file_actions_init(&action)) goto error;
-	if (0 != posix_spawn_file_actions_addclose(&action, stdin[1])) goto error;
-	if (0 != posix_spawn_file_actions_addclose(&action, stdout[0])) goto error;
-	if (0 != posix_spawn_file_actions_addclose(&action, stderr[0])) goto error;
 	if (0 != posix_spawn_file_actions_addclose(&action, 0)) goto error;
 	if (0 != posix_spawn_file_actions_addclose(&action, 1)) goto error;
 	if (0 != posix_spawn_file_actions_addclose(&action, 2)) goto error;
-	if (0 != posix_spawn_file_actions_adddup2(&action, stdin[0], 0)) goto error;
-	if (0 != posix_spawn_file_actions_adddup2(&action, stdout[1], 1)) goto error;
-	if (0 != posix_spawn_file_actions_adddup2(&action, stderr[1], 2)) goto error;
-	if (0 != posix_spawn_file_actions_addclose(&action, stdin[0])) goto error;
-	if (0 != posix_spawn_file_actions_addclose(&action, stdout[1])) goto error;
-	if (0 != posix_spawn_file_actions_addclose(&action, stderr[1])) goto error;
+
+	if (3 < nargs) {
+		lua_pushliteral(L, "stdin");
+		lua_gettable(L, 4);
+		if (LUA_TSTRING == lua_type(L, -1)) {
+			if (0 != posix_spawn_file_actions_addclose(&action, stdin[1])) goto error;
+			if (0 != posix_spawn_file_actions_adddup2(&action, stdin[0], 0)) goto error;
+			if (0 != posix_spawn_file_actions_addclose(&action, stdin[0])) goto error;
+			lua_pop(L, 1);
+			poll_stdin = 1;
+		}
+		lua_pushliteral(L, "stdout");
+		lua_gettable(L, 4);
+		if (LUA_TSTRING == lua_type(L, -1)) {
+			if (0 != posix_spawn_file_actions_addopen(&action, 1, lua_tostring(L, -1), (O_WRONLY | O_CREAT | O_TRUNC), 0600)) goto error;
+			lua_pop(L, 1);
+		} else if (lua_toboolean(L, -1)) {
+			if (0 != posix_spawn_file_actions_addclose(&action, stdout[0])) goto error;
+			if (0 != posix_spawn_file_actions_adddup2(&action, stdout[1], 1)) goto error;
+			if (0 != posix_spawn_file_actions_addclose(&action, stdout[1])) goto error;
+			lua_pop(L, 1);
+			poll_stdout = 1;
+		}
+		lua_pushliteral(L, "stderr");
+		lua_gettable(L, 4);
+		if (LUA_TSTRING == lua_type(L, -1)) {
+			if (0 != posix_spawn_file_actions_addopen(&action, 2, lua_tostring(L, -1), (O_WRONLY | O_CREAT | O_TRUNC), 0600)) goto error;
+			lua_pop(L, 1);
+		} else if (lua_toboolean(L, -1)) {
+			if (0 != posix_spawn_file_actions_addclose(&action, stderr[0])) goto error;
+			if (0 != posix_spawn_file_actions_adddup2(&action, stderr[1], 2)) goto error;
+			if (0 != posix_spawn_file_actions_addclose(&action, stderr[1])) goto error;
+			lua_pop(L, 1);
+			poll_stderr = 1;
+		}
+	}
 
 	while (1) {
 		errno = 0;
@@ -413,112 +443,91 @@ Cposix_spawn(lua_State *L)
 		int fd0 = 0;
 		int fd1 = 0;
 		int fd2 = 0;
+
 		lua_createtable(L, 0, 2);
 		int r;
-	        for (errno = 0;(r = poll(fds, 3, timeout)); errno = 0) {
+	        for (errno = 0; ((poll_stdin || poll_stdout || poll_stderr) && (r = poll(fds, 3, timeout))); errno = 0) {
 			if (0 < r) {
-				if (3 < nargs) {
-					lua_pushstring(L, "stdin");
-					lua_gettable(L, 4);
-					if (LUA_TSTRING == lua_type(L, -1)){
-						if (fds[0].revents & POLLOUT) {
-							int sz = lua_rawlen(L, -1);
-							ssize_t wr = write(stdin[1], lua_tostring(L, -1), sz);
-							while (1) {
-								if (0 < wr) break;
-								if (0 > wr && (EAGAIN == errno)) {
-									errno = 0;
-									continue;
-								}
-								if (0 > wr) goto error;
-								if (0 == wr) {
-									errno = 0;
-									return luaX_pusherror(L, "0 bytes written to stdin.");
-								}
+				if (!poll_stdin) {
+					fd0 = 1;
+					close(stdin[1]);
+				} else {
+					if (fds[0].revents & POLLOUT) {
+						int sz = lua_rawlen(L, -1);
+						ssize_t wr = write(stdin[1], lua_tostring(L, -1), sz);
+						while (1) {
+							if (0 < wr) break;
+							if (0 > wr && (EAGAIN == errno)) {
+								errno = 0;
+								continue;
 							}
-							fd0 = 1;
+							if (0 > wr) goto error;
+							if (0 == wr) {
+								errno = 0;
+								return luaX_pusherror(L, "0 bytes written to stdin.");
+							}
 						}
-					} else {
 						fd0 = 1;
 					}
-					lua_pop(L, 1);
+				}
+				if (!poll_stdout) {
+					fd1 = 1;
+					close(stdout[0]);
 				} else {
-					fd0 = 1;
-				}
-				{
-					int check = 0;
-					if (3 < nargs) {
-						lua_pushstring(L, "stdout");
-						lua_gettable(L, 4);
-						check = lua_toboolean(L, -1);
-						lua_pop(L, 1);
-					}
-					if (0 == check) {
+					if (fds[1].revents & POLLIN) {
+						size_t sz = 1024;
+						char line[sz];
+						int n = 1;
+						lua_newtable(L);
+						while (1) {
+							auxL_bzero(line, sz);
+							errno = 0;
+							ssize_t ret = auxL_getline(stdout[0], line, sz);
+							if (0 == ret) break;
+							if (-255 == ret) {
+								errno = 0;
+								return luaX_pusherror(L, "Read characters exceed buffer.");
+							}
+							if (0 > ret) {
+								return luaX_pusherror(L, "Errno set.");
+							}
+							if (0 < ret) {
+								lua_pushstring(L, line);
+								lua_rawseti(L, -2, n++);
+							}
+						}
+						lua_setfield(L, -2, "stdout");
 						fd1 = 1;
-					} else {
-						if (fds[1].revents & POLLIN) {
-							size_t sz = 1024;
-							char line[sz];
-							int n = 1;
-							lua_newtable(L);
-							while (1) {
-								auxL_bzero(line, sz);
-								errno = 0;
-								ssize_t ret = auxL_getline(stdout[0], line, sz);
-								if (0 == ret) break;
-								if (-255 == ret) {
-									errno = 0;
-									return luaX_pusherror(L, "Read characters exceed buffer.");
-								}
-								if (0 > ret) {
-									return luaX_pusherror(L, "Errno set.");
-								}
-								if (0 < ret) {
-									lua_pushstring(L, line);
-									lua_rawseti(L, -2, n++);
-								}
-							}
-							lua_setfield(L, -2, "stdout");
-							fd1 = 1;
-						}
 					}
 				}
-				{
-					int check = 0;
-					if (3 < nargs) {
-						lua_pushstring(L, "stderr");
-						lua_gettable(L, 4);
-						check = lua_toboolean(L, -1);
-						lua_pop(L, 1);
-					}
-					if (0 == check) {
-						fd2 = 1;
-					} else {
-						if (fds[2].revents & POLLIN) {
-							size_t sz = 1024;
-							char line[sz];
-							int n = 1;
-							lua_newtable(L);
-							while (1) {
-								auxL_bzero(line, sz);
+				if (!poll_stderr) {
+					fd2 = 1;
+					close(stderr[0]);
+				} else {
+					if (fds[2].revents & POLLIN) {
+						size_t sz = 1024;
+						char line[sz];
+						int n = 1;
+						lua_newtable(L);
+						while (1) {
+							auxL_bzero(line, sz);
+							errno = 0;
+							ssize_t ret = auxL_getline(stderr[0], line, sz);
+							if (0 == ret) break;
+							if (-255 == ret) {
 								errno = 0;
-								ssize_t ret = auxL_getline(stderr[0], line, sz);
-								if (0 == ret) break;
-								if (-255 == ret) {
-									errno = 0;
-									return luaX_pusherror(L, "Read characters exceed buffer.");
-								}
-								if (0 > ret) {
-									return luaX_pusherror(L, "Errno set.");
-								}
-								if (0 < ret) {
-									lua_pushstring(L, line);
-									lua_rawseti(L, -2, n++);
-								}
+								return luaX_pusherror(L, "Read characters exceed buffer.");
 							}
-							lua_setfield(L, -2, "stderr");
-							fd2 = 1;
+							if (0 > ret) {
+								return luaX_pusherror(L, "Errno set.");
+							}
+							if (0 < ret) {
+								lua_pushstring(L, line);
+								lua_rawseti(L, -2, n++);
+							}
 						}
+						lua_setfield(L, -2, "stderr");
+						fd2 = 1;
 					}
 				}
 			}
