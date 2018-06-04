@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -14,6 +15,40 @@ auxI_assertion_failed(const char *file, int line, const char *diag, const char *
 	(void)fflush(stderr);
 	abort();
 }
+
+ssize_t
+auxL_getline(int fd, void *alloc, size_t alloc_sz)
+{
+	size_t r = 0;
+	ssize_t len;
+	char *buf;
+	char c;
+	buf = alloc;
+	size_t sz = alloc_sz - 1;
+        while (1) {
+		errno = 0;
+		len = read(fd, &c, 1);
+		if (r < sz && c != '\n') {
+			r++;
+			*buf++ = c;
+		} else if (r > sz) {
+			return -255;
+		} else if (c == '\n') {
+			*buf++ = '\0';
+			break;
+		}
+		if (0 == len) return 0;
+                if (0 > len) {
+			if (EINTR == errno) {
+				continue;
+			} else {
+				return -1;
+			}
+		}
+	}
+	return r;
+}
+
 
 /*
  * From: https://boringssl.googlesource.com/boringssl/+/ad1907fe73334d6c696c8539646c21b11178f20f
