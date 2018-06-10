@@ -271,26 +271,6 @@ local pexec = function(args)
 end
 
 function exec.exec(args)
-  local flags = {}
-  flags.stdin = args.stdin
-  flags.stdout = true
-  flags.stderr = args.stderr
-  flags.timeout = args.timeout
-  flags.cwd = args.cwd
-  local argv = {}
-  for _, v in ipairs(args) do
-    argv[#argv + 1] = v
-  end
-  local R = P.posix_spawn(args.exe, argv, args.env, flags);
-  R.exe = args.exe
-  if R.code == 0 or args.ignore then
-    return R.code, R
-  else
-    return nil, R
-  end
-end
-
-function exec._exec(args)
   local pid, err, fd0, fd1, fd2 = pexec(args)
   if not pid then return nil, err end
   local R = {stdout = {}, stderr = {}}
@@ -347,6 +327,26 @@ function exec._exec(args)
 end
 
 function exec.qexec(args)
+  local flags = {}
+  flags.stdin = args.stdin
+  flags.stdout = args.stdout
+  flags.stderr = args.stderr
+  flags.timeout = args.timeout
+  flags.cwd = args.cwd
+  local argv = {}
+  for _, v in ipairs(args) do
+    argv[#argv + 1] = v
+  end
+  local R = P.posix_spawn(args.exe, argv, args.env, flags);
+  R.exe = args.exe
+  if R.code == 0 or args.ignore then
+    return R.code, R
+  else
+    return nil, R
+  end
+end
+
+function exec._qexec(args)
   local pid, err = unistd.fork()
   local R = {}
   if pid == nil or pid == -1 then
@@ -480,15 +480,8 @@ function os.real_name()
   return pwd.getpwuid(unistd.getuid()).pw_name
 end
 
-function exec.context(str)
-  local silent, exe, args
-  if string.sub(str, 1, 1) == "-" then
-    args.stdout = false
-    args.stderr = false
-    exe = string.sub(str, 2)
-  else
-    exe = str
-  end
+function exec.context(exe)
+  local args
   if strlen(path.split(exe)) == 0 then
     args = {exe = path.bin(exe)}
   else
@@ -507,7 +500,7 @@ function exec.context(str)
         a[#a+1] = k
       end
     end
-    return E(a)
+    return exec.qexec(a)
   end})
 end
 
