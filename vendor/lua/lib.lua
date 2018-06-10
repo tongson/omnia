@@ -338,10 +338,10 @@ function exec.qexec(args)
     argv[#argv + 1] = v
   end
   local R, xs, xe = P.posix_spawn(args.exe, argv, args.env, flags)
+  R.error = xs
+  R.errno = xe
   R.exe = args.exe
   if (R.code == 0) or args.ignore then
-    R.error = xs
-    R.errno = xe
     return R.code, R
   else
     return nil, R
