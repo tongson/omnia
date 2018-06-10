@@ -241,10 +241,10 @@ T["All tests"] = function()
     end
     T.table.count = function()
       local nt = { "x", "y", "z" }
-      local n = table.count(nt)
-      T.equal(n, 3)
+      local n = table.count(nt, "z")
+      T.equal(n, 1)
       n = table.count(nt, 2)
-      T.equal(n, 2)
+      T.equal(n, 0)
     end
     T.table.array = function()
       local a, n
