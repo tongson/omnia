@@ -395,8 +395,15 @@ Cposix_spawn(lua_State *L)
 		errno = 0;
 		r = posix_spawn(&pid, argv[0], &action, NULL, argv, env);
 		if (0 == r) break;
+		if (3 < nargs) {
+			lua_pushstring(L, "ignore");
+			lua_gettable(L, 4);
+			if (lua_toboolean(L, -1)) {
+				lua_pop(L, 1);
+				break;
+			}
+		}
 		if ((0 > r) && (EINTR == errno)) continue;
-		goto error;
 	}
 	{
 		int timeout = -1;
