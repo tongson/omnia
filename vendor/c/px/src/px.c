@@ -338,16 +338,6 @@ Cposix_spawn(lua_State *L)
 			env[0] = 0;
 		}
 	}
-	if (3 < nargs) {
-		// chdir() to arg #4 {cwd = ''}
-		lua_pushstring(L, "cwd");
-		lua_gettable(L, 4);
-		if (LUA_TSTRING == lua_type(L, -1)) {
-			errno = 0;
-			if (chdir(lua_tostring(L, -1))) return luaX_pusherror(L, "chdir(2) error");
-		}
-		lua_pop(L, 1);
-	}
 
 	int stdin[2] ;
 	int poll_stdin = 0;
