@@ -1,15 +1,16 @@
 local C = require "lib"
 local T = require "u-test"
 local fcntl = require"posix.fcntl"
+local unistd = require"posix.unistd"
 
 T["All tests"] = function()
   do
     local os = C.os
     T.os.effective_name = function()
-      T.equal(os.effective_name(), "ed")
+      T.equal(os.effective_name(), "tongson")
     end
     T.os.real_name = function()
-      T.equal(os.real_name(), "ed")
+      T.equal(os.real_name(), "tongson")
     end
     T.os.readin = function()
     end
@@ -458,7 +459,7 @@ T["All tests"] = function()
       file:write(stdin)
       file:close()
       -- args.cwd, args.env
-      local args = {exe = "/usr/bin/make", env = {"TEST=ok"}, cwd = "tmp", "-f", "Makefile"}
+      local args = {exe = "/usr/bin/make", env = {"TEST=ok"}, "-f", "Makefile"}
       res, tbl = exec.qexec(args)
       T.equal(res, 0)
       -- result.status
@@ -484,12 +485,10 @@ T["All tests"] = function()
       T.equal(res, 0)
       local make = exec.ctx("make")
       make.env = {"TEST=ok"}
-      make.cwd = "tmp"
-      res, tbl = make("-f", "Makefile2")
+      res, tbl = make("-f", "tmp/Makefile2")
       T.equal(res, 0)
       T.equal(tbl.status, "exited")
       T.is_number(tbl.pid)
-      make.cwd = "../tmp"
       make.ignore = true
       res, tbl = make("-f", "XXX")
       T.equal(res, 2)
@@ -531,7 +530,6 @@ T["All tests"] = function()
         rm tmp/Makefile2
       ]]
     end
-    T.exec.popen.skip = true
     T.exec.popen = function()
       os.execute[[
         touch tmp/one
@@ -551,7 +549,7 @@ T["All tests"] = function()
       T.equal(r.status, "exit")
       t, r = exec.popen("xxx", ".", true)
       T.equal(t, 127)
-      T.equal(r.output[1], "sh: line 6: xxx: command not found")
+      T.equal(r.output[1], "sh: 7: xxx: not found")
       os.execute[[
         rm tmp/one
         rm tmp/two
@@ -569,7 +567,6 @@ T["All tests"] = function()
         rm tmp/pwrite
       ]]
     end
-    T.exec.system.skip = true
     T.exec.system = function()
       local t, r = exec.system("ls", "tmp")
       T.equal(t, 0)
@@ -578,7 +575,7 @@ T["All tests"] = function()
       t, r = exec.system("ls XXX")
       T.is_nil(t)
       t, r = exec.system("ls XXX", ".", true)
-      T.equal(t, 1)
+      T.equal(t, 2)
     end
     T.exec.script = function()
       os.execute[[
