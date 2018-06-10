@@ -534,6 +534,7 @@ T["All tests"] = function()
         rm tmp/Makefile2
       ]]
     end
+    T.exec.popen.skip = true
     T.exec.popen = function()
       os.execute[[
         touch tmp/one
@@ -571,6 +572,7 @@ T["All tests"] = function()
         rm tmp/pwrite
       ]]
     end
+    T.exec.system.skip = true
     T.exec.system = function()
       local t, r = exec.system("ls", "tmp")
       T.equal(t, 0)
