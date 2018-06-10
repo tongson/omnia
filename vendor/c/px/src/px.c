@@ -443,14 +443,14 @@ Cposix_spawn(lua_State *L)
 				errno = 0;
 				return luaX_pusherror(L, "Execution timed out.");
 			}
-			int w = waitpid(pid, &status, 0);
-			if (0 == w || EINTR == errno) continue;
-			if (pid == w) break;
-			if ((0 == pr) || (0 > pr)) goto error;
-
 		}
 	}
 
+	while(1) {
+		int w = waitpid(pid, &status, 0);
+		if (0 < w) break;
+		if (0 == w || EINTR == errno) continue;
+	}
 	posix_spawn_file_actions_destroy(&action);
 	lua_createtable(L, 0, 3);
 	if (WIFEXITED(status)) {
