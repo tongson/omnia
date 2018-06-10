@@ -332,14 +332,15 @@ function exec.qexec(args)
   flags.stdout = args.stdout
   flags.stderr = args.stderr
   flags.timeout = args.timeout
+  flags.ignore = args.ignore
   flags.cwd = args.cwd
   local argv = {}
   for _, v in ipairs(args) do
     argv[#argv + 1] = v
   end
-  local R = P.posix_spawn(args.exe, argv, args.env, flags);
-  R.exe = args.exe
-  if R.code == 0 or args.ignore then
+  local R = P.posix_spawn(args.exe, argv, args.env, flags)
+  if args.ignore or (R.code == 0) then
+    R.exe = args.exe
     return R.code, R
   else
     return nil, R
