@@ -427,6 +427,7 @@ Cposix_spawn(lua_State *L)
 							wr = write(stdin[1], lua_tostring(L, -1), sz);
 							if (0 < wr) break;
 							if (0 > wr && (EAGAIN == errno)) continue;
+							if (0 > wr && (EINTR == errno)) continue;
 							if (0 > wr) goto error;
 							if (0 == wr) return luaX_pusherror(L, "0 bytes written to stdin.");
 						}
