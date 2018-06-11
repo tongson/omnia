@@ -26,6 +26,16 @@ local try_f = function(fn)
   end
 end
 
+local skip_f = function(fn)
+  return function(ok, ...)
+    if ok then
+      return ok, ...
+    else
+      if fn then fn(...) end
+    end
+  end
+end
+
 local printf = function(str, ...)
   return io.write(string.format(str, ...))
 end
@@ -594,6 +604,8 @@ return {
     pcall = pcall_f,
     try_f = try_f,
     try = try_f,
+    skip_f = skip_f,
+    skip = skip_f,
     time = time
   },
   fmt = {
