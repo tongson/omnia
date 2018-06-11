@@ -14,6 +14,9 @@
 #include <sys/poll.h>
 #include <sys/wait.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 /*
  * lclonetable
  */
@@ -41,6 +44,14 @@ static const Node dummynode_ = {
 
 #include "flopen.h"
 #include "closefrom.h"
+
+static int
+is_file(const char *path)
+{
+    struct stat path_stat;
+    stat(path, &path_stat);
+    return S_ISREG(path_stat.st_mode);
+}
 
 static int
 lcleartable(lua_State *L) {
@@ -301,6 +312,7 @@ Cposix_spawn(lua_State *L)
 	char **argv;
 	char **env;
 	const char *path = luaL_checkstring(L, 1);
+	if (!is_file(path)) return luaX_pusherror(L, "bad argument #1 to 'posix_spawn' (valid path expected)");
 	if (LUA_TTABLE != lua_type(L, 2)) {
 		errno = 0;
 		return luaX_pusherror(L, "bad argument #2 to 'posix_spawn' (table expected)");
@@ -393,6 +405,7 @@ Cposix_spawn(lua_State *L)
 				break;
 			}
 		}
+		if (0 > r) goto error;
 		if ((0 > r) && (EINTR == errno)) continue;
 	}
 	{
