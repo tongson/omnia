@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include <stdio.h>
 #include <spawn.h>
 #include <sys/poll.h>
 #include <sys/wait.h>
@@ -142,6 +143,39 @@ lclonetable(lua_State *L)
 	memcpy(to->array, from->array, from->sizearray * sizeof(TValue));
 	barrierback(L,to);
 	lua_settop(L, 1);
+	return 1;
+}
+
+static int
+argtypeerror(lua_State *L, int narg, const char *expected)
+{
+	const char *got = luaL_typename(L, narg);
+	return luaL_argerror(L, narg,
+		lua_pushfstring(L, "%s expected, got %s", expected, got));
+}
+
+static lua_Integer
+checkinteger(lua_State *L, int narg, const char *expected)
+{
+	lua_Integer d = lua_tointeger(L, narg);
+	if (d == 0 && !lua_isinteger(L, narg))
+		 argtypeerror(L, narg, expected);
+	return d;
+}
+
+static int
+checkint(lua_State *L, int narg)
+{
+	return (int)checkinteger(L, narg, "int");
+}
+
+static int
+Cdprintf(lua_State *L)
+{
+	int fd = checkint(L, 1);
+	const char *str = luaL_checkstring(L, 2);
+	int ret = dprintf(fd, "%s\n", str);
+	lua_pushinteger(L, ret);
 	return 1;
 }
 
@@ -506,6 +540,7 @@ luaL_Reg syslib[] =
 	{"posix_spawn", Cposix_spawn},
 	{"table_copy", lclonetable},
 	{"table_clear", lcleartable},
+	{"dprintf", Cdprintf},
 	{NULL, NULL}
 };
 

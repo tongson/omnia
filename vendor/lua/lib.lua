@@ -217,6 +217,15 @@ function fd.write(f, buf)
   return true
 end
 
+function fd.printf(f, buf)
+  local r = P.dprintf(f, buf)
+  if r > 0 then
+    return r
+  else
+    return nil, "dprintf(3) error."
+  end
+end
+
 function file.stat(str)
   if stat.stat(str) then return str end
 end
