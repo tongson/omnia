@@ -36,6 +36,7 @@ The SRC, VENDOR split is just for organization. Underneath they are using the sa
 Run `make` during development or `make release` for the final executable without debug symbols in `bin/`.<br/>
 If you want to link statically run `make release STATIC=1`<br/>
 
+You can also use omnia as a base of the monorepo of your Lua/Fennel/Moonscript code.
 
 #### Adding plain Lua, Fennel and MoonScript modules. (NOTE: VENDOR and SRC are interchangeable.)
 
@@ -120,6 +121,7 @@ Module                                                                          
 [luaproxy](https://github.com/arcapos/luaproxy)                                 | 6d7bb0c         | BSD 3C
 [luatweetnacl](https://github.com/philanc/luatweetnacl)                         | 0.5-1           | MIT
 [lua-array](https://github.com/cloudwu/lua-array)                               | 676ba83         | MIT
+[lpty](http://tset.de/lpty/index.html)                                          | 1.2.2           | MIT
 
 [1] posix.deprecated and posix.compat removed<br/>
 [2] Does not include the async resolver<br/>
