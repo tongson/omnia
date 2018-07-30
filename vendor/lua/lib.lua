@@ -1,8 +1,8 @@
---- Configi standard library.
+--- omnia standard library.
 -- Lua extensions and some unix utilities.
--- Depends on cimicida and Luaposix.
+-- Depends on the following:
 --     VENDOR= lib cimicida inspect
---     VENDOR_C= posix px
+--     VENDOR_C= posix px array auxlib
 -- @module lib
 
 local rename, strlen, select, setmetatable, next, ipairs, require, type =
