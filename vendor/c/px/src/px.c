@@ -145,6 +145,20 @@ lclonetable(lua_State *L)
 	return 1;
 }
 
+static int
+Chostname(lua_State *L)
+{
+        char hostname[1026]; // NI_MAXHOST + 1
+        size_t len = 1025;
+        if (!gethostname(hostname, len)) {
+                hostname[1025] = '\0';
+                lua_pushstring(L, hostname);
+        } else {
+                return luaX_pusherror(L, "gethostname(2) error");
+        }
+        return 1;
+}
+
 /***
 chroot(2) wrapper.
 @function chroot
@@ -497,6 +511,7 @@ error:
 static const
 luaL_Reg syslib[] =
 {
+	{"hostname", Chostname},
 	{"chroot", Cchroot},
 	{"fdclose", Cfdclose},
 	{"flopen", Cflopen},
