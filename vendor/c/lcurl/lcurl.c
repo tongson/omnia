@@ -14,6 +14,7 @@
 #include "lcshare.h"
 #include "lcerror.h"
 #include "lchttppost.h"
+#include "lcmime.h"
 #include "lcutils.h"
 
 /*export*/
@@ -113,6 +114,13 @@ static int lcurl_version_info(lua_State *L){
 #ifdef CURL_VERSION_HTTPS_PROXY
     lua_pushliteral(L, "HTTPS_PROXY");  lua_pushboolean(L, data->features & CURL_VERSION_HTTPS_PROXY ); lua_rawset(L, -3);
 #endif
+#ifdef CURL_VERSION_MULTI_SSL
+    lua_pushliteral(L, "MULTI_SSL");    lua_pushboolean(L, data->features & CURL_VERSION_MULTI_SSL   ); lua_rawset(L, -3);
+#endif
+#ifdef CURL_VERSION_BROTLI
+    lua_pushliteral(L, "BROTLI");       lua_pushboolean(L, data->features & CURL_VERSION_BROTLI      ); lua_rawset(L, -3);
+#endif
+
   lua_setfield(L, -2, "features");         /* bitmask, see defines below */
 
   if(data->ssl_version){lua_pushstring(L, data->ssl_version); lua_setfield(L, -2, "ssl_version");}      /* human readable string */
@@ -135,10 +143,19 @@ static int lcurl_version_info(lua_State *L){
     if(data->libidn){lua_pushstring(L, data->libidn); lua_setfield(L, -2, "libidn");}
   }
 
-  if(data->age >= CURLVERSION_FOURTH){ /* added in 7.16.1 */
+#if LCURL_CURL_VER_GE(7,16,1)
+  if(data->age >= CURLVERSION_FOURTH){
     lua_pushnumber(L, data->iconv_ver_num); lua_setfield(L, -2, "iconv_ver_num");
     if(data->libssh_version){lua_pushstring(L, data->libssh_version);lua_setfield(L, -2, "libssh_version");}
   }
+#endif
+
+#if LCURL_CURL_VER_GE(7,57,0)
+  if(data->age >= CURLVERSION_FOURTH){
+    lua_pushnumber(L, data->brotli_ver_num); lua_setfield(L, -2, "brotli_ver_num");
+    if(data->brotli_version){lua_pushstring(L, data->brotli_version);lua_setfield(L, -2, "brotli_version");}
+  }
+#endif
 
   if(lua_isstring(L, 1)){
     lua_pushvalue(L, 1); lua_rawget(L, -2);
@@ -155,7 +172,7 @@ static const struct luaL_Reg lcurl_functions[] = {
   {"share",           lcurl_share_new        },
   {"version",         lcurl_version          },
   {"version_info",    lcurl_version_info     },
-
+  
   {NULL,NULL}
 };
 
@@ -184,6 +201,21 @@ static volatile int LCURL_INIT = 0;
 
 static const char* LCURL_REGISTRY = "LCURL Registry";
 static const char* LCURL_USERVAL  = "LCURL Uservalues";
+#if LCURL_CURL_VER_GE(7,56,0)
+static const char* LCURL_MIME_EASY_MAP  = "LCURL Mime easy";
+#endif
+
+#if LCURL_CURL_VER_GE(7,56,0)
+#define NUP 3
+#else
+#define NUP 2
+#endif
+
+#if LCURL_CURL_VER_GE(7,56,0)
+#define LCURL_PUSH_NUP(L) lua_pushvalue(L, -NUP-1);lua_pushvalue(L, -NUP-1);lua_pushvalue(L, -NUP-1);
+#else
+#define LCURL_PUSH_NUP(L) lua_pushvalue(L, -NUP-1);lua_pushvalue(L, -NUP-1);
+#endif
 
 static int luaopen_lcurl_(lua_State *L, const struct luaL_Reg *func){
   if(!LCURL_INIT){
@@ -209,21 +241,37 @@ static int luaopen_lcurl_(lua_State *L, const struct luaL_Reg *func){
     lcurl_util_new_weak_table(L, "k");
   }
 
+#if LCURL_CURL_VER_GE(7,56,0)
+  lua_rawgetp(L, LUA_REGISTRYINDEX, LCURL_MIME_EASY_MAP);
+  if(!lua_istable(L, -1)){ /* Mime->Easy */
+    lua_pop(L, 1);
+    lcurl_util_new_weak_table(L, "v");
+  }
+#endif
+
   lua_newtable(L); /* library  */
 
-  lua_pushvalue(L, -3); lua_pushvalue(L, -3); luaL_setfuncs(L, func, 2);
-  lua_pushvalue(L, -3); lua_pushvalue(L, -3); lcurl_error_initlib(L, 2);
-  lua_pushvalue(L, -3); lua_pushvalue(L, -3); lcurl_hpost_initlib(L, 2);
-  lua_pushvalue(L, -3); lua_pushvalue(L, -3); lcurl_easy_initlib (L, 2);
-  lua_pushvalue(L, -3); lua_pushvalue(L, -3); lcurl_multi_initlib(L, 2);
-  lua_pushvalue(L, -3); lua_pushvalue(L, -3); lcurl_share_initlib(L, 2);
+  LCURL_PUSH_NUP(L); luaL_setfuncs(L, func, NUP);
+  LCURL_PUSH_NUP(L); lcurl_error_initlib(L, NUP);
+  LCURL_PUSH_NUP(L); lcurl_hpost_initlib(L, NUP);
+  LCURL_PUSH_NUP(L); lcurl_easy_initlib (L, NUP);
+  LCURL_PUSH_NUP(L); lcurl_mime_initlib (L, NUP);
+  LCURL_PUSH_NUP(L); lcurl_multi_initlib(L, NUP);
+  LCURL_PUSH_NUP(L); lcurl_share_initlib(L, NUP);
 
-  lua_pushvalue(L, -3); lua_rawsetp(L, LUA_REGISTRYINDEX, LCURL_REGISTRY);
-  lua_pushvalue(L, -2); lua_rawsetp(L, LUA_REGISTRYINDEX, LCURL_USERVAL);
+  LCURL_PUSH_NUP(L);
 
-  lua_remove(L, -2); /* registry */
+#if LCURL_CURL_VER_GE(7,56,0)
+  lua_rawsetp(L, LUA_REGISTRYINDEX, LCURL_MIME_EASY_MAP);
+#endif
+
+  lua_rawsetp(L, LUA_REGISTRYINDEX, LCURL_USERVAL);
+  lua_rawsetp(L, LUA_REGISTRYINDEX, LCURL_REGISTRY);
 
   lcurl_util_set_const(L, lcurl_flags);
+
+  lutil_push_null(L);
+  lua_setfield(L, -2, "null");
 
   return 1;
 }

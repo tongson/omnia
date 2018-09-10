@@ -1,4 +1,4 @@
-lcurlOBJs= vendor/c/lcurl/l52util.o vendor/c/lcurl/lceasy.o vendor/c/lcurl/lchttppost.o vendor/c/lcurl/lcerror.o vendor/c/lcurl/lcmulti.o vendor/c/lcurl/lcshare.o vendor/c/lcurl/lcutils.o vendor/c/lcurl/lcurl.o
+lcurlOBJs= vendor/c/lcurl/l52util.o vendor/c/lcurl/lceasy.o vendor/c/lcurl/lchttppost.o vendor/c/lcurl/lcerror.o vendor/c/lcurl/lcmulti.o vendor/c/lcurl/lcshare.o vendor/c/lcurl/lcutils.o vendor/c/lcurl/lcurl.o vendor/c/lcurl/lmime.o
 lcurlA= lcurl.a
 lcurlSO= lcurl.so
 CLEAN+= clean_lcurl
