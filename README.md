@@ -123,6 +123,7 @@ Module                                                                          
 [lua-array](https://github.com/cloudwu/lua-array)                               | 676ba83         | MIT
 [lpty](http://tset.de/lpty/index.html)                                          | 1.2.2           | MIT
 [uuid](https://github.com/Configi/configi)                                      | HEAD            | Apache
+[ftcsv](https://github.com/FourierTransformer/ftcsv)                            | 1.1.6           | MIT
 
 [1] posix.deprecated and posix.compat removed<br/>
 [2] Does not include the async resolver<br/>
