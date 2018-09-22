@@ -1,5 +1,5 @@
 ln = require'linenoise'
-import remove, insert, concat from table
+import insert, concat from table
 import printerr, to_lua, evalprint, init_moonpath, deinit_moonpath from require'moor.utils'
 
 prompt =
@@ -27,9 +27,9 @@ cndgen = (env) ->  (line) ->
 
 			prefix = front .. prefix
 
-			append_candidates = (t) ->
-				if type(t) == 'table'
-					table.insert(res, prefix .. k) for k in pairs t when all or k\sub(1, #last) == last
+			append_candidates = (tt) ->
+				if type(tt) == 'table'
+					table.insert(res, prefix .. k) for k in pairs tt when all or k\sub(1, #last) == last
 
 			append_candidates t
 
@@ -51,7 +51,7 @@ string.match_if_fncls = =>
 -- for busted unit test, repl is sepalated with `get_line` and `replgen`
 -- and using the former for the test, the latter is only needed by `repl`.
 
-get_line = ->
+xget_line = ->
 	with line = ln.linenoise prompt.p .. " "
 		if line and line\match '%S' then ln.historyadd line
 
@@ -149,7 +149,7 @@ replgen = (get_line) -> (env = {}, _ENV = _ENV, ignorename) ->
 	env
 
 -- this is main repl
-repl = replgen get_line
+repl = replgen xget_line
 
 setmetatable {:replgen, :repl, :printerr},
 	__call: (env, _ENV, ignorename) => repl env, _ENV, ignorename
