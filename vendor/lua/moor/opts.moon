@@ -1,4 +1,4 @@
-import printerr, to_lua, fnwrap, evalprint, init_moonpath, deinit_moonpath from require'moor.utils'
+import printerr, to_lua, evalprint from require'moor.utils'
 
 -- lasting loop or not
 loopflag = true

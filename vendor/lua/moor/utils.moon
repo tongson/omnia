@@ -2,7 +2,7 @@ parse = require'moonscript.parse'
 compile = require'moonscript.compile'
 inspect = require'inspect'
 ms = require'moonscript.base'
-import remove, insert, concat from table
+import remove, concat from table
 
 init_moonpath = ->
 	moonpath = package.moonpath
