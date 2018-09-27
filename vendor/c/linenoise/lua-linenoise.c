@@ -25,7 +25,9 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <stdlib.h>
+#include <string.h>
 #include "linenoise.h"
+#include "encodings/utf8.h"
 
 #define LN_COMPLETION_TYPE "linenoiseCompletions*"
 
@@ -35,8 +37,14 @@
 #define LN_EXPORT extern
 #endif
 
-static int completion_func_ref;
+#ifndef LUA_OK
+#define LUA_OK 0
+#endif
+
+static int completion_func_ref = LUA_NOREF;
+static int hints_func_ref = LUA_NOREF;
 static lua_State *completion_state;
+static int callback_error_ref;
 
 static int handle_ln_error(lua_State *L)
 {
@@ -50,9 +58,10 @@ static int handle_ln_ok(lua_State *L)
     return 1;
 }
 
-static void completion_callback_wrapper(const char *line, linenoiseCompletions *completions)
+static int completion_callback_wrapper(const char *line, linenoiseCompletions *completions)
 {
     lua_State *L = completion_state;
+    int status;
 
     lua_rawgeti(L, LUA_REGISTRYINDEX, completion_func_ref);
     *((linenoiseCompletions **) lua_newuserdata(L, sizeof(linenoiseCompletions *))) = completions;
@@ -61,7 +70,98 @@ static void completion_callback_wrapper(const char *line, linenoiseCompletions *
 
     lua_pushstring(L, line);
 
-    lua_pcall(L, 2, 0, 0);
+    status = lua_pcall(L, 2, 0, 0);
+
+    if(status == LUA_OK) {
+        return 0;
+    } else {
+        lua_rawseti(L, LUA_REGISTRYINDEX, callback_error_ref);
+        return 1;
+    }
+}
+
+static char *
+hints_callback_wrapper(const char *line, int *color, int *bold, int *err)
+{
+    lua_State *L = completion_state;
+    char *result = NULL;
+    int status;
+
+    lua_rawgeti(L, LUA_REGISTRYINDEX, hints_func_ref);
+
+    lua_pushstring(L, line);
+
+    status = lua_pcall(L, 1, 2, 0);
+    if(status != LUA_OK) {
+        lua_rawseti(L, LUA_REGISTRYINDEX, callback_error_ref);
+        *err = 1;
+        return NULL;
+    }
+
+    if(!lua_isnoneornil(L, -2)) {
+        if(lua_isstring(L, -2)) {
+            const char *hint;
+            lua_Alloc alloc_f;
+            void *ud;
+
+            hint = lua_tostring(L, -2);
+            alloc_f = lua_getallocf(L, &ud);
+            result = alloc_f(&ud, NULL, LUA_TSTRING, strlen(hint) + 1);
+            if(result) {
+                strcpy(result, hint);
+            }
+        } else {
+            lua_pushfstring(L, "Invalid first value of type '%s' from hints callback - string or nil required", lua_typename(L, lua_type(L, -2)));
+            lua_rawseti(L, LUA_REGISTRYINDEX, callback_error_ref);
+            *err = 1;
+            lua_pop(L, 2);
+            return NULL;
+        }
+
+        if(!lua_isnoneornil(L, -1)) {
+            if(lua_istable(L, -1)) {
+                lua_getfield(L, -1, "color");
+                if(lua_isnumber(L, -1)) {
+                    *color = lua_tointeger(L, -1);
+                } else if(!lua_isnoneornil(L, -1)) {
+                    lua_pushfstring(L, "Invalid color value of type '%s' from hints callback - number or nil required", lua_typename(L, lua_type(L, -1)));
+                    lua_rawseti(L, LUA_REGISTRYINDEX, callback_error_ref);
+                    *err = 1;
+                    lua_pop(L, 3);
+                    // return the result to allow linenoise to free it
+                    return result;
+                }
+                lua_pop(L, 1);
+
+                lua_getfield(L, -1, "bold");
+                *bold = lua_toboolean(L, -1);
+                lua_pop(L, 1);
+            } else {
+                lua_pushfstring(L, "Invalid second value of type '%s' from hints callback - table or nil required", lua_typename(L, lua_type(L, -1)));
+                lua_rawseti(L, LUA_REGISTRYINDEX, callback_error_ref);
+                *err = 1;
+                lua_pop(L, 2);
+                // return the result to allow linenoise to free it
+                return result;
+            }
+        }
+    }
+
+    lua_pop(L, 2);
+
+    return result;
+}
+
+static void
+free_hints_callback(void *p)
+{
+    lua_State *L = completion_state;
+    lua_Alloc alloc_f;
+    void *ud;
+
+    alloc_f = lua_getallocf(L, &ud);
+
+    alloc_f(ud, p, 0, 0);
 }
 
 static int l_linenoise(lua_State *L)
@@ -70,14 +170,26 @@ static int l_linenoise(lua_State *L)
     char *line;
 
     completion_state = L;
+    lua_pushliteral(L, "");
+    lua_rawseti(L, LUA_REGISTRYINDEX, callback_error_ref);
     line = linenoise(prompt);
     completion_state = NULL;
+
+    lua_rawgeti(L, LUA_REGISTRYINDEX, callback_error_ref);
+    if(strlen(lua_tostring(L, -1)) != 0) {
+        lua_pushnil(L);
+        lua_insert(L, -2);
+        if(line) {
+            linenoiseFree(line);
+        }
+        return 2;
+    }
 
     if(! line) {
         return handle_ln_error(L);
     }
     lua_pushstring(L, line);
-    free(line);
+    linenoiseFree(line);
     return 1;
 }
 
@@ -146,11 +258,21 @@ static int l_clearscreen(lua_State *L)
 
 static int l_setcompletion(lua_State *L)
 {
-    luaL_checktype(L, 1, LUA_TFUNCTION);
+    if(lua_isnoneornil(L, 1)) {
+        luaL_unref(L, LUA_REGISTRYINDEX, completion_func_ref);
+        completion_func_ref = LUA_NOREF;
+        linenoiseSetCompletionCallback(NULL);
+    } else {
+        luaL_checktype(L, 1, LUA_TFUNCTION);
 
-    lua_pushvalue(L, 1);
-    completion_func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
-    linenoiseSetCompletionCallback(completion_callback_wrapper);
+        lua_pushvalue(L, 1);
+        if(completion_func_ref == LUA_NOREF) {
+            completion_func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+        } else {
+            lua_rawseti(L, LUA_REGISTRYINDEX, completion_func_ref);
+        }
+        linenoiseSetCompletionCallback(completion_callback_wrapper);
+    }
 
     return handle_ln_ok(L);
 }
@@ -165,6 +287,58 @@ static int l_addcompletion(lua_State *L)
     return handle_ln_ok(L);
 }
 
+static int
+l_setmultiline(lua_State *L)
+{
+    int is_multi_line = lua_toboolean(L, 1);
+
+    linenoiseSetMultiLine(is_multi_line);
+
+    return handle_ln_ok(L);
+}
+
+static int
+l_sethints(lua_State *L)
+{
+    if(lua_isnoneornil(L, 1)) {
+        luaL_unref(L, LUA_REGISTRYINDEX, hints_func_ref);
+        hints_func_ref = LUA_NOREF;
+
+        linenoiseSetHintsCallback(NULL);
+        linenoiseSetFreeHintsCallback(NULL);
+    } else {
+        luaL_checktype(L, 1, LUA_TFUNCTION);
+
+        lua_pushvalue(L, 1);
+        if(hints_func_ref == LUA_NOREF) {
+            hints_func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+        } else {
+            lua_rawseti(L, LUA_REGISTRYINDEX, hints_func_ref);
+        }
+        linenoiseSetHintsCallback(hints_callback_wrapper);
+        linenoiseSetFreeHintsCallback(free_hints_callback);
+    }
+    return handle_ln_ok(L);
+}
+
+static int
+l_printkeycodes(lua_State *L)
+{
+    linenoisePrintKeyCodes();
+    return handle_ln_ok(L);
+}
+
+static int
+l_enableutf8(lua_State *L)
+{
+    linenoiseSetEncodingFunctions(
+            linenoiseUtf8PrevCharLen,
+            linenoiseUtf8NextCharLen,
+            linenoiseUtf8ReadCode);
+
+    return 0;
+}
+
 luaL_Reg linenoise_funcs[] = {
     { "linenoise", l_linenoise },
     { "historyadd", l_historyadd },
@@ -174,6 +348,10 @@ luaL_Reg linenoise_funcs[] = {
     { "clearscreen", l_clearscreen },
     { "setcompletion", l_setcompletion},
     { "addcompletion", l_addcompletion },
+    { "setmultiline", l_setmultiline },
+    { "sethints", l_sethints },
+    { "printkeycodes", l_printkeycodes },
+    { "enableutf8", l_enableutf8 },
 
     /* Aliases for more consistent function names */
     { "addhistory", l_historyadd },
@@ -187,14 +365,32 @@ luaL_Reg linenoise_funcs[] = {
     { NULL, NULL }
 };
 
-int luaopen_linenoise(lua_State *L)
+luaL_Reg linenoise_methods[] = {
+    { "add", l_addcompletion },
+    { NULL, NULL }
+};
+
+LN_EXPORT int luaopen_linenoise(lua_State *L)
 {
+    lua_pushliteral(L, "");
+    callback_error_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
     lua_newtable(L);
 
     luaL_newmetatable(L, LN_COMPLETION_TYPE);
     lua_pushboolean(L, 0);
     lua_setfield(L, -2, "__metatable");
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+
+#if LUA_VERSION_NUM > 501
+    luaL_setfuncs(L, linenoise_methods, 0);
     lua_pop(L, 1);
     luaL_setfuncs(L,linenoise_funcs,0);
+#else
+    luaL_register(L, NULL, linenoise_methods);
+    lua_pop(L, 1);
+    luaL_register(L, NULL, linenoise_funcs);
+#endif
     return 1;
 }

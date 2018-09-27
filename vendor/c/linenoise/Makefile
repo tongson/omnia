@@ -1,4 +1,4 @@
-linenoiseOBJS= vendor/c/linenoise/linenoise.o vendor/c/linenoise/lua-linenoise.o
+linenoiseOBJS= vendor/c/linenoise/encodings/utf8.o vendor/c/linenoise/linenoise.o vendor/c/linenoise/lua-linenoise.o
 linenoiseA= linenoise.a
 linenoiseSO= linenoise.so
 CLEAN+= clean_linenoise
@@ -9,6 +9,10 @@ $(linenoiseA): $(linenoiseOBJS)
 	$(TARGET_RANLIB) $@
 
 vendor/c/linenoise/%.o: vendor/c/linenoise/%.c
+	$(ECHOT) CC $@
+	$(TARGET_DYNCC) -o $@ -Ivendor/c/linenoise $(TARGET_FLAGS) -c $<
+
+vendor/c/linenoise/encodings/%.o: vendor/c/linenoise/encodings/%.c
 	$(ECHOT) CC $@
 	$(TARGET_DYNCC) -o $@ -Ivendor/c/linenoise $(TARGET_FLAGS) -c $<
 
