@@ -87,7 +87,7 @@ A copy of the upstream Fennel REPL and compiler is also included. To compile, ru
 
 Project                                                     | Version         | License
 ------------------------------------------------------------|-----------------|---------
-[Lua](http://www.lua.org)                                   | 5.3.4           | MIT
+[Lua](http://www.lua.org)                                   | 5.3.5           | MIT
 [luastatic](https://github.com/ers35/luastatic)             | 0.0.9-dev       | CC0
 [Fennel](https://github.com/bakpakin/Fennel)                | HEAD            | MIT
 [MoonScript](http://moonscript.org)                         | 0.5.0           | MIT
