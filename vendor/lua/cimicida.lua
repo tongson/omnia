@@ -31,7 +31,7 @@ local catch_f = function(fn)
     if ok then
       return ok, ...
     else
-      if fn then fn(...) end
+      if fn then return fn(...) end
     end
   end
 end
