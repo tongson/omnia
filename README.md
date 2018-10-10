@@ -99,31 +99,31 @@ Project                                                     | Version         | 
 
 #### Available modules (Feel free to open a Github issue if you want help with adding a new Lua module.)
 
-Module                                                                          | Version         | License
---------------------------------------------------------------------------------|-----------------|---------
-[Luaposix](https://github.com/luaposix/luaposix)[1]                             | 34.0            | MIT
-[Linotify](https://github.com/hoelzro/linotify)                                 | 0.5             | MIT
-[LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)                                | 1.0.1           | MIT
-[lsocket](http://tset.de/lsocket/)[2]                                           | 1.4             | MIT
-[luafilesystem](https://github.com/keplerproject/luafilesystem)                 | 1.6.3           | MIT
-[lua-linenoise](https://github.com/hoelzro/lua-linenoise)                       | 0.9             | MIT
-[inspect.lua](https://github.com/kikito/inspect.lua)                            | 3.1.0           | MIT
-[cimicida](https://github.com/Configi/configi)                                  | HEAD            | MIT
-[lib](https://github.com/Configi/configi)                                       | HEAD            | MIT
-[u-test](https://github.com/IUdalov/u-test/)                                    | HEAD            | MIT
-[px](https://github.com/Configi/configi)                                        | HEAD            | MIT
-[factid](https://github.com/Configi/configi)                                    | HEAD            | MIT
-[Lua-cURLv3](https://github.com/Lua-cURL/Lua-cURLv3)                            | b4d1d79         | MIT
-[plc](https://github.com/philanc/plc)                                           | HEAD            | MIT
-[argparse](https://github.com/mpeterv/argparse)                                 | 0.5.0           | MIT
-[dkjson](http://dkolf.de/src/dkjson-lua.fsl/home)                               | c23a579         | MIT
-[lua-ConciseSerialization](https://github.com/fperrad/lua-ConciseSerialization) | 0.2.0           | MIT
-[luaproxy](https://github.com/arcapos/luaproxy)                                 | 6d7bb0c         | BSD 3C
-[luatweetnacl](https://github.com/philanc/luatweetnacl)                         | 0.5-1           | MIT
-[lua-array](https://github.com/cloudwu/lua-array)                               | 676ba83         | MIT
-[lpty](http://tset.de/lpty/index.html)                                          | 1.2.2           | MIT
-[uuid](https://github.com/Configi/configi)                                      | HEAD            | Apache
-[ftcsv](https://github.com/FourierTransformer/ftcsv)                            | 1.1.6           | MIT
+Module                                                                            | Version         | License
+----------------------------------------------------------------------------------|-----------------|---------
+[Luaposix](https://github.com/luaposix/luaposix)[1]                               | 34.0            | MIT
+[Linotify](https://github.com/hoelzro/linotify)                                   | 0.5             | MIT
+[LPeg](http://www.inf.puc-rio.br/~roberto/lpeg/)                                  | 1.0.1           | MIT
+[lsocket](http://tset.de/lsocket/)[2]                                             | 1.4             | MIT
+[luafilesystem](https://github.com/keplerproject/luafilesystem)                   | 1.6.3           | MIT
+[lua-linenoise](https://github.com/hoelzro/lua-linenoise)                         | 0.9             | MIT
+[inspect.lua](https://github.com/kikito/inspect.lua)                              | 3.1.0           | MIT
+[cimicida](https://github.com/Configi/configi)                                    | HEAD            | MIT
+[lib](https://github.com/Configi/configi)                                         | HEAD            | MIT
+[u-test](https://github.com/IUdalov/u-test/)                                      | HEAD            | MIT
+[px](https://github.com/Configi/configi)                                          | HEAD            | MIT
+[factid](https://github.com/Configi/configi)                                      | HEAD            | MIT
+[Lua-cURLv3](https://github.com/Lua-cURL/Lua-cURLv3)                              | b4d1d79         | MIT
+[plc](https://github.com/philanc/plc)                                             | HEAD            | MIT
+[argparse](https://github.com/mpeterv/argparse)                                   | 0.5.0           | MIT
+[dkjson](http://dkolf.de/src/dkjson-lua.fsl/home)                                 | c23a579         | MIT
+[lua-ConciseSerialization](https://framagit.org/fperrad/lua-ConciseSerialization) | 0.2.1           | MIT
+[luaproxy](https://github.com/arcapos/luaproxy)                                   | 6d7bb0c         | BSD 3C
+[luatweetnacl](https://github.com/philanc/luatweetnacl)                           | 0.5-1           | MIT
+[lua-array](https://github.com/cloudwu/lua-array)                                 | 676ba83         | MIT
+[lpty](http://tset.de/lpty/index.html)                                            | 1.2.2           | MIT
+[uuid](https://github.com/Configi/configi)                                        | HEAD            | Apache
+[ftcsv](https://github.com/FourierTransformer/ftcsv)                              | 1.1.6           | MIT
 
 [1] posix.deprecated and posix.compat removed<br/>
 [2] Does not include the async resolver<br/>

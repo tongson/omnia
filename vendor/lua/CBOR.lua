@@ -77,7 +77,10 @@ local function pack_half_float(n)
 end
 
 local coders = setmetatable({}, {
-    __index = function (t, k) error("encode '" .. k .. "' is unimplemented") end
+    __index = function (t, k)
+        if k == 1 then return end   -- allows ipairs (Lua 5.3)
+        error("encode '" .. k .. "' is unimplemented")
+    end
 })
 m.coders = coders
 
@@ -87,11 +90,11 @@ local function encode_unsigned (n, major)
     elseif n <= 0xFF then
         return char(major + 0x18, n)
     elseif n <= 0xFFFF then
-        return pack('>BI2', major + 0x19, n)
+        return pack('>B I2', major + 0x19, n)
     elseif n <= 4294967295.0 then
-        return pack('>BI4', major + 0x1A, n)
+        return pack('>B I4', major + 0x1A, n)
     else
-        return pack('>BI8', major + 0x1B, n)
+        return pack('>B I8', major + 0x1B, n)
     end
 end
 
@@ -298,11 +301,11 @@ coders['half'] = function (buffer, n)
 end
 
 coders['single'] = function (buffer, n)
-    buffer[#buffer+1] = pack('>Bf', 0xFA, n)
+    buffer[#buffer+1] = pack('>B f', 0xFA, n)
 end
 
 coders['double'] = function (buffer, n)
-    buffer[#buffer+1] = pack('>Bd', 0xFB, n)
+    buffer[#buffer+1] = pack('>B d', 0xFB, n)
 end
 
 local function set_float (option)
@@ -640,7 +643,7 @@ for k, v in pairs(direct_small) do
     end
 end
 setmetatable(decoders, {
-    __index = function (t, k) error("decode '" .. format('0x%X', k) .. "' is unimplemented") end
+    __index = function (t, k) error("decode '" .. format('%#x', k) .. "' is unimplemented") end
 })
 
 local function cursor_string (str)
@@ -680,7 +683,7 @@ function m.decode (s)
     checktype('decode', 1, s, 'string')
     local cursor = cursor_string(s)
     local data = decode_cursor(cursor)
-    if cursor.i < cursor.j then
+    if cursor.i <= cursor.j then
         error "extra bytes"
     end
     return data
@@ -727,9 +730,9 @@ else
     end
 end
 
-m._VERSION = '0.2.0'
+m._VERSION = '0.2.1'
 m._DESCRIPTION = "lua-ConciseSerialization : a pure Lua 5.3 implementation of CBOR / RFC7049"
-m._COPYRIGHT = "Copyright (c) 2016-2017 Francois Perrad"
+m._COPYRIGHT = "Copyright (c) 2016-2018 Francois Perrad"
 return m
 --
 -- This library is licensed under the terms of the MIT/X11 license,
