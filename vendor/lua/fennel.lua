@@ -295,7 +295,8 @@ local function parser(getbyte, filename)
                 until not b or (state == "done")
                 if not b then parseError('unexpected end of source') end
                 local raw = string.char(unpack(chars))
-                local loadFn = loadCode(('return %s'):format(raw), nil, filename)
+                local formatted = raw:gsub("[\1-\31]", function (c) return '\\' .. c:byte() end)
+                local loadFn = loadCode(('return %s'):format(formatted), nil, filename)
                 dispatch(loadFn())
             else -- Try symbol
                 local chars = {}
@@ -1106,7 +1107,7 @@ SPECIALS['fn'] = function(ast, scope, parent)
     end
     emit(parent, fChunk, ast)
     emit(parent, 'end', ast)
-    return fnName
+    return expr(fnName, 'sym')
 end
 
 SPECIALS['luaexpr'] = function(ast)
@@ -1576,9 +1577,9 @@ local function traceback(msg, start)
     return table.concat(lines, '\n')
 end
 
-local function currentGlobalNames()
+local function currentGlobalNames(env)
     local names = {}
-    for k in pairs(_G) do table.insert(names, k) end
+    for k in pairs(env or _G) do table.insert(names, k) end
     return names
 end
 
@@ -1587,7 +1588,7 @@ local function eval(str, options, ...)
     -- eval and dofile are considered "live" entry points, so we can assume
     -- that the globals available at compile time are a reasonable allowed list
     if options.allowedGlobals == nil then
-        options.allowedGlobals = currentGlobalNames()
+        options.allowedGlobals = currentGlobalNames(options.env)
     end
     local luaSource = compileString(str, options)
     local loader = loadCode(luaSource, options.env,
@@ -1598,10 +1599,10 @@ end
 local function dofile_fennel(filename, options, ...)
     options = options or {sourcemap = true}
     if options.allowedGlobals == nil then
-        options.allowedGlobals = currentGlobalNames()
+        options.allowedGlobals = currentGlobalNames(options.env)
     end
     local f = assert(io.open(filename, "rb"))
-    local source = f:read("*all")
+    local source = f:read("*all"):gsub("^#![^\n]*\n", "")
     f:close()
     options.filename = options.filename or filename
     return eval(source, options, ...)
@@ -1614,7 +1615,7 @@ local function repl(options)
     -- This would get set for us when calling eval, but we want to seed it
     -- with a value that is persistent so it doesn't get reset on each eval.
     if opts.allowedGlobals == nil then
-        options.allowedGlobals = currentGlobalNames()
+        options.allowedGlobals = currentGlobalNames(opts.env)
     end
 
     local env = opts.env or setmetatable({}, {
