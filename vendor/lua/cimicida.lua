@@ -309,7 +309,7 @@ local falsy = function(s)
 end
 
 local popen = function(str, cwd, ignore)
-  local header = [[  set -ef
+  local header = [[  set -efuo pipefail
   unset IFS
   export LC_ALL=C
   export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin
