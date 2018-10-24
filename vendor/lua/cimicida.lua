@@ -313,7 +313,6 @@ local popen = function(str, cwd, ignore)
   unset IFS
   export LC_ALL=C
   export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin
-  exec 0>&- 2>&1
   ]]
   if cwd then
     str = string.format("%scd %s\n%s", header, cwd, str)
