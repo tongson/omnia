@@ -221,7 +221,7 @@ function file.stat(str)
   if stat.stat(str) then return str end
 end
 
-function path.bin(bin)
+function exec.path(bin)
   -- If executable is not in any of these directories then it should be using the complete path.
   local t = { "/usr/bin/", "/bin/", "/usr/sbin/", "/sbin/", "/usr/local/bin/", "/usr/local/sbin/" }
   for _, p in ipairs(t) do
@@ -482,10 +482,10 @@ function os.real_name()
   return pwd.getpwuid(unistd.getuid()).pw_name
 end
 
-function exec.context(exe)
+function exec.context(exe, expect)
   local args
   if strlen(path.split(exe)) == 0 then
-    args = {exe = path.bin(exe)}
+    args = {exe = exec.path(exe)}
   else
     args = {exe = exe}
   end
@@ -519,7 +519,7 @@ exec.cmd = setmetatable({}, {__index =
     end
     -- Search common executable directories if not a full path.
     if strlen(path.split(exe)) == 0 then
-      exe = path.bin(exe)
+      exe = exec.path(exe)
     end
     return function(...)
       local args
@@ -572,4 +572,5 @@ function time.unix(t, f)
   return ptime.strftime(f, ptime.gmtime(t))
 end
 
+path.bin = exec.path
 return _ENV
