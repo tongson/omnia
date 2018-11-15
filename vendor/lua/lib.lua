@@ -502,7 +502,11 @@ function exec.context(exe, expect)
         a[#a+1] = k
       end
     end
-    return exec.qexec(a)
+    if expect == nil then
+      return exec.qexec(a)
+    elseif exec.qexec(a) == expect then
+      return true
+    end
   end})
 end
 
