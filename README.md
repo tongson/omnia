@@ -1,3 +1,8 @@
+#### No longer maintained.
+
+Focused on the LuaJIT implementation at [omniajit](https://github.com/tongson/omniajit).
+
+
 Omnia -- Batteries included Lua
 =====
 
